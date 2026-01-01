@@ -46,10 +46,10 @@ class LLMDecisionEngine {
         
         this.decisionContext = {
             gameState: {
-                gameTime: GameManager ? GameManager.gameTime : 0,
+                gameTime: (typeof Game !== 'undefined') ? Game.gameTime : 0,
                 gamePhase: this.controller.strategicAnalyzer.getCurrentGamePhase(),
-                blueScore: GameManager ? GameManager.blueScore : 0,
-                redScore: GameManager ? GameManager.redScore : 0
+                blueScore: (typeof Game !== 'undefined' && Game.blueScore) ? Game.blueScore : 0,
+                redScore: (typeof Game !== 'undefined' && Game.redScore) ? Game.redScore : 0
             },
             heroState: {
                 health: hero.health,

@@ -393,7 +393,7 @@ class AdvancedSmartEvaluator {
 
     calculateDynamicWeights(scores, heroState, gameState) {
         let weights = { ...this.baseWeights };
-        const difficulty = this.controller.difficulty || 'normal';
+        const difficulty = (this.controller && this.controller.difficulty) || 'normal';
 
         // Difficulty multipliers
         if (difficulty === 'nightmare') {
