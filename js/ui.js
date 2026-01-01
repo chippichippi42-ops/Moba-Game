@@ -502,10 +502,6 @@ const UI = {
         const existingOverlay = element.querySelector('.cooldown-overlay');
         element.innerHTML = '';
         
-        if (existingOverlay) {
-            element.appendChild(existingOverlay);
-        }
-        
         // Create key indicator
         const keyIndicator = document.createElement('div');
         keyIndicator.className = 'skill-key-indicator';
@@ -604,6 +600,11 @@ const UI = {
         
         iconContainer.appendChild(skillIcon);
         element.appendChild(iconContainer);
+        
+        // Cooldown overlay should be above the icon
+        if (existingOverlay) {
+            element.appendChild(existingOverlay);
+        }
         
         // Create upgrade button
         const upgradeBtn = document.createElement('div');
@@ -1188,23 +1189,42 @@ const UI = {
             if (overlay) {
                 if (level === 0) {
                     overlay.style.height = '100%';
-                    overlay.style.background = 'rgba(0,0,0,0.8)';
+                    overlay.style.background = 'rgba(100, 100, 100, 0.6)';
+                    overlay.style.opacity = '0.6';
+                    element.classList.remove('on-cooldown');
+                    delete element.dataset.cooldown;
                 } else if (cooldown > 0) {
                     const maxCd = ability.cooldown[level - 1];
                     overlay.style.height = ((cooldown / maxCd) * 100) + '%';
                     overlay.style.background = 'rgba(0,0,0,0.7)';
+                    overlay.style.opacity = '1';
                     element.dataset.cooldown = Math.ceil(cooldown / 1000);
                     element.classList.add('on-cooldown');
                 } else {
                     overlay.style.height = '0%';
+                    overlay.style.background = 'rgba(0,0,0,0.7)';
+                    overlay.style.opacity = '1';
                     element.classList.remove('on-cooldown');
                     delete element.dataset.cooldown;
+                }
+            }
+            
+            const iconContainer = element.querySelector('.skill-icon-container');
+            if (iconContainer) {
+                if (level === 0) {
+                    iconContainer.style.filter = 'grayscale(1) brightness(0.6)';
+                    iconContainer.style.opacity = '0.8';
+                } else {
+                    iconContainer.style.filter = '';
+                    iconContainer.style.opacity = '';
                 }
             }
             
             if (level > 0) {
                 const manaCost = ability.manaCost[level - 1];
                 element.style.opacity = player.mana < manaCost ? '0.5' : '1';
+            } else {
+                element.style.opacity = '1';
             }
             
             const upgradeBtn = element.querySelector('.skill-upgrade-btn');
@@ -1379,8 +1399,13 @@ const UI = {
                 <span class="victim kill-victim-strikethrough" style="color: ${victimColor};">${entry.victim}</span>
             `;
         } else if (entry.type === 'tower') {
+            const teamColor = entry.victimTeam === CONFIG.teams.BLUE
+                ? '#4488FF'
+                : (entry.victimTeam === CONFIG.teams.RED ? '#FF4444' : victimColor);
+            const victimName = entry.victim;
+            
             div.innerHTML = `
-                <span class="victim kill-victim-strikethrough" style="color: ${victimColor};">${entry.victim}</span>
+                <span class="victim kill-victim-strikethrough" style="color: ${teamColor};">${victimName}</span>
                 <span class="action">was destroyed</span>
             `;
         }

@@ -201,221 +201,221 @@ const TowerManager = {
         }
     },
     
-	/**
-	 * Render tower - UPDATED với main tower đẹp hơn
-	 */
-	render(ctx) {
-		if (!this.isAlive) {
-			// Render ruins
-			ctx.fillStyle = '#333';
-			ctx.beginPath();
-			ctx.arc(this.x, this.y, this.radius * 0.7, 0, Math.PI * 2);
-			ctx.fill();
-			return;
-		}
-		
-		if (this.towerType === 'main') {
-			this.renderMainTower(ctx);
-		} else {
-			this.renderNormalTower(ctx);
-		}
-		
-		// Range indicator when targeting
-		if (this.currentTarget) {
-			ctx.strokeStyle = this.color;
-			ctx.lineWidth = 2;
-			ctx.globalAlpha = 0.3;
-			ctx.setLineDash([10, 5]);
-			ctx.beginPath();
-			ctx.arc(this.x, this.y, this.attackRange, 0, Math.PI * 2);
-			ctx.stroke();
-			ctx.setLineDash([]);
-			ctx.globalAlpha = 1;
-		}
-		
-		// Health bar
-		this.renderHealthBar(ctx);
-	},
+    /**
+     * Render tower - UPDATED với main tower đẹp hơn
+     */
+    render(ctx) {
+        if (!this.isAlive) {
+            // Render ruins
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius * 0.7, 0, Math.PI * 2);
+            ctx.fill();
+            return;
+        }
+        
+        if (this.towerType === 'main') {
+            this.renderMainTower(ctx);
+        } else {
+            this.renderNormalTower(ctx);
+        }
+        
+        // Range indicator when targeting
+        if (this.currentTarget) {
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.3;
+            ctx.setLineDash([10, 5]);
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.attackRange, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 1;
+        }
+        
+        // Health bar
+        this.renderHealthBar(ctx);
+    },
 
-	/**
-	 * Render main tower (Nexus) - NEW
-	 */
-	renderMainTower(ctx) {
-		const size = this.radius * 1.5; // Lớn hơn
-		const time = Date.now() / 1000;
-		
-		// Outer glow
-		const glowGradient = ctx.createRadialGradient(
-			this.x, this.y, size * 0.5,
-			this.x, this.y, size * 2
-		);
-		glowGradient.addColorStop(0, this.color + '40');
-		glowGradient.addColorStop(1, 'transparent');
-		ctx.fillStyle = glowGradient;
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, size * 2, 0, Math.PI * 2);
-		ctx.fill();
-		
-		// Base platform
-		ctx.fillStyle = '#1a1a2e';
-		ctx.beginPath();
-		ctx.arc(this.x, this.y + 10, size * 1.2, 0, Math.PI * 2);
-		ctx.fill();
-		
-		// Main structure - hexagonal base
-		ctx.fillStyle = '#2a2a4e';
-		ctx.beginPath();
-		for (let i = 0; i < 6; i++) {
-			const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
-			const x = this.x + Math.cos(angle) * size;
-			const y = this.y + Math.sin(angle) * size;
-			if (i === 0) ctx.moveTo(x, y);
-			else ctx.lineTo(x, y);
-		}
-		ctx.closePath();
-		ctx.fill();
-		
-		// Inner glow ring
-		ctx.strokeStyle = this.color;
-		ctx.lineWidth = 4;
-		ctx.globalAlpha = 0.6 + Math.sin(time * 2) * 0.2;
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, size * 0.7, 0, Math.PI * 2);
-		ctx.stroke();
-		ctx.globalAlpha = 1;
-		
-		// Central crystal
-		const crystalSize = size * 0.5;
-		const crystalGradient = ctx.createLinearGradient(
-			this.x - crystalSize, this.y - crystalSize * 1.5,
-			this.x + crystalSize, this.y + crystalSize
-		);
-		crystalGradient.addColorStop(0, '#ffffff');
-		crystalGradient.addColorStop(0.3, this.color);
-		crystalGradient.addColorStop(1, this.team === CONFIG.teams.BLUE ? '#0066aa' : '#aa2222');
-		
-		ctx.fillStyle = crystalGradient;
-		ctx.beginPath();
-		ctx.moveTo(this.x, this.y - crystalSize * 2);
-		ctx.lineTo(this.x + crystalSize, this.y);
-		ctx.lineTo(this.x, this.y + crystalSize * 0.5);
-		ctx.lineTo(this.x - crystalSize, this.y);
-		ctx.closePath();
-		ctx.fill();
-		
-		// Crystal highlight
-		ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-		ctx.beginPath();
-		ctx.moveTo(this.x - crystalSize * 0.3, this.y - crystalSize * 1.2);
-		ctx.lineTo(this.x, this.y - crystalSize * 1.8);
-		ctx.lineTo(this.x + crystalSize * 0.2, this.y - crystalSize);
-		ctx.closePath();
-		ctx.fill();
-		
-		// Energy particles
-		ctx.fillStyle = this.color;
-		for (let i = 0; i < 6; i++) {
-			const angle = (time + i / 6 * Math.PI * 2) % (Math.PI * 2);
-			const dist = size * 0.9;
-			const px = this.x + Math.cos(angle) * dist;
-			const py = this.y + Math.sin(angle) * dist;
-			const particleSize = 4 + Math.sin(time * 3 + i) * 2;
-			
-			ctx.globalAlpha = 0.6 + Math.sin(time * 2 + i) * 0.3;
-			ctx.beginPath();
-			ctx.arc(px, py, particleSize, 0, Math.PI * 2);
-			ctx.fill();
-		}
-		ctx.globalAlpha = 1;
-		
-		// Team emblem glow
-		ctx.shadowColor = this.color;
-		ctx.shadowBlur = 30;
-		ctx.fillStyle = this.color;
-		ctx.beginPath();
-		ctx.arc(this.x, this.y - crystalSize * 0.5, 8, 0, Math.PI * 2);
-		ctx.fill();
-		ctx.shadowBlur = 0;
-	},
+    /**
+     * Render main tower (Nexus) - NEW
+     */
+    renderMainTower(ctx) {
+        const size = this.radius * 1.5; // Lớn hơn
+        const time = Date.now() / 1000;
+        
+        // Outer glow
+        const glowGradient = ctx.createRadialGradient(
+            this.x, this.y, size * 0.5,
+            this.x, this.y, size * 2
+        );
+        glowGradient.addColorStop(0, this.color + '40');
+        glowGradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, size * 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Base platform
+        ctx.fillStyle = '#1a1a2e';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y + 10, size * 1.2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Main structure - hexagonal base
+        ctx.fillStyle = '#2a2a4e';
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+            const x = this.x + Math.cos(angle) * size;
+            const y = this.y + Math.sin(angle) * size;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fill();
+        
+        // Inner glow ring
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 4;
+        ctx.globalAlpha = 0.6 + Math.sin(time * 2) * 0.2;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, size * 0.7, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        
+        // Central crystal
+        const crystalSize = size * 0.5;
+        const crystalGradient = ctx.createLinearGradient(
+            this.x - crystalSize, this.y - crystalSize * 1.5,
+            this.x + crystalSize, this.y + crystalSize
+        );
+        crystalGradient.addColorStop(0, '#ffffff');
+        crystalGradient.addColorStop(0.3, this.color);
+        crystalGradient.addColorStop(1, this.team === CONFIG.teams.BLUE ? '#0066aa' : '#aa2222');
+        
+        ctx.fillStyle = crystalGradient;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y - crystalSize * 2);
+        ctx.lineTo(this.x + crystalSize, this.y);
+        ctx.lineTo(this.x, this.y + crystalSize * 0.5);
+        ctx.lineTo(this.x - crystalSize, this.y);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Crystal highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.beginPath();
+        ctx.moveTo(this.x - crystalSize * 0.3, this.y - crystalSize * 1.2);
+        ctx.lineTo(this.x, this.y - crystalSize * 1.8);
+        ctx.lineTo(this.x + crystalSize * 0.2, this.y - crystalSize);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Energy particles
+        ctx.fillStyle = this.color;
+        for (let i = 0; i < 6; i++) {
+            const angle = (time + i / 6 * Math.PI * 2) % (Math.PI * 2);
+            const dist = size * 0.9;
+            const px = this.x + Math.cos(angle) * dist;
+            const py = this.y + Math.sin(angle) * dist;
+            const particleSize = 4 + Math.sin(time * 3 + i) * 2;
+            
+            ctx.globalAlpha = 0.6 + Math.sin(time * 2 + i) * 0.3;
+            ctx.beginPath();
+            ctx.arc(px, py, particleSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        
+        // Team emblem glow
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 30;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y - crystalSize * 0.5, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    },
 
-	/**
-	 * Render normal tower - RENAMED from original render logic
-	 */
-	renderNormalTower(ctx) {
-		// Tower base
-		ctx.fillStyle = '#1a1a2e';
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-		ctx.fill();
-		
-		// Tower body
-		const gradient = ctx.createRadialGradient(
-			this.x, this.y - 20, 10,
-			this.x, this.y, this.radius
-		);
-		gradient.addColorStop(0, this.color);
-		gradient.addColorStop(1, '#1a1a2e');
-		
-		ctx.fillStyle = gradient;
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, this.radius - 10, 0, Math.PI * 2);
-		ctx.fill();
-		
-		// Tower top (crystal)
-		const crystalSize = 20;
-		ctx.fillStyle = this.color;
-		ctx.beginPath();
-		ctx.moveTo(this.x, this.y - crystalSize * 1.5);
-		ctx.lineTo(this.x + crystalSize * 0.7, this.y - crystalSize * 0.3);
-		ctx.lineTo(this.x, this.y + crystalSize * 0.3);
-		ctx.lineTo(this.x - crystalSize * 0.7, this.y - crystalSize * 0.3);
-		ctx.closePath();
-		ctx.fill();
-		
-		// Glow effect
-		ctx.shadowColor = this.color;
-		ctx.shadowBlur = 20;
-		ctx.beginPath();
-		ctx.arc(this.x, this.y - crystalSize * 0.5, crystalSize * 0.3, 0, Math.PI * 2);
-		ctx.fill();
-		ctx.shadowBlur = 0;
-	},
+    /**
+     * Render normal tower - RENAMED from original render logic
+     */
+    renderNormalTower(ctx) {
+        // Tower base
+        ctx.fillStyle = '#1a1a2e';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Tower body
+        const gradient = ctx.createRadialGradient(
+            this.x, this.y - 20, 10,
+            this.x, this.y, this.radius
+        );
+        gradient.addColorStop(0, this.color);
+        gradient.addColorStop(1, '#1a1a2e');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius - 10, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Tower top (crystal)
+        const crystalSize = 20;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y - crystalSize * 1.5);
+        ctx.lineTo(this.x + crystalSize * 0.7, this.y - crystalSize * 0.3);
+        ctx.lineTo(this.x, this.y + crystalSize * 0.3);
+        ctx.lineTo(this.x - crystalSize * 0.7, this.y - crystalSize * 0.3);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Glow effect
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y - crystalSize * 0.5, crystalSize * 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    },
 
-	/**
-	 * Render health bar - UPDATED cho main tower
-	 */
-	renderHealthBar(ctx) {
-		const barWidth = this.towerType === 'main' ? this.radius * 3 : this.radius * 2;
-		const barHeight = this.towerType === 'main' ? 14 : 10;
-		const barY = this.y + (this.towerType === 'main' ? this.radius * 1.8 : this.radius + 15);
-		
-		// Background
-		ctx.fillStyle = 'rgba(0,0,0,0.8)';
-		ctx.fillRect(this.x - barWidth / 2 - 2, barY - 2, barWidth + 4, barHeight + 4);
-		
-		// Health fill
-		const healthPercent = this.health / this.maxHealth;
-		ctx.fillStyle = healthPercent > 0.5 ? '#22c55e' : 
-						healthPercent > 0.25 ? '#fbbf24' : '#ef4444';
-		ctx.fillRect(this.x - barWidth / 2, barY, barWidth * healthPercent, barHeight);
-		
-		// Border
-		ctx.strokeStyle = this.towerType === 'main' ? this.color : '#fff';
-		ctx.lineWidth = this.towerType === 'main' ? 2 : 1;
-		ctx.strokeRect(this.x - barWidth / 2, barY, barWidth, barHeight);
-		
-		// Health text for main tower
-		if (this.towerType === 'main') {
-			ctx.font = 'bold 11px Arial';
-			ctx.fillStyle = '#fff';
-			ctx.textAlign = 'center';
-			ctx.fillText(
-				`${Math.ceil(this.health)}/${this.maxHealth}`,
-				this.x,
-				barY + barHeight - 2
-			);
-		}
-	},
+    /**
+     * Render health bar - UPDATED cho main tower
+     */
+    renderHealthBar(ctx) {
+        const barWidth = this.towerType === 'main' ? this.radius * 3 : this.radius * 2;
+        const barHeight = this.towerType === 'main' ? 14 : 10;
+        const barY = this.y + (this.towerType === 'main' ? this.radius * 1.8 : this.radius + 15);
+        
+        // Background
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.fillRect(this.x - barWidth / 2 - 2, barY - 2, barWidth + 4, barHeight + 4);
+        
+        // Health fill
+        const healthPercent = this.health / this.maxHealth;
+        ctx.fillStyle = healthPercent > 0.5 ? '#22c55e' : 
+                        healthPercent > 0.25 ? '#fbbf24' : '#ef4444';
+        ctx.fillRect(this.x - barWidth / 2, barY, barWidth * healthPercent, barHeight);
+        
+        // Border
+        ctx.strokeStyle = this.towerType === 'main' ? this.color : '#fff';
+        ctx.lineWidth = this.towerType === 'main' ? 2 : 1;
+        ctx.strokeRect(this.x - barWidth / 2, barY, barWidth, barHeight);
+        
+        // Health text for main tower
+        if (this.towerType === 'main') {
+            ctx.font = 'bold 11px Arial';
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.fillText(
+                `${Math.ceil(this.health)}/${this.maxHealth}`,
+                this.x,
+                barY + barHeight - 2
+            );
+        }
+    },
     
     /**
      * Get tower at position
@@ -480,15 +480,15 @@ const TowerManager = {
         this.towers = [];
         this.bases = [];
     },
-	
-	/**
-	 * Render all towers
-	 */
-	render(ctx) {
-		for (const tower of this.towers) {
-			tower.render(ctx);
-		}
-	},
+    
+    /**
+     * Render all towers
+     */
+    render(ctx) {
+        for (const tower of this.towers) {
+            tower.render(ctx);
+        }
+    },
 };
 
 /**
@@ -674,32 +674,52 @@ class Tower {
      * Tower destroyed
      */
     die(killer) {
+        if (this.isAlive === false) return;
         this.isAlive = false;
         this.health = 0;
-        
+
         // Give experience to killer team
         if (killer) {
             const team = killer.team;
             const heroes = Game.getTeamHeroes(team);
             const expPerHero = this.expReward / heroes.length;
-            
+
             for (const hero of heroes) {
                 hero.gainExp(expPerHero);
             }
         }
-        
+
         // Create destruction effect
         EffectManager.createExplosion(this.x, this.y, 100, this.color);
-        
+
         // Check for game end
-        if (this.towerType === 'main') {
+        if (this.towerType === 'main' && typeof Game !== 'undefined' && typeof Game.onMainTowerDestroyed === 'function') {
             Game.onMainTowerDestroyed(this.team);
         }
-        
-        // Announcement
-        UI.addKillFeed(null, this.name, 'tower');
+
+        // Announcement (avoid spurious kill feed during initialization)
+        if (typeof Game !== 'undefined' && Game.gameTime > 3000) {
+            const teamName = this.team === CONFIG.teams.BLUE ? 'BLUE' : 'RED';
+            const laneName = this.lane ? this.lane.toUpperCase() : null;
+            const towerTypeMap = {
+                outer: 'Outer Tower',
+                inner: 'Inner Tower',
+                inhibitor: 'Inhibitor',
+                main: 'Main Tower',
+            };
+            const towerTypeName = towerTypeMap[this.towerType] || this.name;
+            const formattedName = [teamName, laneName, towerTypeName].filter(Boolean).join(' ');
+
+            UI.addKillFeed(null, {
+                type: 'tower',
+                team: this.team,
+                lane: this.lane,
+                towerType: this.towerType,
+                name: formattedName,
+            }, 'tower');
+        }
     }
-    
+
     /**
      * Render tower
      */
