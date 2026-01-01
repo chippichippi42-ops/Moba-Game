@@ -13,6 +13,13 @@ const AIManager = new (class AIManager {
         this.dodgeSystem = new DodgeSystem();
         this.comboExecutor = new ComboExecutor();
         this.targetSelector = new TargetSelector();
+
+        // Advanced AI Systems
+        this.advancedEvaluator = new AdvancedSmartEvaluator();
+        this.ollamaIntegrator = new OllamaIntegrator(AI_CONFIG.external_ai.ollama);
+        this.smartDecisionCache = new SmartDecisionCache();
+        this.promptBuilder = new AdvancedPromptBuilder();
+        this.responseFusion = new ResponseFusion();
         
         // Initialize all systems
         this.initializeSystems();
@@ -38,7 +45,12 @@ const AIManager = new (class AIManager {
             pathFinding: this.pathFinding,
             dodgeSystem: this.dodgeSystem,
             comboExecutor: this.comboExecutor,
-            targetSelector: this.targetSelector
+            targetSelector: this.targetSelector,
+            advancedEvaluator: this.advancedEvaluator,
+            ollamaIntegrator: this.ollamaIntegrator,
+            smartDecisionCache: this.smartDecisionCache,
+            promptBuilder: this.promptBuilder,
+            responseFusion: this.responseFusion
         });
         
         this.controllers.push(controller);

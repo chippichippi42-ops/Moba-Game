@@ -15,16 +15,31 @@ class DecisionMaker {
         this.currentObjective = null;
     }
     
-    makeDecision(deltaTime, entities) {
+    makeDecision(deltaTime, entities, aggressiveness = 'balanced') {
         const now = Date.now();
         const decisionInterval = this.controller.getDifficultySetting('decisionInterval');
         
-        if (now - this.lastDecisionTime >= decisionInterval) {
+        if (now - this.lastDecisionTime >= decisionInterval || typeof deltaTime === 'string') {
             const situation = this.analyzeSituation(entities);
+            
+            // Apply aggressiveness to situation if needed
+            if (aggressiveness === 'aggressive') {
+                situation.hasAdvantage = true;
+                situation.shouldRetreat = situation.healthPercent < 0.1;
+            } else if (aggressiveness === 'passive') {
+                situation.hasAdvantage = false;
+                situation.shouldRetreat = situation.healthPercent < 0.6;
+            }
+
             this.currentStrategy = this.determineStrategy(situation);
             this.updateTarget(situation);
             this.lastDecisionTime = now;
         }
+        
+        return {
+            action: this.currentStrategy,
+            target: this.currentTarget
+        };
     }
     
     analyzeSituation(entities) {

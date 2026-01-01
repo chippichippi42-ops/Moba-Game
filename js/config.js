@@ -4,6 +4,39 @@
  * ========================================
  */
 
+const AI_CONFIG = {
+    external_ai: {
+        enabled: true,
+        provider: 'ollama',
+        
+        ollama: {
+            host: 'localhost',
+            port: 11434,
+            model: 'mistral',
+            timeout_ms: 300,
+            retry_attempts: 2
+        },
+        
+        evaluator: {
+            extreme_urgent_threshold: 85,
+            urgent_threshold: 70,
+            planning_threshold: 40,
+            cache_enabled: true,
+            cache_duration_ms: 5000,
+            cache_max_size: 50
+        },
+        
+        request_pool: {
+            max_concurrent: 3,
+            batch_size: 3,
+            priority_queue: true
+        },
+        
+        debug: false,
+        log_decisions: false
+    }
+};
+
 const CONFIG = {
     // === GAME SETTINGS ===
     game: {
