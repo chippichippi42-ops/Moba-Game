@@ -621,9 +621,17 @@ html, body {
 .skill.on-cooldown::after {
     content: attr(data-cooldown);
     position: absolute;
-    font-size: 18px;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
     font-weight: bold;
     color: #fff;
+    background: rgba(34, 34, 34, 0.9);
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 20px;
+    text-align: center;
 }
 
 /* Minimap */
@@ -748,9 +756,44 @@ html, body {
     100% { opacity: 0; }
 }
 
-.kill-entry .killer { color: #00d4ff; }
-.kill-entry .victim { color: #ef4444; }
-.kill-entry .action { color: #64748b; }
+.kill-entry .killer { 
+    font-weight: bold;
+}
+
+.kill-entry .victim { 
+    font-weight: bold;
+    position: relative;
+}
+
+.kill-entry .action { 
+    font-size: 14px;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+/* Strikethrough animation for victim */
+.kill-victim-strikethrough {
+    position: relative;
+    display: inline-block;
+}
+
+.kill-victim-strikethrough::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: strikethrough 0.4s ease-out forwards;
+    animation-delay: 0.2s;
+}
+
+@keyframes strikethrough {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
 
 /* FPS Counter */
 #fpsCounter {
@@ -926,7 +969,7 @@ html, body {
     position: absolute;
     left: 20px;
     top: 80px;
-    width: 220px;
+    width: 200px;
     background: rgba(0, 0, 0, 0.92);
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -942,7 +985,7 @@ html, body {
 }
 
 #teamStatusPanel.collapsed {
-    width: 180px;
+    width: 160px;
 }
 
 /* Header */
