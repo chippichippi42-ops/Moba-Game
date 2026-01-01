@@ -18,7 +18,11 @@ class CombatBehavior {
     
     execute(deltaTime, entities) {
         const hero = this.controller.hero;
-        const target = this.controller.decisionMaker.getCurrentTarget();
+        if (!hero || !hero.isAlive) return;
+
+        const target = this.controller.decisionMaker?.getCurrentTarget
+            ? this.controller.decisionMaker.getCurrentTarget()
+            : null;
         
         if (!target || !target.isAlive) {
             // No valid target, switch back to laning
@@ -35,7 +39,10 @@ class CombatBehavior {
         this.positionForCombat(target, dist);
         
         // Basic attack if in range
-        if (dist <= hero.stats.attackRange + target.radius) {
+        const attackRange = hero.stats?.attackRange ?? 0;
+        const targetRadius = target?.radius ?? 0;
+
+        if (dist <= attackRange + targetRadius && typeof hero.basicAttack === 'function') {
             hero.basicAttack(target);
         }
     }
@@ -45,17 +52,23 @@ class CombatBehavior {
         if (now - this.lastComboTime < this.comboCooldown) return;
         
         const hero = this.controller.hero;
-        const comboExecutor = this.controller.systems.comboExecutor;
+        const comboExecutor = this.controller.systems?.comboExecutor;
         
         // Let combo executor handle the combo
-        comboExecutor.executeBestCombo(hero, target, 'all_in');
+        if (comboExecutor?.executeBestCombo) {
+            comboExecutor.executeBestCombo(hero, target, 'all_in');
+        }
         
         this.lastComboTime = now;
     }
     
     positionForCombat(target, currentDistance) {
         const hero = this.controller.hero;
-        const idealRange = hero.stats.attackRange * this.controller.getTargetingSetting('preferredRangePercentage');
+        const movementOptimizer = this.controller.movementOptimizer;
+        if (!hero || !movementOptimizer) return;
+
+        const preferredRangePct = this.controller.getTargetingSetting('preferredRangePercentage') ?? 0.85;
+        const idealRange = (hero.stats?.attackRange ?? 0) * preferredRangePct;
         
         if (currentDistance < idealRange - 50) {
             // Too close, move back
@@ -64,27 +77,27 @@ class CombatBehavior {
                 x: hero.x + Math.cos(angle) * 100,
                 y: hero.y + Math.sin(angle) * 100
             };
-            this.controller.systems.movementOptimizer.setMovementTarget(retreatPos, 'kiting');
+            movementOptimizer.setMovementTarget(retreatPos, 'kiting');
         } else if (currentDistance > idealRange + 50) {
             // Too far, move closer
             const approachPos = {
                 x: target.x + (Math.random() - 0.5) * 50,
                 y: target.y + (Math.random() - 0.5) * 50
             };
-            this.controller.systems.movementOptimizer.setMovementTarget(approachPos, 'chasing');
+            movementOptimizer.setMovementTarget(approachPos, 'chasing');
         } else {
             // At ideal range, stop moving or strafe
             if (Math.random() < 0.3) {
                 // Random strafing
-                const strafeAngle = Utils.angleBetweenPoints(hero.x, hero.y, target.x, target.y) + 
-                                    (Math.random() > 0.5 ? Math.PI/2 : -Math.PI/2);
+                const strafeAngle = Utils.angleBetweenPoints(hero.x, hero.y, target.x, target.y) +
+                                    (Math.random() > 0.5 ? Math.PI / 2 : -Math.PI / 2);
                 const strafePos = {
                     x: hero.x + Math.cos(strafeAngle) * 50,
                     y: hero.y + Math.sin(strafeAngle) * 50
                 };
-                this.controller.systems.movementOptimizer.setMovementTarget(strafePos, 'strafing');
+                movementOptimizer.setMovementTarget(strafePos, 'strafing');
             } else {
-                this.controller.systems.movementOptimizer.clearMovementTarget();
+                movementOptimizer.clearMovementTarget();
             }
         }
     }
@@ -92,9 +105,9 @@ class CombatBehavior {
     // Use defensive abilities if needed
     useDefensiveAbilities() {
         const hero = this.controller.hero;
-        const healthPercent = hero.health / hero.stats.maxHealth;
+        const healthRatio = Utils.getHealthRatio(hero, 1);
         
-        if (healthPercent < 0.3) {
+        if (healthRatio < 0.3) {
             // Look for healing or shield abilities
             for (const key of ['e', 'r', 'q']) {
                 const ability = hero.heroData.abilities[key];

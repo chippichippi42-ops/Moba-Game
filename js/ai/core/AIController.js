@@ -8,20 +8,20 @@
 class AIController {
     constructor(hero, difficulty, systems) {
         this.hero = hero;
-        this.difficulty = difficulty;
-        this.difficultySettings = CONFIG.aiDifficulty[difficulty];
-        this.systems = systems;
+        this.difficulty = difficulty || 'normal';
+        this.difficultySettings = CONFIG.aiDifficulty?.[this.difficulty] ?? CONFIG.aiDifficulty?.normal ?? {};
+        this.systems = systems || {};
         
         // State management
-        this.stateMachine = new AIState(this, difficulty);
-        this.decisionMaker = new DecisionMaker(this, difficulty);
+        this.stateMachine = new AIState(this, this.difficulty);
+        this.decisionMaker = new DecisionMaker(this, this.difficulty);
         
         // Advanced AI Systems
-        this.advancedEvaluator = systems.advancedEvaluator;
-        this.ollamaIntegrator = systems.ollamaIntegrator;
-        this.smartDecisionCache = systems.smartDecisionCache;
-        this.promptBuilder = systems.promptBuilder;
-        this.responseFusion = systems.responseFusion;
+        this.advancedEvaluator = this.systems.advancedEvaluator;
+        this.ollamaIntegrator = this.systems.ollamaIntegrator;
+        this.smartDecisionCache = this.systems.smartDecisionCache;
+        this.promptBuilder = this.systems.promptBuilder;
+        this.responseFusion = this.systems.responseFusion;
         
         // Behavior systems
         this.laneBehavior = new LaneBehavior(this);
@@ -30,6 +30,15 @@ class AIController {
         this.pushBehavior = new PushBehavior(this);
         this.dodgeBehavior = new DodgeBehavior(this);
         this.jungleBehavior = new JungleBehavior(this);
+
+        this.behaviors = {
+            laneBehavior: this.laneBehavior,
+            combatBehavior: this.combatBehavior,
+            retreatBehavior: this.retreatBehavior,
+            pushBehavior: this.pushBehavior,
+            dodgeBehavior: this.dodgeBehavior,
+            jungleBehavior: this.jungleBehavior,
+        };
         
         // Intelligence systems
         this.strategicAnalyzer = new StrategicAnalyzer(this);
@@ -61,7 +70,7 @@ class AIController {
     }
     
     update(deltaTime, entities) {
-        if (!this.hero.isAlive || this.hero.isDead) return;
+        if (!this.hero || !this.hero.isAlive || this.hero.isDead) return;
         
         // Update state machine
         this.stateMachine.update(deltaTime, entities);
@@ -73,15 +82,17 @@ class AIController {
         this.llmDecisionEngine.update(deltaTime, entities);
         
         // Advanced 10-Layer Smart Evaluation
-        const heroState = this.hero.getState();
+        const heroState = (typeof this.hero.getState === 'function') ? this.hero.getState() : {};
         const gameState = this.getGameState();
         const teamState = this.getTeamState();
 
-        const evaluation = this.advancedEvaluator.analyze(
-            heroState,
-            gameState,
-            teamState
-        );
+        const evaluation = this.advancedEvaluator?.analyze
+            ? this.advancedEvaluator.analyze(
+                heroState,
+                gameState,
+                teamState
+            )
+            : { mode: 'LOCAL', score: 0, scores: {}, weights: {} };
 
         let decision;
         switch (evaluation.mode) {
@@ -90,33 +101,45 @@ class AIController {
                 decision = this.decisionMaker.makeDecision(deltaTime, entities, 'aggressive');
                 break;
             
-            case 'URGENT':
+            case 'URGENT': {
                 // Try cache, else fallback + async
-                const cached = this.smartDecisionCache.getCached(this.hero.id);
-                if (cached && this.smartDecisionCache.canUseCached(evaluation, cached)) {
+                const cached = this.smartDecisionCache?.getCached
+                    ? this.smartDecisionCache.getCached(this.hero.id)
+                    : null;
+
+                if (cached && this.smartDecisionCache?.canUseCached?.(evaluation, cached)) {
                     decision = cached.decision;
                 } else {
                     // Only queue async if Ollama is available
-                    if (this.ollamaIntegrator.isAvailable) {
+                    if (
+                        this.ollamaIntegrator?.isAvailable &&
+                        this.ollamaIntegrator?.queryOllama &&
+                        this.promptBuilder?.buildDecisionPrompt &&
+                        this.responseFusion?.merge &&
+                        this.smartDecisionCache?.updateCache
+                    ) {
                         this.ollamaIntegrator.queryOllama(
                             this.promptBuilder.buildDecisionPrompt(heroState, gameState, teamState, evaluation)
                         ).then(response => {
                             const localDec = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
-                            const fused = this.responseFusion.merge(
-                                response,
-                                localDec,
-                                evaluation
-                            );
+                            const fused = this.responseFusion.merge(response, localDec, evaluation);
                             this.smartDecisionCache.updateCache(this.hero.id, fused, evaluation);
-                        });
+                        }).catch(() => {});
                     }
                     decision = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
                 }
                 break;
+            }
             
             case 'PLANNING':
                 // Queue async if Ollama is available, use local
-                if (this.ollamaIntegrator.isAvailable) {
+                if (
+                    this.ollamaIntegrator?.isAvailable &&
+                    this.ollamaIntegrator?.queryOllama &&
+                    this.promptBuilder?.buildStrategyPrompt &&
+                    this.responseFusion?.merge &&
+                    this.smartDecisionCache?.updateCache
+                ) {
                     this.ollamaIntegrator.queryOllama(
                         this.promptBuilder.buildStrategyPrompt(heroState, gameState, evaluation)
                     ).then(response => {
@@ -124,7 +147,7 @@ class AIController {
                         const localDec = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
                         const fused = this.responseFusion.merge(response, localDec, evaluation);
                         this.smartDecisionCache.updateCache(this.hero.id, fused, evaluation);
-                    });
+                    }).catch(() => {});
                 }
                 decision = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
                 break;
@@ -205,53 +228,57 @@ class AIController {
 
     getGameState() {
         const hero = this.hero;
-        const nearbyEnemies = Combat.getEnemiesInRange(hero, 1000);
-        const nearbyAllies = Combat.getAlliesInRange(hero, 1000);
+        const nearbyEnemies = (typeof Combat !== 'undefined' && hero)
+            ? Combat.getEnemiesInRange(hero, 1000)
+            : [];
+        const nearbyAllies = (typeof Combat !== 'undefined' && hero)
+            ? Combat.getAlliesInRange(hero, 1000)
+            : [];
         
         return {
             nearbyEnemies: nearbyEnemies.map(e => ({
-                id: e.id,
-                distance: Utils.distance(hero.x, hero.y, e.x, e.y),
-                attackDamage: e.stats ? e.stats.attackDamage : 50,
-                hasCC: true, // Simplified
-                onHighGround: false // Simplified
+                id: e?.id,
+                distance: hero ? Utils.distance(hero.x, hero.y, e.x, e.y) : Infinity,
+                attackDamage: Utils.safeNumber(e?.stats?.attackDamage, 50),
+                hasCC: true,
+                onHighGround: false
             })),
             nearbyAllies: nearbyAllies.map(a => ({
-                id: a.id,
-                healthPercent: (a.health / a.stats.maxHealth) * 100
+                id: a?.id,
+                healthPercent: Utils.getHealthPercent(a, 100)
             })),
-            blueScore: typeof Game !== 'undefined' && Game.blueScore ? Game.blueScore : 0,
-            redScore: typeof Game !== 'undefined' && Game.redScore ? Game.redScore : 0,
-            towerUnderAttackNearby: false, // Simplified
-            objectiveThreat: false, // Simplified
-            minionWavePushedIn: false, // Simplified
-            waveFrozen: false, // Simplified
-            inUnvardedArea: false, // Simplified
+            blueScore: (typeof Game !== 'undefined' && typeof Game.blueScore === 'number') ? Game.blueScore : 0,
+            redScore: (typeof Game !== 'undefined' && typeof Game.redScore === 'number') ? Game.redScore : 0,
+            towerUnderAttackNearby: false,
+            objectiveThreat: false,
+            minionWavePushedIn: false,
+            waveFrozen: false,
+            inUnvardedArea: false,
             teamFightActive: nearbyEnemies.length >= 3 && nearbyAllies.length >= 2,
-            teammateCritical: nearbyAllies.some(a => a.health / a.stats.maxHealth < 0.25),
-            enemyMissingDuration: 0, // Simplified
-            goodRotationWindow: true, // Simplified
-            wavePushing: false, // Simplified
-            teamMomentum: 0, // Simplified
-            goldDifferential: 0, // Simplified
-            incomingCCChain: false, // Simplified
-            predictedEnemyGank: false, // Simplified
-            objectiveContestedSoon: false, // Simplified
-            deathProbability: 0, // Simplified
-            killOpportunity: false, // Simplified
-            nearObjective: false // Simplified
+            teammateCritical: nearbyAllies.some(a => Utils.getHealthRatio(a, 1) < 0.25),
+            enemyMissingDuration: 0,
+            goodRotationWindow: true,
+            wavePushing: false,
+            teamMomentum: 0,
+            goldDifferential: 0,
+            incomingCCChain: false,
+            predictedEnemyGank: false,
+            objectiveContestedSoon: false,
+            deathProbability: 0,
+            killOpportunity: false,
+            nearObjective: false
         };
     }
 
     getTeamState() {
-        const team = this.hero.team;
+        const team = this.hero?.team;
         let totalHP = 0;
         let count = 0;
 
-        if (typeof HeroManager !== 'undefined' && HeroManager.heroes) {
+        if (team && typeof HeroManager !== 'undefined' && Array.isArray(HeroManager.heroes)) {
             for (const h of HeroManager.heroes) {
-                if (h.team === team && h.isAlive) {
-                    totalHP += (h.health / h.stats.maxHealth) * 100;
+                if (h?.team === team && h?.isAlive) {
+                    totalHP += Utils.getHealthPercent(h, 0);
                     count++;
                 }
             }
@@ -264,47 +291,49 @@ class AIController {
     
     // Get current difficulty settings
     getDifficultySetting(key) {
-        return this.difficultySettings[key];
+        return this.difficultySettings?.[key] ?? CONFIG.aiDifficulty?.normal?.[key];
     }
     
     // Get AI parameter
     getAIParameter(key) {
-        return CONFIG.aiParameters[key][this.difficulty] || CONFIG.aiParameters[key].normal;
+        const params = CONFIG.aiParameters?.[key];
+        if (!params) return undefined;
+        return params?.[this.difficulty] ?? params?.normal;
     }
     
     // Get movement settings
     getMovementSetting(key) {
-        return CONFIG.aiMovement[key];
+        return CONFIG.aiMovement?.[key];
     }
     
     // Get dodge settings
     getDodgeSetting(key) {
-        return CONFIG.aiDodge[key];
+        return CONFIG.aiDodge?.[key];
     }
     
     // Get combo settings
     getComboSetting(key) {
-        return CONFIG.aiCombo[key];
+        return CONFIG.aiCombo?.[key];
     }
     
     // Get targeting settings
     getTargetingSetting(key) {
-        return CONFIG.aiTargeting[key];
+        return CONFIG.aiTargeting?.[key];
     }
     
     // Get vision settings
     getVisionSetting(key) {
-        return CONFIG.aiVision[key];
+        return CONFIG.aiVision?.[key];
     }
     
     // Get farming settings
     getFarmingSetting(key) {
-        return CONFIG.aiFarming[key];
+        return CONFIG.aiFarming?.[key];
     }
     
     // Get roaming settings
     getRoamingSetting(key) {
-        return CONFIG.aiRoaming[key];
+        return CONFIG.aiRoaming?.[key];
     }
 }
 

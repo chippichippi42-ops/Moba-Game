@@ -18,6 +18,7 @@ class DodgeBehavior {
     
     execute(deltaTime, entities) {
         const hero = this.controller.hero;
+        if (!hero || !hero.isAlive) return;
         
         // Try to dodge incoming projectiles
         this.tryDodgeProjectiles();
@@ -40,7 +41,7 @@ class DodgeBehavior {
         
         const hero = this.controller.hero;
         
-        if (!ProjectileManager || !ProjectileManager.projectiles) return;
+        if (typeof ProjectileManager === 'undefined' || !ProjectileManager.projectiles) return;
         
         for (const proj of ProjectileManager.projectiles) {
             if (proj.team === hero.team) continue;
@@ -99,7 +100,7 @@ class DodgeBehavior {
                     x: hero.x + Math.cos(avoidDirection) * 100,
                     y: hero.y + Math.sin(avoidDirection) * 100
                 };
-                this.controller.systems.movementOptimizer.setMovementTarget(avoidPos, 'avoiding');
+                this.controller.movementOptimizer?.setMovementTarget?.(avoidPos, 'avoiding');
                 return true;
             }
         }
@@ -126,7 +127,7 @@ class DodgeBehavior {
         }
         
         // Check towers
-        if (TowerManager && TowerManager.towers) {
+        if (typeof TowerManager !== 'undefined' && Array.isArray(TowerManager.towers)) {
             for (const tower of TowerManager.towers) {
                 if (tower.team !== hero.team && tower.isAlive) {
                     const dist = Utils.distance(hero.x, hero.y, tower.x, tower.y);
@@ -203,7 +204,7 @@ class DodgeBehavior {
         
         // Make sure dodge position is safe
         if (!GameMap.checkWallCollision(dodgePos.x, dodgePos.y, hero.radius)) {
-            this.controller.systems.movementOptimizer.setMovementTarget(dodgePos, 'dodging');
+            this.controller.movementOptimizer?.setMovementTarget?.(dodgePos, 'dodging');
         }
     }
     
@@ -217,7 +218,7 @@ class DodgeBehavior {
         };
         
         if (!GameMap.checkWallCollision(dodgePos.x, dodgePos.y, hero.radius)) {
-            this.controller.systems.movementOptimizer.setMovementTarget(dodgePos, 'dodging');
+            this.controller.movementOptimizer?.setMovementTarget?.(dodgePos, 'dodging');
         }
     }
     
@@ -238,7 +239,7 @@ class DodgeBehavior {
         const hero = this.controller.hero;
         const projectiles = [];
         
-        if (!ProjectileManager || !ProjectileManager.projectiles) return projectiles;
+        if (typeof ProjectileManager === 'undefined' || !ProjectileManager.projectiles) return projectiles;
         
         for (const proj of ProjectileManager.projectiles) {
             if (proj.team === hero.team) continue;

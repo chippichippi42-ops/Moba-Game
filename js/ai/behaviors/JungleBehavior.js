@@ -19,6 +19,7 @@ class JungleBehavior {
     
     execute(deltaTime, entities) {
         const hero = this.controller.hero;
+        if (!hero || !hero.isAlive) return;
         
         // Find nearest jungle camp if we don't have one
         if (!this.currentCamp || this.currentCamp.isCleared) {
@@ -40,7 +41,7 @@ class JungleBehavior {
     }
     
     findNearestJungleCamp() {
-        if (!CreatureManager.camps || CreatureManager.camps.length === 0) {
+        if (typeof CreatureManager === 'undefined' || !Array.isArray(CreatureManager.camps) || CreatureManager.camps.length === 0) {
             return null;
         }
         
@@ -68,7 +69,7 @@ class JungleBehavior {
         if (!this.currentCamp) return;
         
         const hero = this.controller.hero;
-        const creature = this.currentCamp.creatures.find(c => c.isAlive);
+        const creature = this.currentCamp?.creatures?.find(c => c?.isAlive);
         
         if (!creature) {
             this.currentCamp = null;
@@ -77,7 +78,10 @@ class JungleBehavior {
         
         const dist = Utils.distance(hero.x, hero.y, creature.x, creature.y);
         
-        if (dist <= hero.stats.attackRange + creature.radius) {
+        const attackRange = hero.stats?.attackRange ?? 0;
+        const creatureRadius = creature?.radius ?? 0;
+
+        if (dist <= attackRange + creatureRadius && typeof hero.basicAttack === 'function') {
             hero.basicAttack(creature);
             
             // Use abilities if appropriate
@@ -123,18 +127,18 @@ class JungleBehavior {
             y: creature.y + Math.sin(angle) * optimalRange
         };
         
-        this.controller.systems.movementOptimizer.setMovementTarget(targetPos, 'jungling');
+        this.controller.movementOptimizer?.setMovementTarget?.(targetPos, 'jungling');
     }
     
     shouldStopJungling() {
         const hero = this.controller.hero;
         
         // Stop if low health
-        const healthPercent = hero.health / hero.stats.maxHealth;
-        if (healthPercent < 0.3) return true;
+        const healthRatio = Utils.getHealthRatio(hero, 1);
+        if (healthRatio < 0.3) return true;
         
         // Stop if enemies are nearby
-        const enemies = Combat.getEnemiesInRange(hero, 800);
+        const enemies = (typeof Combat !== 'undefined') ? Combat.getEnemiesInRange(hero, 800) : [];
         if (enemies.length > 0) return true;
         
         // Stop if no camps available

@@ -40,6 +40,7 @@ class LaneBehavior {
     
     execute(deltaTime, entities) {
         const hero = this.controller.hero;
+        if (!hero || !hero.isAlive) return;
         
         // Check for last hit opportunities
         this.tryLastHit();
@@ -55,7 +56,7 @@ class LaneBehavior {
         if (!lanePos) return;
         
         // Apply movement with waypoints
-        this.controller.systems.movementOptimizer.setMovementTarget(lanePos, 'laning');
+        this.controller.movementOptimizer?.setMovementTarget?.(lanePos, 'laning');
         
         // Farm minions if available
         this.farmMinions();
@@ -66,8 +67,10 @@ class LaneBehavior {
         if (now - this.lastFarmTime < this.farmCooldown) return;
         
         const hero = this.controller.hero;
-        const nearbyMinions = MinionManager.getMinionsInRange(hero.x, hero.y, hero.stats.attackRange + 100)
-            .filter(m => m.team !== hero.team);
+        const attackRange = hero.stats?.attackRange ?? 0;
+        const nearbyMinions = (typeof MinionManager !== 'undefined' && MinionManager.getMinionsInRange)
+            ? MinionManager.getMinionsInRange(hero.x, hero.y, attackRange + 100).filter(m => m.team !== hero.team)
+            : [];
         
         const lastHitTarget = nearbyMinions.find(m => 
             m.health <= hero.stats.attackDamage * 1.2
@@ -80,7 +83,8 @@ class LaneBehavior {
             
             if (shouldLastHit) {
                 const dist = Utils.distance(hero.x, hero.y, lastHitTarget.x, lastHitTarget.y);
-                if (dist <= hero.stats.attackRange + lastHitTarget.radius) {
+                const targetRadius = lastHitTarget?.radius ?? 0;
+                if (dist <= attackRange + targetRadius && typeof hero.basicAttack === 'function') {
                     hero.basicAttack(lastHitTarget);
                     this.lastFarmTime = now;
                     return true;
@@ -93,8 +97,10 @@ class LaneBehavior {
     
     farmMinions() {
         const hero = this.controller.hero;
-        const nearbyMinions = MinionManager.getMinionsInRange(hero.x, hero.y, hero.stats.attackRange + 100)
-            .filter(m => m.team !== hero.team);
+        const attackRange = hero.stats?.attackRange ?? 0;
+        const nearbyMinions = (typeof MinionManager !== 'undefined' && MinionManager.getMinionsInRange)
+            ? MinionManager.getMinionsInRange(hero.x, hero.y, attackRange + 100).filter(m => m.team !== hero.team)
+            : [];
         
         if (nearbyMinions.length === 0) return;
         
@@ -128,7 +134,8 @@ class LaneBehavior {
         
         if (bestMinion) {
             const dist = Utils.distance(hero.x, hero.y, bestMinion.x, bestMinion.y);
-            if (dist <= hero.stats.attackRange + bestMinion.radius) {
+            const targetRadius = bestMinion?.radius ?? 0;
+            if (dist <= attackRange + targetRadius && typeof hero.basicAttack === 'function') {
                 hero.basicAttack(bestMinion);
             } else {
                 // Move towards the minion
@@ -136,22 +143,25 @@ class LaneBehavior {
                     x: bestMinion.x + (Math.random() - 0.5) * 50,
                     y: bestMinion.y + (Math.random() - 0.5) * 50
                 };
-                this.controller.systems.movementOptimizer.setMovementTarget(targetPos, 'farming');
+                this.controller.movementOptimizer?.setMovementTarget?.(targetPos, 'farming');
             }
         }
     }
     
     shouldJungle() {
         const hero = this.controller.hero;
-        const jungleRate = this.controller.getDifficultySetting('jungleRate');
+        if (!hero || !hero.isAlive) return false;
+
+        const jungleRate = this.controller.getDifficultySetting('jungleRate') ?? 0;
         
         // Don't jungle if low health
-        const healthPercent = hero.health / hero.stats.maxHealth;
-        if (healthPercent < 0.5) return false;
+        const healthRatio = Utils.getHealthRatio(hero, 1);
+        if (healthRatio < 0.5) return false;
         
         // Check if there are enemy minions nearby
-        const enemyMinions = MinionManager.getMinionsInRange(hero.x, hero.y, 800)
-            .filter(m => m.team !== hero.team);
+        const enemyMinions = (typeof MinionManager !== 'undefined' && MinionManager.getMinionsInRange)
+            ? MinionManager.getMinionsInRange(hero.x, hero.y, 800).filter(m => m.team !== hero.team)
+            : [];
         
         // Only jungle if no enemy minions or random chance based on jungle rate
         if (enemyMinions.length === 0 && Math.random() < jungleRate) {
@@ -163,7 +173,7 @@ class LaneBehavior {
     }
     
     findNearestJungleCamp() {
-        if (!CreatureManager.camps || CreatureManager.camps.length === 0) {
+        if (typeof CreatureManager === 'undefined' || !Array.isArray(CreatureManager.camps) || CreatureManager.camps.length === 0) {
             return null;
         }
         

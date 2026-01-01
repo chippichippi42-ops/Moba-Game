@@ -72,6 +72,8 @@ class MovementOptimizer {
         this.lastStuckCheck = now;
         
         const hero = this.controller.hero;
+        if (!hero) return;
+
         const distMoved = Utils.distance(
             hero.x, hero.y,
             this.lastPosition.x, this.lastPosition.y
@@ -187,6 +189,7 @@ class MovementOptimizer {
     
     moveTowards(targetX, targetY) {
         const hero = this.controller.hero;
+        if (!hero) return;
         
         // Apply random offset if stuck
         const finalX = targetX + this.randomOffset.x;
@@ -221,13 +224,15 @@ class MovementOptimizer {
             }
         }
         
-        let speed = hero.stats.moveSpeed * this.controller.getDifficultySetting('movementSpeed');
+        const speedMultiplier = this.controller.getDifficultySetting('movementSpeed') ?? 1;
+        let speed = (hero.stats?.moveSpeed ?? 0) * speedMultiplier;
         
         // Apply movement debuffs
         if (Array.isArray(hero.debuffs)) {
             const slow = hero.debuffs.find(d => d.type === 'slow');
             if (slow) {
-                speed *= (1 - slow.percent / 100);
+                const slowPct = Utils.safeNumber(slow.percent, 0);
+                speed *= (1 - slowPct / 100);
             }
         }
         
@@ -241,11 +246,17 @@ class MovementOptimizer {
     }
     
     calculatePathToPosition(targetPosition) {
+        const hero = this.controller.hero;
+        if (!hero) return;
+
         // Use A* pathfinding
-        const start = { x: this.controller.hero.x, y: this.controller.hero.y };
+        const start = { x: hero.x, y: hero.y };
         const end = { x: targetPosition.x, y: targetPosition.y };
-        
-        this.waypoints = this.controller.systems.pathFinding.findPath(start, end, this.controller.hero.radius);
+
+        const pathFinding = this.controller.systems?.pathFinding;
+        this.waypoints = pathFinding?.findPath
+            ? pathFinding.findPath(start, end, hero.radius)
+            : [];
         this.currentWaypointIndex = 0;
         
         // Update path quality based on waypoints
@@ -279,8 +290,10 @@ class MovementOptimizer {
         this.currentWaypointIndex = 0;
         
         // Stop movement
-        this.controller.hero.vx = 0;
-        this.controller.hero.vy = 0;
+        if (this.controller.hero) {
+            this.controller.hero.vx = 0;
+            this.controller.hero.vy = 0;
+        }
     }
     
     getMovementState() {

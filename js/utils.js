@@ -14,6 +14,51 @@ const Utils = {
         return Math.max(min, Math.min(max, value));
     },
 
+    safeNumber(value, fallback = 0) {
+        return (typeof value === 'number' && !Number.isNaN(value)) ? value : fallback;
+    },
+
+    safeDivide(numerator, denominator, fallback = 0) {
+        const n = this.safeNumber(numerator, 0);
+        const d = this.safeNumber(denominator, 0);
+        if (d === 0) return fallback;
+        return n / d;
+    },
+
+    getMaxHealth(entity, fallback = 1) {
+        const max = entity?.stats?.maxHealth ?? entity?.maxHealth;
+        return this.safeNumber(max, fallback);
+    },
+
+    getMaxMana(entity, fallback = 1) {
+        const max = entity?.stats?.maxMana ?? entity?.maxMana;
+        return this.safeNumber(max, fallback);
+    },
+
+    getHealth(entity, fallback = 0) {
+        return this.safeNumber(entity?.health, fallback);
+    },
+
+    getMana(entity, fallback = 0) {
+        return this.safeNumber(entity?.mana, fallback);
+    },
+
+    getHealthRatio(entity, fallback = 1) {
+        return this.safeDivide(this.getHealth(entity), this.getMaxHealth(entity, 0), fallback);
+    },
+
+    getManaRatio(entity, fallback = 1) {
+        return this.safeDivide(this.getMana(entity), this.getMaxMana(entity, 0), fallback);
+    },
+
+    getHealthPercent(entity, fallback = 100) {
+        return this.getHealthRatio(entity, fallback / 100) * 100;
+    },
+
+    getManaPercent(entity, fallback = 100) {
+        return this.getManaRatio(entity, fallback / 100) * 100;
+    },
+
     /**
      * Linear interpolation
      */
