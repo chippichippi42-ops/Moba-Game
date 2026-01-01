@@ -197,7 +197,7 @@ const Screens = {
 			Game.pause();
 		}
 	},
-    
+	
 	/**
 	 * Close settings - FIXED
 	 */
@@ -413,35 +413,35 @@ const Screens = {
     /**
      * Start game with current selections
      */
-    startGame() {
+    async startGame() {
         if (!this.selectedHero) {
             alert('Vui lòng chọn một tướng!');
             return;
         }
-        
+
         this.hideAllScreens();
-        
+
         // Generate AI names
         const usedNames = [this.playerName];
         const aiNames = {
             allies: [],
             enemies: [],
         };
-        
+
         for (let i = 0; i < 2; i++) {
             const name = this.getRandomAIName(usedNames);
             usedNames.push(name);
             aiNames.allies.push(name);
         }
-        
+
         for (let i = 0; i < 3; i++) {
             const name = this.getRandomAIName(usedNames);
             usedNames.push(name);
             aiNames.enemies.push(name);
         }
-        
+
         // Initialize game
-        Game.init({
+        await Game.init({
             playerHero: this.selectedHero,
             playerSpell: this.selectedSpell,
             playerName: this.playerName,
@@ -449,14 +449,14 @@ const Screens = {
             enemyDifficulty: this.enemyDifficulty,
             aiNames: aiNames,
         });
-        
+
         UI.showIngameUI();
-        
+
         // Start music
         if (typeof AudioManager !== 'undefined') {
             AudioManager.playMusic();
         }
-        
+
         Game.start();
     },
     

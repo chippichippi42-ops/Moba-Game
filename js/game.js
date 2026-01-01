@@ -37,36 +37,36 @@ const Game = {
     /**
      * Initialize game
      */
-    init(settings) {
+    async init(settings) {
         console.log('Initializing MOBA Arena...');
-        
+
         // Store settings
         this.settings = { ...this.settings, ...settings };
-        
+
         // Get canvas
         this.canvas = document.getElementById('gameCanvas');
         if (!this.canvas) {
             console.error('Canvas not found!');
             return;
         }
-        
+
         this.ctx = this.canvas.getContext('2d');
-        
+
         // Setup canvas
         this.setupCanvas();
-        
+
         // Initialize systems
-        this.initializeSystems();
-        
+        await this.initializeSystems();
+
         // Create game entities
         this.createGameEntities();
-        
+
         // Reset state
         this.isRunning = false;
         this.isPaused = false;
         this.isGameOver = false;
         this.gameTime = 0;
-        
+
         console.log('Game initialized successfully!');
     },
     
@@ -112,13 +112,13 @@ const Game = {
     /**
      * Initialize all game systems
      */
-    initializeSystems() {
+    async initializeSystems() {
         // Initialize map first
         GameMap.init();
-        
+
         // Initialize camera
         Camera.init(this.canvas);
-        
+
         // Initialize managers
         HeroManager.init();
         TowerManager.init();
@@ -127,16 +127,17 @@ const Game = {
         ProjectileManager.init();
         EffectManager.init();
         AIManager.init();
-        
+        await AIManager.initializeAI();
+
         // Initialize input
         Input.init();
-        
+
         // Initialize UI
         UI.init();
-        
+
         // Initialize minimap
         Minimap.init();
-        
+
         // Initialize screens
         Screens.init();
     },
@@ -500,7 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Export
+// Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = Game;
 }

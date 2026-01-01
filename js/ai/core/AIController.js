@@ -96,32 +96,36 @@ class AIController {
                 if (cached && this.smartDecisionCache.canUseCached(evaluation, cached)) {
                     decision = cached.decision;
                 } else {
-                    // Queue async + fallback
-                    this.ollamaIntegrator.queryOllama(
-                        this.promptBuilder.buildDecisionPrompt(heroState, gameState, teamState, evaluation)
-                    ).then(response => {
-                        const localDec = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
-                        const fused = this.responseFusion.merge(
-                            response,
-                            localDec,
-                            evaluation
-                        );
-                        this.smartDecisionCache.updateCache(this.hero.id, fused, evaluation);
-                    });
+                    // Only queue async if Ollama is available
+                    if (this.ollamaIntegrator.isAvailable) {
+                        this.ollamaIntegrator.queryOllama(
+                            this.promptBuilder.buildDecisionPrompt(heroState, gameState, teamState, evaluation)
+                        ).then(response => {
+                            const localDec = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
+                            const fused = this.responseFusion.merge(
+                                response,
+                                localDec,
+                                evaluation
+                            );
+                            this.smartDecisionCache.updateCache(this.hero.id, fused, evaluation);
+                        });
+                    }
                     decision = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
                 }
                 break;
             
             case 'PLANNING':
-                // Queue async, use local
-                this.ollamaIntegrator.queryOllama(
-                    this.promptBuilder.buildStrategyPrompt(heroState, gameState, evaluation)
-                ).then(response => {
-                    // Cache for next time (simple integration)
-                    const localDec = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
-                    const fused = this.responseFusion.merge(response, localDec, evaluation);
-                    this.smartDecisionCache.updateCache(this.hero.id, fused, evaluation);
-                });
+                // Queue async if Ollama is available, use local
+                if (this.ollamaIntegrator.isAvailable) {
+                    this.ollamaIntegrator.queryOllama(
+                        this.promptBuilder.buildStrategyPrompt(heroState, gameState, evaluation)
+                    ).then(response => {
+                        // Cache for next time (simple integration)
+                        const localDec = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
+                        const fused = this.responseFusion.merge(response, localDec, evaluation);
+                        this.smartDecisionCache.updateCache(this.hero.id, fused, evaluation);
+                    });
+                }
                 decision = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
                 break;
             

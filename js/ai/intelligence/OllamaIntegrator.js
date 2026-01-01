@@ -13,6 +13,7 @@ class OllamaIntegrator {
         this.timeoutMs = config.timeout_ms || 300;
         this.retryAttempts = config.retry_attempts || 2;
         this.isConnected = false;
+        this.isAvailable = false;
     }
 
     async connect() {
@@ -25,6 +26,20 @@ class OllamaIntegrator {
             return this.isConnected;
         } catch (error) {
             this.isConnected = false;
+            return false;
+        }
+    }
+
+    async checkAvailability() {
+        try {
+            const response = await fetch(`http://${this.host}:${this.port}/api/tags`, {
+                method: 'GET',
+                signal: AbortSignal.timeout(2000)
+            });
+            this.isAvailable = response.ok;
+            return this.isAvailable;
+        } catch (error) {
+            this.isAvailable = false;
             return false;
         }
     }
@@ -49,12 +64,13 @@ class OllamaIntegrator {
                 });
 
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
+
                 const data = await response.json();
                 return this.parseResponse(data.response);
             } catch (error) {
                 attempts++;
                 if (attempts > this.retryAttempts) {
+                    this.isAvailable = false;
                     return this.handleTimeout();
                 }
             }
