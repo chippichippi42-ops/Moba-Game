@@ -1129,14 +1129,27 @@ html, body {
     min-width: 0;
 }
 
-.ally-name {
-    font-size: 12px;
+.ally-name-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ally-username {
+    font-size: 11px;
+    font-weight: bold;
     color: #e2e8f0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: 5px;
-    font-weight: 600;
+}
+
+.ally-heroname {
+    font-size: 9px;
+    color: #cbd5e1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Ally Bars */
@@ -1199,8 +1212,8 @@ html, body {
         font-size: 16px;
     }
     
-    .ally-name {
-        font-size: 11px;
+    .ally-username {
+        font-size: 10px;
     }
     
     .team-panel-content {
