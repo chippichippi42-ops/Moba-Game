@@ -77,8 +77,12 @@ const AIManager = new (class AIManager {
         }
     }
     
-    clear() {
+    clearAll() {
         this.controllers = [];
+    }
+
+    clear() {
+        this.clearAll();
     }
     
     // Get AI controller for specific hero

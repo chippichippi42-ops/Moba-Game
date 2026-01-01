@@ -40,6 +40,12 @@ const Game = {
     async init(settings) {
         console.log('Initializing MOBA Arena...');
 
+        // If a previous game instance exists (e.g. play again / rejoin), stop updates and clear entities
+        if (this.isRunning) {
+            this.isRunning = false;
+        }
+        this.cleanup();
+
         // Store settings
         this.settings = { ...this.settings, ...settings };
 
@@ -146,6 +152,14 @@ const Game = {
      * Create game entities
      */
     createGameEntities() {
+        // Ensure no orphaned heroes/controllers from previous runs (rejoin / play again)
+        if (typeof HeroManager !== 'undefined' && typeof HeroManager.clearAll === 'function') {
+            HeroManager.clearAll();
+        }
+        if (typeof AIManager !== 'undefined' && typeof AIManager.clearAll === 'function') {
+            AIManager.clearAll();
+        }
+
         // Create player hero
         const player = HeroManager.createHero(
             this.settings.playerHero,
@@ -340,13 +354,13 @@ const Game = {
         EffectManager.render(this.ctx);
     },
     
-	/**
-	 * Pause game - UPDATED
-	 */
-	pause() {
-		this.isPaused = true;
-		Screens.showPause(); // Screens sẽ tự ẩn UI
-	},
+    /**
+     * Pause game - UPDATED
+     */
+    pause() {
+        this.isPaused = true;
+        Screens.showPause(); // Screens sẽ tự ẩn UI
+    },
     
     /**
      * Resume game

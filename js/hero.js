@@ -34,6 +34,27 @@ HeroRegistry.register(HeroLaLo);
 HeroRegistry.register(HeroNemo);
 HeroRegistry.register(HeroBalametany);
 
+// Normalize ability icon fields for UI (support optional custom image icons)
+for (const heroData of HeroRegistry.getAll()) {
+    const abilities = heroData?.abilities;
+    if (!abilities) continue;
+
+    for (const key of Object.keys(abilities)) {
+        const ability = abilities[key];
+        if (!ability) continue;
+
+        // If current icon is an emoji/non-path string, keep it as iconEmoji and use a placeholder image icon.
+        if (typeof ability.icon === 'string') {
+            const iconStr = ability.icon;
+            const looksLikePath = iconStr.includes('/') || iconStr.endsWith('.png') || iconStr.endsWith('.jpg') || iconStr.endsWith('.jpeg') || iconStr.endsWith('.svg');
+            if (!looksLikePath) {
+                ability.iconEmoji = ability.iconEmoji || iconStr;
+                ability.icon = `assets/icons/placeholder_${key}.svg`;
+            }
+        }
+    }
+}
+
 /**
  * Hero Manager
  */
@@ -128,11 +149,18 @@ const HeroManager = {
     },
     
     /**
-     * Clear all
+     * Clear ALL heroes (used on full game reset)
      */
-    clear() {
+    clearAll() {
         this.heroes = [];
         this.player = null;
+    },
+
+    /**
+     * Clear (backwards-compatible alias)
+     */
+    clear() {
+        this.clearAll();
     },
 };
 

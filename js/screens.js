@@ -8,6 +8,7 @@ const Screens = {
     currentScreen: 'start',
     screens: {},
     previousScreen: null, // Thêm biến lưu màn hình trước đó
+    _listenersSetup: false,
     
     // Selection state
     selectedHero: null,
@@ -83,150 +84,165 @@ const Screens = {
         return Utils.randomItem(available);
     },
     
-	/**
-	 * Setup event listeners - UPDATED
-	 */
-	setupEventListeners() {
-		// Start screen
-		document.getElementById('btnPlay')?.addEventListener('click', () => {
-			const nameInput = document.getElementById('playerNameInput');
-			if (nameInput) {
-				this.savePlayerName(nameInput.value.trim());
-			}
-			this.showScreen('pregame');
-			
-			if (typeof AudioManager !== 'undefined') {
-				AudioManager.resume();
-			}
-		});
-		
-		document.getElementById('btnSettings')?.addEventListener('click', () => {
-			this.previousScreen = this.currentScreen;
-			this.showScreen('settings');
-		});
-		
-		document.getElementById('btnQuit')?.addEventListener('click', () => {
-			alert('Cảm ơn bạn đã chơi MOBA Arena!');
-		});
-		
-		document.getElementById('playerNameInput')?.addEventListener('change', (e) => {
-			this.savePlayerName(e.target.value.trim());
-		});
-		
-		// Pre-game screen
-		document.getElementById('btnStartGame')?.addEventListener('click', () => {
-			this.startGame();
-		});
-		
-		document.getElementById('btnBackToMenu')?.addEventListener('click', () => {
-			this.showScreen('start');
-		});
-		
-		document.getElementById('allyDifficulty')?.addEventListener('change', (e) => {
-			this.allyDifficulty = e.target.value;
-		});
-		
-		document.getElementById('enemyDifficulty')?.addEventListener('change', (e) => {
-			this.enemyDifficulty = e.target.value;
-		});
-		
-		// Settings screen - UPDATED
-		document.getElementById('btnCloseSettings')?.addEventListener('click', () => {
-			this.closeSettings();
-		});
-		
-		// Pause screen
-		document.getElementById('btnResume')?.addEventListener('click', () => {
-			this.resumeFromPause();
-		});
-		
-		// Pause settings - UPDATED
-		document.getElementById('btnPauseSettings')?.addEventListener('click', () => {
-			this.previousScreen = 'pause';
-			this.showScreen('settings');
-		});
-		
-		document.getElementById('btnExitGame')?.addEventListener('click', () => {
-			Game.stop();
-			this.hideScreen('pause');
-			this.showScreen('start');
-			UI.hideIngameUI();
-			
-			if (typeof AudioManager !== 'undefined') {
-				AudioManager.stopMusic();
-			}
-		});
-		
-		// Game over screen
-		document.getElementById('btnPlayAgain')?.addEventListener('click', () => {
-			this.hideScreen('gameover');
-			this.showScreen('pregame');
-		});
-		
-		document.getElementById('btnBackToMenuEnd')?.addEventListener('click', () => {
-			this.hideScreen('gameover');
-			this.showScreen('start');
-		});
-		
-		// === NEW: ESC key handler ===
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape') {
-				this.handleEscapeKey();
-			}
-		});
-	},
-	
-	/**
-	 * Handle ESC key press - NEW
-	 */
-	handleEscapeKey() {
-		// Nếu đang ở settings
-		if (this.currentScreen === 'settings') {
-			this.closeSettings();
-			return;
-		}
-		
-		// Nếu đang ở pause
-		if (this.currentScreen === 'pause') {
-			this.resumeFromPause();
-			return;
-		}
-		
-		// Nếu game đang chạy và không pause
-		if (Game.isRunning && !Game.isPaused && !Game.isGameOver) {
-			Game.pause();
-		}
-	},
-	
-	/**
-	 * Close settings - FIXED
-	 */
-	closeSettings() {
-		this.hideScreen('settings');
-		
-		if (this.previousScreen === 'pause') {
-			this.showScreen('pause');
-			// KHÔNG hiện UI vì vẫn đang pause
-		} else if (Game.isRunning && !Game.isPaused) {
-			UI.showIngameUI();
-			MinionManager.showCountdownForResume();
-		} else if (!Game.isRunning) {
-			this.showScreen('start');
-		}
-		this.previousScreen = null;
-	},
+    /**
+     * Setup event listeners - UPDATED
+     */
+    setupEventListeners() {
+        if (this._listenersSetup) return;
+        this._listenersSetup = true;
 
-	/**
-	 * Resume from pause - UPDATED
-	 */
-	resumeFromPause() {
-		Game.resume();
-		this.hideScreen('pause');
-		UI.showIngameUI();
-		MinionManager.showCountdownForResume(); // Hiện lại countdown nếu cần
-	},
+        // Start screen
+        document.getElementById('btnPlay')?.addEventListener('click', () => {
+            const nameInput = document.getElementById('playerNameInput');
+            if (nameInput) {
+                this.savePlayerName(nameInput.value.trim());
+            }
+            this.showScreen('pregame');
+            
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.resume();
+            }
+        });
+        
+        document.getElementById('btnSettings')?.addEventListener('click', () => {
+            this.previousScreen = this.currentScreen;
+            this.showScreen('settings');
+        });
 
-		
+        document.getElementById('btnHowToPlay')?.addEventListener('click', () => {
+            if (typeof UI !== 'undefined' && typeof UI.openHowToPlayModal === 'function') {
+                UI.openHowToPlayModal();
+            }
+        });
+        
+        document.getElementById('btnQuit')?.addEventListener('click', () => {
+            alert('Cảm ơn bạn đã chơi MOBA Arena!');
+        });
+        
+        document.getElementById('playerNameInput')?.addEventListener('change', (e) => {
+            this.savePlayerName(e.target.value.trim());
+        });
+        
+        // Pre-game screen
+        document.getElementById('btnStartGame')?.addEventListener('click', () => {
+            this.startGame();
+        });
+        
+        document.getElementById('btnBackToMenu')?.addEventListener('click', () => {
+            this.showScreen('start');
+        });
+        
+        document.getElementById('allyDifficulty')?.addEventListener('change', (e) => {
+            this.allyDifficulty = e.target.value;
+        });
+        
+        document.getElementById('enemyDifficulty')?.addEventListener('change', (e) => {
+            this.enemyDifficulty = e.target.value;
+        });
+        
+        // Settings screen - UPDATED
+        document.getElementById('btnCloseSettings')?.addEventListener('click', () => {
+            this.closeSettings();
+        });
+        
+        // Pause screen
+        document.getElementById('btnResume')?.addEventListener('click', () => {
+            this.resumeFromPause();
+        });
+        
+        // Pause settings - UPDATED
+        document.getElementById('btnPauseSettings')?.addEventListener('click', () => {
+            this.previousScreen = 'pause';
+            this.showScreen('settings');
+        });
+        
+        document.getElementById('btnExitGame')?.addEventListener('click', () => {
+            Game.stop();
+            this.hideScreen('pause');
+            this.showScreen('start');
+            UI.hideIngameUI();
+            
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.stopMusic();
+            }
+        });
+        
+        // Game over screen
+        document.getElementById('btnPlayAgain')?.addEventListener('click', () => {
+            this.hideScreen('gameover');
+            this.showScreen('pregame');
+        });
+        
+        document.getElementById('btnBackToMenuEnd')?.addEventListener('click', () => {
+            this.hideScreen('gameover');
+            this.showScreen('start');
+        });
+        
+        // === NEW: ESC key handler ===
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.handleEscapeKey();
+            }
+        });
+    },
+    
+    /**
+     * Handle ESC key press - NEW
+     */
+    handleEscapeKey() {
+        // Close How To Play modal first (if open)
+        if (typeof UI !== 'undefined' && typeof UI.isHowToPlayModalOpen === 'function' && UI.isHowToPlayModalOpen()) {
+            UI.closeHowToPlayModal();
+            return;
+        }
+
+        // Nếu đang ở settings
+        if (this.currentScreen === 'settings') {
+            this.closeSettings();
+            return;
+        }
+        
+        // Nếu đang ở pause
+        if (this.currentScreen === 'pause') {
+            this.resumeFromPause();
+            return;
+        }
+        
+        // Nếu game đang chạy và không pause
+        if (Game.isRunning && !Game.isPaused && !Game.isGameOver) {
+            Game.pause();
+        }
+    },
+    
+    /**
+     * Close settings - FIXED
+     */
+    closeSettings() {
+        this.hideScreen('settings');
+        
+        if (this.previousScreen === 'pause') {
+            this.showScreen('pause');
+            // KHÔNG hiện UI vì vẫn đang pause
+        } else if (Game.isRunning && !Game.isPaused) {
+            UI.showIngameUI();
+            MinionManager.showCountdownForResume();
+        } else if (!Game.isRunning) {
+            this.showScreen('start');
+        }
+        this.previousScreen = null;
+    },
+
+    /**
+     * Resume from pause - UPDATED
+     */
+    resumeFromPause() {
+        Game.resume();
+        this.hideScreen('pause');
+        UI.showIngameUI();
+        MinionManager.showCountdownForResume(); // Hiện lại countdown nếu cần
+    },
+
+        
     /**
      * Populate hero selection grid
      */
@@ -389,14 +405,14 @@ const Screens = {
         this.currentScreen = null;
     },
     
-	/**
-	 * Show pause screen - UPDATED
-	 */
-	showPause() {
-		UI.hideIngameUI();
-		MinionManager.hideCountdownForPause(); // Ẩn countdown lính
-		this.showScreen('pause');
-	},
+    /**
+     * Show pause screen - UPDATED
+     */
+    showPause() {
+        UI.hideIngameUI();
+        MinionManager.hideCountdownForPause(); // Ẩn countdown lính
+        this.showScreen('pause');
+    },
     
     /**
      * Show game over screen

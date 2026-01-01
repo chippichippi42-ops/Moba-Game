@@ -252,39 +252,46 @@ const GameMap = {
     generateTowerPositions() {
         const w = this.width;
         const h = this.height;
-        
-        this.towerPositions.blue.main = { x: 600, y: h - 600 };
+
+        // Increase tower spacing by ~18% while keeping lane anchors stable
+        const spacingFactor = 1.18;
+        const scaleAxis = (value, base) => base + (value - base) * spacingFactor;
+
+        const blueBase = { x: 600, y: h - 600 };
+        const redBase = { x: w - 600, y: 600 };
+
+        this.towerPositions.blue.main = { x: blueBase.x, y: blueBase.y };
         this.towerPositions.blue.top = [
-            { x: 400, y: h - 1500 },
-            { x: 400, y: h - 2800 },
-            { x: 400, y: h - 4200 },
+            { x: 400, y: scaleAxis(h - 1500, blueBase.y) },
+            { x: 400, y: scaleAxis(h - 2800, blueBase.y) },
+            { x: 400, y: scaleAxis(h - 4200, blueBase.y) },
         ];
         this.towerPositions.blue.mid = [
-            { x: 1500, y: h - 1500 },
-            { x: 2400, y: h - 2400 },
-            { x: 3300, y: h - 3300 },
+            { x: scaleAxis(1500, blueBase.x), y: scaleAxis(h - 1500, blueBase.y) },
+            { x: scaleAxis(2400, blueBase.x), y: scaleAxis(h - 2400, blueBase.y) },
+            { x: scaleAxis(3300, blueBase.x), y: scaleAxis(h - 3300, blueBase.y) },
         ];
         this.towerPositions.blue.bot = [
-            { x: 1500, y: h - 400 },
-            { x: 2800, y: h - 400 },
-            { x: 4200, y: h - 400 },
+            { x: scaleAxis(1500, blueBase.x), y: h - 400 },
+            { x: scaleAxis(2800, blueBase.x), y: h - 400 },
+            { x: scaleAxis(4200, blueBase.x), y: h - 400 },
         ];
-        
-        this.towerPositions.red.main = { x: w - 600, y: 600 };
+
+        this.towerPositions.red.main = { x: redBase.x, y: redBase.y };
         this.towerPositions.red.top = [
-            { x: w - 1500, y: 400 },
-            { x: w - 2800, y: 400 },
-            { x: w - 4200, y: 400 },
+            { x: scaleAxis(w - 1500, redBase.x), y: 400 },
+            { x: scaleAxis(w - 2800, redBase.x), y: 400 },
+            { x: scaleAxis(w - 4200, redBase.x), y: 400 },
         ];
         this.towerPositions.red.mid = [
-            { x: w - 1500, y: 1500 },
-            { x: w - 2400, y: 2400 },
-            { x: w - 3300, y: 3300 },
+            { x: scaleAxis(w - 1500, redBase.x), y: scaleAxis(1500, redBase.y) },
+            { x: scaleAxis(w - 2400, redBase.x), y: scaleAxis(2400, redBase.y) },
+            { x: scaleAxis(w - 3300, redBase.x), y: scaleAxis(3300, redBase.y) },
         ];
         this.towerPositions.red.bot = [
-            { x: w - 400, y: 1500 },
-            { x: w - 400, y: 2800 },
-            { x: w - 400, y: 4200 },
+            { x: w - 400, y: scaleAxis(1500, redBase.y) },
+            { x: w - 400, y: scaleAxis(2800, redBase.y) },
+            { x: w - 400, y: scaleAxis(4200, redBase.y) },
         ];
     },
     

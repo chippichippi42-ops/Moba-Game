@@ -44,6 +44,7 @@ const UI = {
         this.createTeamStatusPanel();
         this.createRespawnOverlay();
         this.createAttackRangeIndicator();
+        this.createHowToPlayModal();
     },
     
     /**
@@ -472,6 +473,160 @@ const UI = {
     createAttackRangeIndicator() {
         this.showAttackRange = false;
         this.attackRangeAlpha = 0;
+    },
+
+    createHowToPlayModal() {
+        const existing = document.getElementById('howToPlayModal');
+        if (existing) {
+            this.elements.howToPlayModal = existing;
+            this.elements.howToPlayContent = existing.querySelector('#howToPlayContent');
+            return;
+        }
+
+        const overlay = document.createElement('div');
+        overlay.id = 'howToPlayModal';
+        overlay.className = 'howto-modal-overlay';
+        overlay.innerHTML = `
+            <div class="howto-modal" role="dialog" aria-modal="true" aria-labelledby="howtoTitle">
+                <button class="howto-close" id="howToPlayCloseBtn" type="button" aria-label="Close">×</button>
+                <h2 id="howtoTitle">How To Play</h2>
+                <div class="howto-content" id="howToPlayContent"></div>
+            </div>
+        `;
+
+        const uiOverlay = document.getElementById('uiOverlay');
+        if (uiOverlay) {
+            uiOverlay.appendChild(overlay);
+        } else {
+            document.body.appendChild(overlay);
+        }
+
+        this.elements.howToPlayModal = overlay;
+        this.elements.howToPlayContent = overlay.querySelector('#howToPlayContent');
+
+        overlay.querySelector('#howToPlayCloseBtn')?.addEventListener('click', () => {
+            this.closeHowToPlayModal();
+        });
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                this.closeHowToPlayModal();
+            }
+        });
+    },
+
+    isHowToPlayModalOpen() {
+        const modal = this.elements.howToPlayModal || document.getElementById('howToPlayModal');
+        return !!modal && modal.classList.contains('open');
+    },
+
+    async openHowToPlayModal() {
+        if (!this.elements.howToPlayModal) {
+            this.createHowToPlayModal();
+        }
+
+        await this.loadHowToPlayContent();
+
+        const modal = this.elements.howToPlayModal;
+        if (modal) {
+            modal.classList.add('open');
+            modal.querySelector('#howToPlayCloseBtn')?.focus();
+        }
+    },
+
+    closeHowToPlayModal() {
+        const modal = this.elements.howToPlayModal || document.getElementById('howToPlayModal');
+        if (modal) {
+            modal.classList.remove('open');
+        }
+    },
+
+    async loadHowToPlayContent() {
+        if (this._howToPlayLoaded || this._howToPlayLoadingPromise) {
+            return this._howToPlayLoadingPromise;
+        }
+
+        this._howToPlayLoadingPromise = (async () => {
+            const container = this.elements.howToPlayContent;
+            if (container) {
+                container.innerHTML = '<div class="howto-loading">Loading...</div>';
+            }
+
+            try {
+                const res = await fetch('instruction.md', { cache: 'no-cache' });
+                const text = await res.text();
+                const html = this.markdownToHTML(text);
+                if (container) container.innerHTML = html;
+                this._howToPlayLoaded = true;
+            } catch (e) {
+                if (container) {
+                    container.innerHTML = '<p>Failed to load instructions.</p>';
+                }
+            } finally {
+                this._howToPlayLoadingPromise = null;
+            }
+        })();
+
+        return this._howToPlayLoadingPromise;
+    },
+
+    markdownToHTML(markdown) {
+        const lines = String(markdown || '').split(/\r?\n/);
+
+        const out = [];
+        let inList = false;
+
+        const closeList = () => {
+            if (inList) {
+                out.push('</ul>');
+                inList = false;
+            }
+        };
+
+        for (const rawLine of lines) {
+            const line = rawLine.trimEnd();
+            const trimmed = line.trim();
+
+            if (!trimmed) {
+                closeList();
+                out.push('');
+                continue;
+            }
+
+            const safe = this.escapeHTML(trimmed);
+
+            if (trimmed.startsWith('### ')) {
+                closeList();
+                out.push(`<h3>${this.escapeHTML(trimmed.slice(4))}</h3>`);
+                continue;
+            }
+            if (trimmed.startsWith('## ')) {
+                closeList();
+                out.push(`<h2>${this.escapeHTML(trimmed.slice(3))}</h2>`);
+                continue;
+            }
+            if (trimmed.startsWith('# ')) {
+                closeList();
+                out.push(`<h1>${this.escapeHTML(trimmed.slice(2))}</h1>`);
+                continue;
+            }
+
+            const bulletMatch = trimmed.match(/^[-*]\s+(.*)$/);
+            if (bulletMatch) {
+                if (!inList) {
+                    out.push('<ul>');
+                    inList = true;
+                }
+                out.push(`<li>${this.escapeHTML(bulletMatch[1])}</li>`);
+                continue;
+            }
+
+            closeList();
+            out.push(`<p>${safe}</p>`);
+        }
+
+        closeList();
+        return out.join('\n');
     },
     
     /**
@@ -1052,6 +1207,27 @@ const UI = {
             const ability = player.heroData.abilities[key];
             const level = player.abilityLevels[key];
             const cooldown = player.abilityCooldowns[key];
+
+            // Skill icon rendering (optional) + key indicator
+            const keyEl = element.querySelector('.key');
+            if (keyEl) keyEl.textContent = key.toUpperCase();
+
+            const iconPath = ability?.icon;
+            let iconImg = element.querySelector('.skill-icon-img');
+            if (iconPath) {
+                element.classList.add('has-icon');
+                if (!iconImg) {
+                    iconImg = document.createElement('img');
+                    iconImg.className = 'skill-icon-img';
+                    iconImg.alt = ability?.name ? `${ability.name} icon` : `${key.toUpperCase()} ability icon`;
+                    element.insertBefore(iconImg, keyEl || element.firstChild);
+                }
+                if (iconImg.src !== iconPath) iconImg.src = iconPath;
+                iconImg.style.display = 'block';
+            } else {
+                element.classList.remove('has-icon');
+                if (iconImg) iconImg.style.display = 'none';
+            }
             
             const overlay = element.querySelector('.cooldown-overlay');
             if (overlay) {
@@ -1163,49 +1339,88 @@ const UI = {
         }
     },
     
+    escapeHTML(str) {
+        return String(str)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    },
+
+    getKillFeedEntityName(entity) {
+        if (!entity) return 'Unknown';
+        if (typeof entity === 'string') return entity;
+
+        if (entity.type === 'hero') return entity.playerName || entity.name || 'Unknown';
+        if (entity.type === 'tower') return entity.name || 'Tower';
+        if (entity.type === 'minion') return entity.name || 'Minion';
+        if (entity.type === 'creature') return entity.name || 'Monster';
+
+        return entity.playerName || entity.name || 'Unknown';
+    },
+
+    getKillFeedEntityColor(entity) {
+        const player = typeof HeroManager !== 'undefined' ? HeroManager.player : null;
+
+        // Unknown / structures
+        if (!entity) return '#FFFFFF';
+        if (typeof entity === 'string') return '#FFFFFF';
+        if (entity.type === 'tower') return '#FFFFFF';
+
+        // Monsters default to red
+        if (entity.type === 'creature') return '#FF0000';
+
+        // If no player context, fall back to white
+        if (!player) return '#FFFFFF';
+
+        // Player
+        if (entity === player) return '#00FF00';
+
+        // Team-based
+        if (entity.team === player.team) return '#00CCFF';
+        if (entity.team === CONFIG.teams.RED || entity.team === CONFIG.teams.BLUE) return '#FF0000';
+
+        return '#FFFFFF';
+    },
+
     addKillFeed(killer, victim, type) {
-        let killerName = 'Unknown';
-        
-        // Check killer type to get proper name
-        if (!killer) {
-            killerName = 'Unknown';
-        } else if (killer.type === 'hero') {
-            // Hero: use playerName or name
-            killerName = killer.playerName || killer.name || 'Unknown';
-        } else if (killer.type === 'tower') {
-            // Tower: use name or "Tower"
-            killerName = killer.name || 'Tower';
-        } else if (killer.type === 'minion') {
-            // Minion: use name or "Minion"
-            killerName = killer.name || 'Minion';
-        } else if (killer.type === 'creature') {
-            // Creature: use name or "Monster"
-            killerName = killer.name || 'Monster';
-        } else {
-            // Fallback: try to get name or playerName
-            killerName = killer.playerName || killer.name || 'Unknown';
-        }
-        
-        let victimName = typeof victim === 'string' ? victim : (victim?.playerName || victim?.name || 'Unknown');
-        
-        const entry = { killer: killerName, victim: victimName, type, timestamp: Date.now() };
+        const killerName = this.getKillFeedEntityName(killer);
+        const victimName = this.getKillFeedEntityName(victim);
+
+        const entry = {
+            killer: killerName,
+            killerColor: this.getKillFeedEntityColor(killer),
+            victim: victimName,
+            victimColor: this.getKillFeedEntityColor(victim),
+            type,
+            timestamp: Date.now()
+        };
+
         this.killFeed.unshift(entry);
         if (this.killFeed.length > this.maxKillFeedEntries) this.killFeed.pop();
         this.renderKillFeedEntry(entry);
     },
-    
+
     renderKillFeedEntry(entry) {
         if (!this.elements.killFeed) return;
-        
+
         const div = document.createElement('div');
         div.className = 'kill-entry';
-        
+
         if (entry.type === 'kill') {
-            div.innerHTML = `<span class="killer">${entry.killer}</span><span class="action">killed</span><span class="victim">${entry.victim}</span>`;
+            div.innerHTML = `
+                <span class="kill-feed-name kill-feed-killer" style="color: ${entry.killerColor}">${this.escapeHTML(entry.killer)}</span>
+                <span class="kill-feed-action" aria-hidden="true">⚔️</span>
+                <span class="kill-feed-name kill-feed-victim kill-feed-slashed" style="color: ${entry.victimColor}">${this.escapeHTML(entry.victim)}</span>
+            `;
         } else if (entry.type === 'tower') {
-            div.innerHTML = `<span class="victim">${entry.victim}</span><span class="action">was destroyed</span>`;
+            div.innerHTML = `
+                <span class="kill-feed-name kill-feed-victim" style="color: #FFFFFF">${this.escapeHTML(entry.victim)}</span>
+                <span class="kill-feed-action">was destroyed</span>
+            `;
         }
-        
+
         this.elements.killFeed.insertBefore(div, this.elements.killFeed.firstChild);
         setTimeout(() => div.remove(), CONFIG.ui.killFeedDuration);
     },
