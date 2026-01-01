@@ -77,6 +77,16 @@ const HeroNemo = {
             stunDuration: 1000,
             maxLevel: 5,
 
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'CC',
+            priority: 1,
+            minDamage: 120,
+            isEscape: false,
+            isCC: true,
+            canChain: true,
+            isSustain: false,
+            isEngage: true,
+
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] 
                     + (hero.stats.attackDamage * this.adRatio)
@@ -116,6 +126,16 @@ const HeroNemo = {
             duration: 4000,
             maxLevel: 5,
 
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Sustain',
+            priority: 3,
+            minDamage: 0,
+            isEscape: false,
+            isCC: false,
+            canChain: false,
+            isSustain: true,
+            isEngage: false,
+
             execute(hero, targetX, targetY, level) {
                 const shieldAmount = this.baseShield[level - 1] 
                     + (hero.stats.abilityPower * this.apRatio)
@@ -148,6 +168,16 @@ const HeroNemo = {
             radius: 350,
             tauntDuration: 2000,
             maxLevel: 5,
+
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'CC',
+            priority: 2,
+            minDamage: 0,
+            isEscape: false,
+            isCC: true,
+            canChain: true,
+            isSustain: false,
+            isEngage: true,
 
             execute(hero, targetX, targetY, level) {
                 return {
@@ -184,6 +214,16 @@ const HeroNemo = {
             duration: 5000,
             tickRate: 1000,
             maxLevel: 3,
+
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Sustain',
+            priority: 1,
+            minDamage: 0,
+            isEscape: false,
+            isCC: false,
+            canChain: false,
+            isSustain: true,
+            isEngage: false,
 
             execute(hero, targetX, targetY, level) {
                 const healPerTick = this.baseHeal[level - 1] + (hero.stats.abilityPower * this.apRatio);

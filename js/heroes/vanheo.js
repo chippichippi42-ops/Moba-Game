@@ -75,6 +75,16 @@ const HeroVanheo = {
             width: 60,
             speed: 1500,
             maxLevel: 5,
+
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Burst',
+            priority: 3,
+            minDamage: 120,
+            isEscape: false,
+            isCC: false,
+            canChain: true,
+            isSustain: false,
+            isEngage: false,
             
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] + (hero.stats.attackDamage * this.adRatio);
@@ -117,6 +127,16 @@ const HeroVanheo = {
             slowDuration: 2000,
             maxLevel: 5,
 
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'CC',
+            priority: 2,
+            minDamage: 130,
+            isEscape: false,
+            isCC: true,
+            canChain: true,
+            isSustain: false,
+            isEngage: false,
+
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] + (hero.stats.attackDamage * this.adRatio);
                 
@@ -155,6 +175,16 @@ const HeroVanheo = {
             projectileRange: 600,
             cdrOnHit: 2000,
             maxLevel: 5,
+
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Escape',
+            priority: 4,
+            minDamage: 90,
+            isEscape: true,
+            isCC: false,
+            canChain: true,
+            isSustain: false,
+            isEngage: false,
 
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] + (hero.stats.attackDamage * this.adRatio);
@@ -201,6 +231,16 @@ const HeroVanheo = {
             damageFalloff: 0.15, // -15% mỗi mục tiêu
             minDamagePercent: 0.4,
             maxLevel: 3,
+
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Burst',
+            priority: 1,
+            minDamage: 400,
+            isEscape: false,
+            isCC: false,
+            canChain: true,
+            isSustain: false,
+            isEngage: false,
 
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] + (hero.stats.attackDamage * this.adRatio);

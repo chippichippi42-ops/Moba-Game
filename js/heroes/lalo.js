@@ -77,6 +77,16 @@ const HeroLaLo = {
             explosionRadius: 150,
             maxLevel: 5,
 
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Burst',
+            priority: 3,
+            minDamage: 140,
+            isEscape: false,
+            isCC: false,
+            canChain: true,
+            isSustain: false,
+            isEngage: false,
+
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] + (hero.stats.abilityPower * this.apRatio);
                 const angle = Utils.angleBetweenPoints(hero.x, hero.y, targetX, targetY);
@@ -118,6 +128,16 @@ const HeroLaLo = {
             freezeDuration: 1500,
             maxLevel: 5,
 
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'CC',
+            priority: 2,
+            minDamage: 110,
+            isEscape: false,
+            isCC: true,
+            canChain: true,
+            isSustain: false,
+            isEngage: true,
+
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] + (hero.stats.abilityPower * this.apRatio);
                 
@@ -153,6 +173,16 @@ const HeroLaLo = {
             range: 400,
             maxLevel: 5,
 
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Mobility',
+            priority: 4,
+            minDamage: 0,
+            isEscape: true,
+            isCC: false,
+            canChain: true,
+            isSustain: false,
+            isEngage: false,
+
             execute(hero, targetX, targetY, level) {
                 const angle = Utils.angleBetweenPoints(hero.x, hero.y, targetX, targetY);
                 const dist = Math.min(Utils.distance(hero.x, hero.y, targetX, targetY), this.range);
@@ -184,6 +214,16 @@ const HeroLaLo = {
             delay: 1500,
             stunDuration: 1500,
             maxLevel: 3,
+
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Burst',
+            priority: 1,
+            minDamage: 350,
+            isEscape: false,
+            isCC: true,
+            canChain: true,
+            isSustain: false,
+            isEngage: true,
 
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] + (hero.stats.abilityPower * this.apRatio);
