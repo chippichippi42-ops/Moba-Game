@@ -219,7 +219,38 @@ class Hero {
         // Ability points
         this.abilityPoints = 1;
     }
-    
+
+    getState() {
+        return {
+            id: this.id,
+            name: this.name,
+            level: this.level,
+            health: this.health,
+            maxHealth: this.stats.maxHealth,
+            healthPercent: (this.health / this.stats.maxHealth) * 100,
+            mana: this.mana,
+            maxMana: this.stats.maxMana,
+            manaPercent: (this.mana / this.stats.maxMana) * 100,
+            x: this.x,
+            y: this.y,
+            isAlive: this.isAlive,
+            abilities: {
+                q: { ready: this.abilityCooldowns.q <= 0 && this.abilityLevels.q > 0 },
+                e: { ready: this.abilityCooldowns.e <= 0 && this.abilityLevels.e > 0 },
+                r: { ready: this.abilityCooldowns.r <= 0 && this.abilityLevels.r > 0 },
+                t: { ready: this.abilityCooldowns.t <= 0 && this.abilityLevels.t > 0 }
+            },
+            hasEscapeRoute: true, // Simplified
+            isCCVulnerable: this.debuffs.length === 0, // Simplified
+            gold: 1000, // Simplified
+            killStreak: this.kills, // Simplified
+            deathStreak: this.deaths, // Simplified
+            deathProbability: 0, // Default
+            timeSinceBase: 0, // Simplified
+            hasManaForCombo: this.mana > 150 // Simplified
+        };
+    }
+
     /**
      * Calculate final stats
      */
