@@ -29,6 +29,14 @@ const AIManager = new (class AIManager {
         this.controllers = [];
         this.initializeSystems();
     }
+
+    async initializeAI() {
+        const isAvailable = await this.ollamaIntegrator.checkAvailability();
+        if (!isAvailable) {
+            console.warn('Ollama not available, using local AI only');
+        }
+        return isAvailable;
+    }
     
     initializeSystems() {
         // Initialize systems with config
