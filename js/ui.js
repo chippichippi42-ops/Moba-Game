@@ -80,9 +80,9 @@ const UI = {
             musicVolume: document.getElementById('musicVolume'),
             sfxVolume: document.getElementById('sfxVolume'),
             cameraSensitivity: document.getElementById('cameraSensitivity'),
-			showCoordinates: document.getElementById('showCoordinates'),
+            showCoordinates: document.getElementById('showCoordinates'),
         };
-		this.createCoordinatesDisplay();
+        this.createCoordinatesDisplay();
     },
     
     /**
@@ -117,318 +117,318 @@ const UI = {
         this.elements.kdaDeaths = document.getElementById('kdaDeaths');
         this.elements.kdaAssists = document.getElementById('kdaAssists');
     },
-	
-	/**
-	 * Create Coordinates Display
-	 */
-	createCoordinatesDisplay() {
-		const coordsDisplay = document.createElement('div');
-		coordsDisplay.id = 'coordinatesDisplay';
-		coordsDisplay.className = 'hidden';
-		coordsDisplay.innerHTML = `
-			<span id="playerCoords">X: 0 Y: 0</span>
-		`;
-		
-		const ingameUI = document.getElementById('ingameUI');
-		if (ingameUI) {
-			ingameUI.appendChild(coordsDisplay);
-		}
-		
-		this.elements.coordinatesDisplay = coordsDisplay;
-		this.elements.playerCoords = document.getElementById('playerCoords');
-	},
-	
     
-	/**
-	 * Create Team Status Panel - RECODE HOÀN TOÀN
-	 */
-	createTeamStatusPanel() {
-		// Xóa panel cũ nếu có
-		const oldPanel = document.getElementById('teamStatusPanel');
-		if (oldPanel) oldPanel.remove();
-		
-		const teamPanel = document.createElement('div');
-		teamPanel.id = 'teamStatusPanel';
-		teamPanel.innerHTML = `
-			<div class="team-panel-header" id="teamPanelHeader">
-				<span class="team-panel-drag-handle" id="teamPanelDragHandle">⋮⋮</span>
-				<span class="team-status-title">Đồng Đội</span>
-				<button class="team-panel-toggle" id="teamPanelToggle" type="button">−</button>
-			</div>
-			<div class="team-panel-content" id="teamPanelContent">
-				<div id="allyStatusList" class="ally-status-list"></div>
-			</div>
-		`;
-		
-		const ingameUI = document.getElementById('ingameUI');
-		if (ingameUI) {
-			ingameUI.appendChild(teamPanel);
-		}
-		
-		// Cache elements
-		this.elements.teamStatusPanel = teamPanel;
-		this.elements.allyStatusList = document.getElementById('allyStatusList');
-		this.elements.teamPanelContent = document.getElementById('teamPanelContent');
-		this.elements.teamPanelToggle = document.getElementById('teamPanelToggle');
-		this.elements.teamPanelHeader = document.getElementById('teamPanelHeader');
-		this.elements.teamPanelDragHandle = document.getElementById('teamPanelDragHandle');
-		
-		// Set initial position
-		teamPanel.style.left = this.teamPanelPosition.x + 'px';
-		teamPanel.style.top = this.teamPanelPosition.y + 'px';
-		
-		// Setup interactions
-		this.setupTeamPanelInteractions();
-	},
+    /**
+     * Create Coordinates Display
+     */
+    createCoordinatesDisplay() {
+        const coordsDisplay = document.createElement('div');
+        coordsDisplay.id = 'coordinatesDisplay';
+        coordsDisplay.className = 'hidden';
+        coordsDisplay.innerHTML = `
+            <span id="playerCoords">X: 0 Y: 0</span>
+        `;
+        
+        const ingameUI = document.getElementById('ingameUI');
+        if (ingameUI) {
+            ingameUI.appendChild(coordsDisplay);
+        }
+        
+        this.elements.coordinatesDisplay = coordsDisplay;
+        this.elements.playerCoords = document.getElementById('playerCoords');
+    },
+    
+    
+    /**
+     * Create Team Status Panel - RECODE HOÀN TOÀN
+     */
+    createTeamStatusPanel() {
+        // Xóa panel cũ nếu có
+        const oldPanel = document.getElementById('teamStatusPanel');
+        if (oldPanel) oldPanel.remove();
+        
+        const teamPanel = document.createElement('div');
+        teamPanel.id = 'teamStatusPanel';
+        teamPanel.innerHTML = `
+            <div class="team-panel-header" id="teamPanelHeader">
+                <span class="team-panel-drag-handle" id="teamPanelDragHandle">⋮⋮</span>
+                <span class="team-status-title">Đồng Đội</span>
+                <button class="team-panel-toggle" id="teamPanelToggle" type="button">−</button>
+            </div>
+            <div class="team-panel-content" id="teamPanelContent">
+                <div id="allyStatusList" class="ally-status-list"></div>
+            </div>
+        `;
+        
+        const ingameUI = document.getElementById('ingameUI');
+        if (ingameUI) {
+            ingameUI.appendChild(teamPanel);
+        }
+        
+        // Cache elements
+        this.elements.teamStatusPanel = teamPanel;
+        this.elements.allyStatusList = document.getElementById('allyStatusList');
+        this.elements.teamPanelContent = document.getElementById('teamPanelContent');
+        this.elements.teamPanelToggle = document.getElementById('teamPanelToggle');
+        this.elements.teamPanelHeader = document.getElementById('teamPanelHeader');
+        this.elements.teamPanelDragHandle = document.getElementById('teamPanelDragHandle');
+        
+        // Set initial position
+        teamPanel.style.left = this.teamPanelPosition.x + 'px';
+        teamPanel.style.top = this.teamPanelPosition.y + 'px';
+        
+        // Setup interactions
+        this.setupTeamPanelInteractions();
+    },
 
     
-	/**
-	 * Setup Team Panel Interactions - Drag + Toggle
-	 */
-	setupTeamPanelInteractions() {
-		const panel = document.getElementById('teamStatusPanel');
-		const header = document.getElementById('teamPanelHeader');
-		const toggleBtn = document.getElementById('teamPanelToggle');
-		const dragHandle = document.getElementById('teamPanelDragHandle');
-		
-		if (!panel || !header || !toggleBtn) return;
-		
-		// === TOGGLE FUNCTIONALITY ===
-		toggleBtn.addEventListener('click', (e) => {
-			e.preventDefault();
-			e.stopPropagation();
-			this.toggleTeamPanel();
-		});
-		
-		// === DRAG FUNCTIONALITY ===
-		let isDragging = false;
-		let dragStartX = 0;
-		let dragStartY = 0;
-		let panelStartX = 0;
-		let panelStartY = 0;
-		
-		const startDrag = (clientX, clientY) => {
-			isDragging = true;
-			dragStartX = clientX;
-			dragStartY = clientY;
-			panelStartX = panel.offsetLeft;
-			panelStartY = panel.offsetTop;
-			
-			panel.style.transition = 'none';
-			panel.style.cursor = 'grabbing';
-			document.body.style.userSelect = 'none';
-		};
-		
-		const doDrag = (clientX, clientY) => {
-			if (!isDragging) return;
-			
-			const deltaX = clientX - dragStartX;
-			const deltaY = clientY - dragStartY;
-			
-			let newX = panelStartX + deltaX;
-			let newY = panelStartY + deltaY;
-			
-			// Giới hạn trong màn hình
-			const maxX = window.innerWidth - panel.offsetWidth - 10;
-			const maxY = window.innerHeight - panel.offsetHeight - 10;
-			
-			newX = Math.max(10, Math.min(newX, maxX));
-			newY = Math.max(10, Math.min(newY, maxY));
-			
-			panel.style.left = newX + 'px';
-			panel.style.top = newY + 'px';
-		};
-		
-		const endDrag = () => {
-			if (!isDragging) return;
-			
-			isDragging = false;
-			panel.style.transition = '';
-			panel.style.cursor = '';
-			document.body.style.userSelect = '';
-			
-			// Lưu vị trí
-			this.teamPanelPosition.x = panel.offsetLeft;
-			this.teamPanelPosition.y = panel.offsetTop;
-		};
-		
-		// Mouse events - chỉ drag khi kéo từ drag handle hoặc header (không phải toggle)
-		header.addEventListener('mousedown', (e) => {
-			if (e.target === toggleBtn) return;
-			e.preventDefault();
-			startDrag(e.clientX, e.clientY);
-		});
-		
-		document.addEventListener('mousemove', (e) => {
-			if (isDragging) {
-				e.preventDefault();
-				doDrag(e.clientX, e.clientY);
-			}
-		});
-		
-		document.addEventListener('mouseup', endDrag);
-		
-		// Touch events
-		header.addEventListener('touchstart', (e) => {
-			if (e.target === toggleBtn) return;
-			const touch = e.touches[0];
-			startDrag(touch.clientX, touch.clientY);
-		}, { passive: true });
-		
-		document.addEventListener('touchmove', (e) => {
-			if (isDragging) {
-				const touch = e.touches[0];
-				doDrag(touch.clientX, touch.clientY);
-			}
-		}, { passive: true });
-		
-		document.addEventListener('touchend', endDrag);
-		document.addEventListener('touchcancel', endDrag);
-	},
+    /**
+     * Setup Team Panel Interactions - Drag + Toggle
+     */
+    setupTeamPanelInteractions() {
+        const panel = document.getElementById('teamStatusPanel');
+        const header = document.getElementById('teamPanelHeader');
+        const toggleBtn = document.getElementById('teamPanelToggle');
+        const dragHandle = document.getElementById('teamPanelDragHandle');
+        
+        if (!panel || !header || !toggleBtn) return;
+        
+        // === TOGGLE FUNCTIONALITY ===
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.toggleTeamPanel();
+        });
+        
+        // === DRAG FUNCTIONALITY ===
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let panelStartX = 0;
+        let panelStartY = 0;
+        
+        const startDrag = (clientX, clientY) => {
+            isDragging = true;
+            dragStartX = clientX;
+            dragStartY = clientY;
+            panelStartX = panel.offsetLeft;
+            panelStartY = panel.offsetTop;
+            
+            panel.style.transition = 'none';
+            panel.style.cursor = 'grabbing';
+            document.body.style.userSelect = 'none';
+        };
+        
+        const doDrag = (clientX, clientY) => {
+            if (!isDragging) return;
+            
+            const deltaX = clientX - dragStartX;
+            const deltaY = clientY - dragStartY;
+            
+            let newX = panelStartX + deltaX;
+            let newY = panelStartY + deltaY;
+            
+            // Giới hạn trong màn hình
+            const maxX = window.innerWidth - panel.offsetWidth - 10;
+            const maxY = window.innerHeight - panel.offsetHeight - 10;
+            
+            newX = Math.max(10, Math.min(newX, maxX));
+            newY = Math.max(10, Math.min(newY, maxY));
+            
+            panel.style.left = newX + 'px';
+            panel.style.top = newY + 'px';
+        };
+        
+        const endDrag = () => {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            panel.style.transition = '';
+            panel.style.cursor = '';
+            document.body.style.userSelect = '';
+            
+            // Lưu vị trí
+            this.teamPanelPosition.x = panel.offsetLeft;
+            this.teamPanelPosition.y = panel.offsetTop;
+        };
+        
+        // Mouse events - chỉ drag khi kéo từ drag handle hoặc header (không phải toggle)
+        header.addEventListener('mousedown', (e) => {
+            if (e.target === toggleBtn) return;
+            e.preventDefault();
+            startDrag(e.clientX, e.clientY);
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                doDrag(e.clientX, e.clientY);
+            }
+        });
+        
+        document.addEventListener('mouseup', endDrag);
+        
+        // Touch events
+        header.addEventListener('touchstart', (e) => {
+            if (e.target === toggleBtn) return;
+            const touch = e.touches[0];
+            startDrag(touch.clientX, touch.clientY);
+        }, { passive: true });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                const touch = e.touches[0];
+                doDrag(touch.clientX, touch.clientY);
+            }
+        }, { passive: true });
+        
+        document.addEventListener('touchend', endDrag);
+        document.addEventListener('touchcancel', endDrag);
+    },
 
-	/**
-	 * Toggle Team Panel - Đóng/Mở
-	 */
-	toggleTeamPanel() {
-		this.teamPanelCollapsed = !this.teamPanelCollapsed;
-		
-		const content = document.getElementById('teamPanelContent');
-		const toggle = document.getElementById('teamPanelToggle');
-		const panel = document.getElementById('teamStatusPanel');
-		
-		if (content) {
-			if (this.teamPanelCollapsed) {
-				content.style.maxHeight = '0';
-				content.style.padding = '0 14px';
-				content.style.opacity = '0';
-				content.style.overflow = 'hidden';
-			} else {
-				content.style.maxHeight = '400px';
-				content.style.padding = '14px';
-				content.style.opacity = '1';
-				content.style.overflow = 'auto';
-			}
-		}
-		
-		if (toggle) {
-			toggle.textContent = this.teamPanelCollapsed ? '+' : '−';
-		}
-		
-		if (panel) {
-			panel.classList.toggle('collapsed', this.teamPanelCollapsed);
-		}
-	},
-	/**
-	 * Update Team Status - Cập nhật thông tin đồng đội
-	 */
-	updateTeamStatus() {
-		const listEl = document.getElementById('allyStatusList');
-		if (!listEl) return;
-		
-		// Không update nếu panel đang đóng
-		if (this.teamPanelCollapsed) return;
-		
-		const player = HeroManager.player;
-		if (!player) return;
-		
-		const allies = HeroManager.getTeamHeroes(player.team).filter(h => h !== player);
-		
-		// Rebuild nếu số lượng thay đổi
-		if (listEl.children.length !== allies.length) {
-			this.buildTeamStatusItems(allies);
-		}
-		
-		// Update từng ally
-		allies.forEach((ally, index) => {
-			const item = listEl.children[index];
-			if (!item) return;
-			
-			// Update dead state
-			item.classList.toggle('dead', !ally.isAlive);
-			
-			// Update health bar
-			const healthFill = item.querySelector('.ally-health-fill');
-			if (healthFill) {
-				const healthPercent = (ally.health / ally.stats.maxHealth) * 100;
-				healthFill.style.width = healthPercent + '%';
-			}
-			
-			// Update mana bar
-			const manaFill = item.querySelector('.ally-mana-fill');
-			if (manaFill) {
-				const manaPercent = (ally.mana / ally.stats.maxMana) * 100;
-				manaFill.style.width = manaPercent + '%';
-			}
-			
-			// Update ult indicator
-			const ultIndicator = item.querySelector('.ally-ult-indicator');
-			if (ultIndicator) {
-				const hasUlt = ally.abilityLevels['t'] > 0 && ally.abilityCooldowns['t'] <= 0;
-				ultIndicator.classList.toggle('ready', hasUlt);
-				ultIndicator.classList.toggle('not-ready', !hasUlt);
-			}
-			
-			// Update respawn timer
-			const respawnTimer = item.querySelector('.ally-respawn-timer');
-			if (respawnTimer) {
-				if (!ally.isAlive && ally.respawnTimer > 0) {
-					respawnTimer.textContent = Math.ceil(ally.respawnTimer / 1000);
-					respawnTimer.style.display = 'block';
-				} else {
-					respawnTimer.style.display = 'none';
-				}
-			}
-			
-			// Update level
-			const levelEl = item.querySelector('.ally-level');
-			if (levelEl) {
-				levelEl.textContent = ally.level;
-			}
-		});
-	},
-	
-	/**
-	 * Build Team Status Items - Tạo các item cho từng ally
-	 */
-	buildTeamStatusItems(allies) {
-		const listEl = document.getElementById('allyStatusList');
-		if (!listEl) return;
-		
-		listEl.innerHTML = '';
-		
-		const roleColors = {
-			marksman: '#f59e0b',
-			fighter: '#ef4444',
-			mage: '#8b5cf6',
-			tank: '#3b82f6',
-			assassin: '#6366f1',
-		};
-		
-		for (const ally of allies) {
-			const item = document.createElement('div');
-			item.className = 'ally-status-item';
-			item.innerHTML = `
-				<div class="ally-icon" style="background: ${roleColors[ally.role] || '#64748b'}">
-					${ally.heroData.icon}
-					<div class="ally-ult-indicator not-ready"></div>
-					<span class="ally-level">${ally.level}</span>
-				</div>
-				<div class="ally-info">
-					<div class="ally-name">${ally.playerName}</div>
-					<div class="ally-bars">
-						<div class="ally-health-bar">
-							<div class="ally-health-fill" style="width: 100%"></div>
-						</div>
-						<div class="ally-mana-bar">
-							<div class="ally-mana-fill" style="width: 100%"></div>
-						</div>
-					</div>
-				</div>
-				<div class="ally-respawn-timer" style="display: none"></div>
-			`;
-			listEl.appendChild(item);
-		}
-	},
+    /**
+     * Toggle Team Panel - Đóng/Mở
+     */
+    toggleTeamPanel() {
+        this.teamPanelCollapsed = !this.teamPanelCollapsed;
+        
+        const content = document.getElementById('teamPanelContent');
+        const toggle = document.getElementById('teamPanelToggle');
+        const panel = document.getElementById('teamStatusPanel');
+        
+        if (content) {
+            if (this.teamPanelCollapsed) {
+                content.style.maxHeight = '0';
+                content.style.padding = '0 14px';
+                content.style.opacity = '0';
+                content.style.overflow = 'hidden';
+            } else {
+                content.style.maxHeight = '400px';
+                content.style.padding = '14px';
+                content.style.opacity = '1';
+                content.style.overflow = 'auto';
+            }
+        }
+        
+        if (toggle) {
+            toggle.textContent = this.teamPanelCollapsed ? '+' : '−';
+        }
+        
+        if (panel) {
+            panel.classList.toggle('collapsed', this.teamPanelCollapsed);
+        }
+    },
+    /**
+     * Update Team Status - Cập nhật thông tin đồng đội
+     */
+    updateTeamStatus() {
+        const listEl = document.getElementById('allyStatusList');
+        if (!listEl) return;
+        
+        // Không update nếu panel đang đóng
+        if (this.teamPanelCollapsed) return;
+        
+        const player = HeroManager.player;
+        if (!player) return;
+        
+        const allies = HeroManager.getTeamHeroes(player.team).filter(h => h !== player);
+        
+        // Rebuild nếu số lượng thay đổi
+        if (listEl.children.length !== allies.length) {
+            this.buildTeamStatusItems(allies);
+        }
+        
+        // Update từng ally
+        allies.forEach((ally, index) => {
+            const item = listEl.children[index];
+            if (!item) return;
+            
+            // Update dead state
+            item.classList.toggle('dead', !ally.isAlive);
+            
+            // Update health bar
+            const healthFill = item.querySelector('.ally-health-fill');
+            if (healthFill) {
+                const healthPercent = (ally.health / ally.stats.maxHealth) * 100;
+                healthFill.style.width = healthPercent + '%';
+            }
+            
+            // Update mana bar
+            const manaFill = item.querySelector('.ally-mana-fill');
+            if (manaFill) {
+                const manaPercent = (ally.mana / ally.stats.maxMana) * 100;
+                manaFill.style.width = manaPercent + '%';
+            }
+            
+            // Update ult indicator
+            const ultIndicator = item.querySelector('.ally-ult-indicator');
+            if (ultIndicator) {
+                const hasUlt = ally.abilityLevels['t'] > 0 && ally.abilityCooldowns['t'] <= 0;
+                ultIndicator.classList.toggle('ready', hasUlt);
+                ultIndicator.classList.toggle('not-ready', !hasUlt);
+            }
+            
+            // Update respawn timer
+            const respawnTimer = item.querySelector('.ally-respawn-timer');
+            if (respawnTimer) {
+                if (!ally.isAlive && ally.respawnTimer > 0) {
+                    respawnTimer.textContent = Math.ceil(ally.respawnTimer / 1000);
+                    respawnTimer.style.display = 'block';
+                } else {
+                    respawnTimer.style.display = 'none';
+                }
+            }
+            
+            // Update level
+            const levelEl = item.querySelector('.ally-level');
+            if (levelEl) {
+                levelEl.textContent = ally.level;
+            }
+        });
+    },
+    
+    /**
+     * Build Team Status Items - Tạo các item cho từng ally
+     */
+    buildTeamStatusItems(allies) {
+        const listEl = document.getElementById('allyStatusList');
+        if (!listEl) return;
+        
+        listEl.innerHTML = '';
+        
+        const roleColors = {
+            marksman: '#f59e0b',
+            fighter: '#ef4444',
+            mage: '#8b5cf6',
+            tank: '#3b82f6',
+            assassin: '#6366f1',
+        };
+        
+        for (const ally of allies) {
+            const item = document.createElement('div');
+            item.className = 'ally-status-item';
+            item.innerHTML = `
+                <div class="ally-icon" style="background: ${roleColors[ally.role] || '#64748b'}">
+                    ${ally.heroData.icon}
+                    <div class="ally-ult-indicator not-ready"></div>
+                    <span class="ally-level">${ally.level}</span>
+                </div>
+                <div class="ally-info">
+                    <div class="ally-name">${ally.playerName}</div>
+                    <div class="ally-bars">
+                        <div class="ally-health-bar">
+                            <div class="ally-health-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="ally-mana-bar">
+                            <div class="ally-mana-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ally-respawn-timer" style="display: none"></div>
+            `;
+            listEl.appendChild(item);
+        }
+    },
 
     
     /**
@@ -646,21 +646,21 @@ const UI = {
                 .respawn-title { font-size: 28px; }
                 .respawn-timer { font-size: 64px; }
             }
-			
-			#coordinatesDisplay {
-				position: absolute;
-				top: 10px;
-				right: 240px;
-				padding: 8px 12px;
-				background: rgba(0, 0, 0, 0.7);
-				border-radius: 6px;
-				font-family: monospace;
-				font-size: 12px;
-				color: #00d4ff;
-				border: 1px solid rgba(0, 212, 255, 0.3);
-			}
+            
+            #coordinatesDisplay {
+                position: absolute;
+                top: 10px;
+                right: 240px;
+                padding: 8px 12px;
+                background: rgba(0, 0, 0, 0.7);
+                border-radius: 6px;
+                font-family: monospace;
+                font-size: 12px;
+                color: #00d4ff;
+                border: 1px solid rgba(0, 212, 255, 0.3);
+            }
 
-			#coordinatesDisplay.hidden { display: none; }
+            #coordinatesDisplay.hidden { display: none; }
         `;
         document.head.appendChild(style);
     },
@@ -723,14 +723,14 @@ const UI = {
                 this.saveSettings();
             });
         }
-		
-		if (this.elements.showCoordinates) {
-			this.elements.showCoordinates.addEventListener('change', (e) => {
-				this.settings.showCoordinates = e.target.checked;
-				this.elements.coordinatesDisplay?.classList.toggle('hidden', !e.target.checked);
-				this.saveSettings();
-			});
-		}
+        
+        if (this.elements.showCoordinates) {
+            this.elements.showCoordinates.addEventListener('change', (e) => {
+                this.settings.showCoordinates = e.target.checked;
+                this.elements.coordinatesDisplay?.classList.toggle('hidden', !e.target.checked);
+                this.saveSettings();
+            });
+        }
     },
     
     loadSettings() {
@@ -784,11 +784,11 @@ const UI = {
             const display = document.getElementById('cameraSensitivityValue');
             if (display) display.textContent = this.settings.cameraSensitivity;
         }
-		
-		if (this.elements.showCoordinates) {
-			this.elements.showCoordinates.checked = this.settings.showCoordinates || false;
-			this.elements.coordinatesDisplay?.classList.toggle('hidden', !this.settings.showCoordinates);
-		}
+        
+        if (this.elements.showCoordinates) {
+            this.elements.showCoordinates.checked = this.settings.showCoordinates || false;
+            this.elements.coordinatesDisplay?.classList.toggle('hidden', !this.settings.showCoordinates);
+        }
     },
     
     update(deltaTime) {
@@ -803,17 +803,17 @@ const UI = {
         this.updateTeamStatus();
         this.updateRespawnOverlay();
         this.updateAttackRangeDisplay();
-		this.updateCoordinates();
+        this.updateCoordinates();
     },
-	
-	updateCoordinates() {
-		if (!this.settings.showCoordinates) return;
-		
-		const player = HeroManager.player;
-		if (!player || !this.elements.playerCoords) return;
-		
-		this.elements.playerCoords.textContent = `X: ${Math.round(player.x)} Y: ${Math.round(player.y)}`;
-	},
+    
+    updateCoordinates() {
+        if (!this.settings.showCoordinates) return;
+        
+        const player = HeroManager.player;
+        if (!player || !this.elements.playerCoords) return;
+        
+        this.elements.playerCoords.textContent = `X: ${Math.round(player.x)} Y: ${Math.round(player.y)}`;
+    },
     
     updateKDA() {
         const player = HeroManager.player;
@@ -1112,30 +1112,30 @@ const UI = {
         }
     },
     
-	addKillFeed(killer, victim, type) {
-		let killerName = 'Unknown';
-		
-		if (killer) {
-			if (killer.playerName) {
-				killerName = killer.playerName;
-			} else if (killer.name) {
-				killerName = killer.name;
-			} else if (killer.type === 'creature') {
-				killerName = killer.name || 'Monster';
-			} else if (killer.type === 'tower') {
-				killerName = 'Tower';
-			} else if (killer.type === 'minion') {
-				killerName = 'Minion';
-			}
-		}
-		
-		let victimName = typeof victim === 'string' ? victim : (victim?.playerName || victim?.name || 'Unknown');
-		
-		const entry = { killer: killerName, victim: victimName, type, timestamp: Date.now() };
-		this.killFeed.unshift(entry);
-		if (this.killFeed.length > this.maxKillFeedEntries) this.killFeed.pop();
-		this.renderKillFeedEntry(entry);
-	},
+    addKillFeed(killer, victim, type) {
+        let killerName = 'Unknown';
+        
+        if (killer) {
+            if (killer.playerName) {
+                killerName = killer.playerName;
+            } else if (killer.name) {
+                killerName = killer.name;
+            } else if (killer.type === 'creature') {
+                killerName = killer.name || 'Monster';
+            } else if (killer.type === 'tower') {
+                killerName = 'Tower';
+            } else if (killer.type === 'minion') {
+                killerName = 'Minion';
+            }
+        }
+        
+        let victimName = typeof victim === 'string' ? victim : (victim?.playerName || victim?.name || 'Unknown');
+        
+        const entry = { killer: killerName, victim: victimName, type, timestamp: Date.now() };
+        this.killFeed.unshift(entry);
+        if (this.killFeed.length > this.maxKillFeedEntries) this.killFeed.pop();
+        this.renderKillFeedEntry(entry);
+    },
     
     renderKillFeedEntry(entry) {
         if (!this.elements.killFeed) return;
@@ -1158,24 +1158,24 @@ const UI = {
         this.killFeed = this.killFeed.filter(e => now - e.timestamp < CONFIG.ui.killFeedDuration);
     },
     
-	/**
-	 * Toggle stats panel - FIX
-	 */
-	toggleStatsPanel() {
-		this.statsPanelVisible = !this.statsPanelVisible;
-		
-		const panel = document.getElementById('statsPanel');
-		if (panel) {
-			if (this.statsPanelVisible) {
-				panel.classList.remove('hidden');
-				panel.style.display = 'block'; // Thêm dòng này để đảm bảo hiển thị
-				this.updateStatsPanel();
-			} else {
-				panel.classList.add('hidden');
-				panel.style.display = 'none'; // Thêm dòng này
-			}
-		}
-	},
+    /**
+     * Toggle stats panel - FIX
+     */
+    toggleStatsPanel() {
+        this.statsPanelVisible = !this.statsPanelVisible;
+        
+        const panel = document.getElementById('statsPanel');
+        if (panel) {
+            if (this.statsPanelVisible) {
+                panel.classList.remove('hidden');
+                panel.style.display = 'block'; // Thêm dòng này để đảm bảo hiển thị
+                this.updateStatsPanel();
+            } else {
+                panel.classList.add('hidden');
+                panel.style.display = 'none'; // Thêm dòng này
+            }
+        }
+    },
     
     updateStatsPanel() {
         const player = HeroManager.player;

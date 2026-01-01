@@ -206,373 +206,383 @@ const CONFIG = {
 
 
 
-	// === WALL POSITIONS - Fully configurable ===
-	wallPositions: [
-		// Blue jungle walls
-		{ x: 1400, y: 5600, width: 200, height: 120 },
-		{ x: 1800, y: 5200, width: 150, height: 200 },
-		{ x: 2200, y: 4800, width: 180, height: 150 },
-		{ x: 1200, y: 4400, width: 250, height: 100 },
-		{ x: 2600, y: 6200, width: 120, height: 180 },
-		{ x: 2000, y: 6600, width: 200, height: 140 },
-		
-		// Red jungle walls
-		{ x: 6400, y: 2200, width: 200, height: 120 },
-		{ x: 6000, y: 2600, width: 150, height: 200 },
-		{ x: 5600, y: 3000, width: 180, height: 150 },
-		{ x: 6600, y: 3400, width: 250, height: 100 },
-		{ x: 5200, y: 1600, width: 120, height: 180 },
-		{ x: 5800, y: 1200, width: 200, height: 140 },
-		
-		// River walls
-		{ x: 3400, y: 4200, width: 160, height: 160 },
-		{ x: 4400, y: 3600, width: 160, height: 160 },
-		
-		// Mid jungle
-		{ x: 2800, y: 3800, width: 140, height: 200 },
-		{ x: 5000, y: 4000, width: 140, height: 200 },
-		{ x: 3200, y: 3200, width: 200, height: 140 },
-		{ x: 4600, y: 4600, width: 200, height: 140 },
-		
-		// Corner walls
-		{ x: 1000, y: 6800, width: 300, height: 150 },
-		{ x: 6800, y: 1000, width: 300, height: 150 },
-	],
+    // === WALL POSITIONS - Fully configurable ===
+    wallPositions: [
+        // Blue jungle walls
+        { x: 1400, y: 5600, width: 200, height: 120 },
+        { x: 1800, y: 5200, width: 150, height: 200 },
+        { x: 2200, y: 4800, width: 180, height: 150 },
+        { x: 1200, y: 4400, width: 250, height: 100 },
+        { x: 2600, y: 6200, width: 120, height: 180 },
+        { x: 2000, y: 6600, width: 200, height: 140 },
+        
+        // Red jungle walls
+        { x: 6400, y: 2200, width: 200, height: 120 },
+        { x: 6000, y: 2600, width: 150, height: 200 },
+        { x: 5600, y: 3000, width: 180, height: 150 },
+        { x: 6600, y: 3400, width: 250, height: 100 },
+        { x: 5200, y: 1600, width: 120, height: 180 },
+        { x: 5800, y: 1200, width: 200, height: 140 },
+        
+        // River walls
+        { x: 3400, y: 4200, width: 160, height: 160 },
+        { x: 4400, y: 3600, width: 160, height: 160 },
+        
+        // Mid jungle
+        { x: 2800, y: 3800, width: 140, height: 200 },
+        { x: 5000, y: 4000, width: 140, height: 200 },
+        { x: 3200, y: 3200, width: 200, height: 140 },
+        { x: 4600, y: 4600, width: 200, height: 140 },
+        
+        // Corner walls
+        { x: 1000, y: 6800, width: 300, height: 150 },
+        { x: 6800, y: 1000, width: 300, height: 150 },
+    ],
 
-	// === BRUSH POSITIONS - Rectangular only ===
-	brushPositions: [
-		// Blue side brushes
-		{ x: 1200, y: 5800, width: 200, height: 120 },
-		{ x: 1600, y: 5400, width: 150, height: 180 },
-		{ x: 2400, y: 6400, width: 180, height: 140 },
-		{ x: 1800, y: 4600, width: 220, height: 100 },
-		{ x: 2800, y: 5600, width: 160, height: 160 },
-		
-		// Red side brushes
-		{ x: 6600, y: 2000, width: 200, height: 120 },
-		{ x: 6200, y: 2400, width: 150, height: 180 },
-		{ x: 5400, y: 1400, width: 180, height: 140 },
-		{ x: 6000, y: 3200, width: 220, height: 100 },
-		{ x: 5000, y: 2200, width: 160, height: 160 },
-		
-		// Lane brushes - Top
-		{ x: 600, y: 3000, width: 120, height: 200 },
-		{ x: 600, y: 4500, width: 120, height: 200 },
-		{ x: 2000, y: 600, width: 200, height: 120 },
-		{ x: 3500, y: 600, width: 200, height: 120 },
-		
-		// Lane brushes - Bot
-		{ x: 7200, y: 4800, width: 120, height: 200 },
-		{ x: 7200, y: 3300, width: 120, height: 200 },
-		{ x: 5800, y: 7200, width: 200, height: 120 },
-		{ x: 4300, y: 7200, width: 200, height: 120 },
-		
-		// River brushes
-		{ x: 3200, y: 4400, width: 140, height: 180 },
-		{ x: 4600, y: 3400, width: 140, height: 180 },
-		
-		// Mid lane brushes
-		{ x: 3000, y: 4800, width: 160, height: 120 },
-		{ x: 4800, y: 3000, width: 160, height: 120 },
-	],
+    // === BRUSH POSITIONS - Rectangular only ===
+    brushPositions: [
+        // Blue side brushes
+        { x: 1200, y: 5800, width: 200, height: 120 },
+        { x: 1600, y: 5400, width: 150, height: 180 },
+        { x: 2400, y: 6400, width: 180, height: 140 },
+        { x: 1800, y: 4600, width: 220, height: 100 },
+        { x: 2800, y: 5600, width: 160, height: 160 },
+        
+        // Red side brushes
+        { x: 6600, y: 2000, width: 200, height: 120 },
+        { x: 6200, y: 2400, width: 150, height: 180 },
+        { x: 5400, y: 1400, width: 180, height: 140 },
+        { x: 6000, y: 3200, width: 220, height: 100 },
+        { x: 5000, y: 2200, width: 160, height: 160 },
+        
+        // Lane brushes - Top
+        { x: 600, y: 3000, width: 120, height: 200 },
+        { x: 600, y: 4500, width: 120, height: 200 },
+        { x: 2000, y: 600, width: 200, height: 120 },
+        { x: 3500, y: 600, width: 200, height: 120 },
+        
+        // Lane brushes - Bot
+        { x: 7200, y: 4800, width: 120, height: 200 },
+        { x: 7200, y: 3300, width: 120, height: 200 },
+        { x: 5800, y: 7200, width: 200, height: 120 },
+        { x: 4300, y: 7200, width: 200, height: 120 },
+        
+        // River brushes
+        { x: 3200, y: 4400, width: 140, height: 180 },
+        { x: 4600, y: 3400, width: 140, height: 180 },
+        
+        // Mid lane brushes
+        { x: 3000, y: 4800, width: 160, height: 120 },
+        { x: 4800, y: 3000, width: 160, height: 120 },
+    ],
 
-	// === CREATURE CAMP POSITIONS ===
-	creatureCamps: [
-		// Blue side camps
-		{ x: 1800, y: 5400, type: 'crystal_golem', team: 'blue', name: 'Crystal Guardian' },
-		{ x: 2400, y: 4800, type: 'shadow_wisps', team: 'blue', name: 'Shadow Wisps' },
-		{ x: 1400, y: 4200, type: 'stone_beetle', team: 'blue', name: 'Stone Beetles' },
-		{ x: 2800, y: 6000, type: 'ember_spirit', team: 'blue', name: 'Ember Spirit' },
-		{ x: 1600, y: 6400, type: 'vine_crawler', team: 'blue', name: 'Vine Crawlers' },
-		{ x: 2200, y: 5800, type: 'frost_elemental', team: 'blue', name: 'Frost Elemental' },
-		
-		// Red side camps
-		{ x: 6000, y: 2400, type: 'crystal_golem', team: 'red', name: 'Crystal Guardian' },
-		{ x: 5400, y: 3000, type: 'shadow_wisps', team: 'red', name: 'Shadow Wisps' },
-		{ x: 6400, y: 3600, type: 'stone_beetle', team: 'red', name: 'Stone Beetles' },
-		{ x: 5000, y: 1800, type: 'ember_spirit', team: 'red', name: 'Ember Spirit' },
-		{ x: 6200, y: 1400, type: 'vine_crawler', team: 'red', name: 'Vine Crawlers' },
-		{ x: 5600, y: 2000, type: 'frost_elemental', team: 'red', name: 'Frost Elemental' },
-		
-		// Neutral objectives
-		{ x: 4400, y: 4800, type: 'ancient_titan', team: 'neutral', name: 'Ancient Titan' },
-		{ x: 3400, y: 3000, type: 'void_herald', team: 'neutral', name: 'Void Herald' },
-		
-		// River camps
-		{ x: 3800, y: 3800, type: 'river_spirit', team: 'neutral', name: 'River Spirit' },
-		{ x: 4000, y: 4000, type: 'river_spirit', team: 'neutral', name: 'River Spirit' },
-	],
+    // === CREATURE CAMP POSITIONS ===
+    creatureCamps: [
+        // Blue side camps
+        { x: 1800, y: 5400, type: 'crystal_golem', team: 'blue', name: 'Crystal Guardian' },
+        { x: 2400, y: 4800, type: 'shadow_wisps', team: 'blue', name: 'Shadow Wisps' },
+        { x: 1400, y: 4200, type: 'stone_beetle', team: 'blue', name: 'Stone Beetles' },
+        { x: 2800, y: 6000, type: 'ember_spirit', team: 'blue', name: 'Ember Spirit' },
+        { x: 1600, y: 6400, type: 'vine_crawler', team: 'blue', name: 'Vine Crawlers' },
+        { x: 2200, y: 5800, type: 'frost_elemental', team: 'blue', name: 'Frost Elemental' },
+        
+        // Red side camps
+        { x: 6000, y: 2400, type: 'crystal_golem', team: 'red', name: 'Crystal Guardian' },
+        { x: 5400, y: 3000, type: 'shadow_wisps', team: 'red', name: 'Shadow Wisps' },
+        { x: 6400, y: 3600, type: 'stone_beetle', team: 'red', name: 'Stone Beetles' },
+        { x: 5000, y: 1800, type: 'ember_spirit', team: 'red', name: 'Ember Spirit' },
+        { x: 6200, y: 1400, type: 'vine_crawler', team: 'red', name: 'Vine Crawlers' },
+        { x: 5600, y: 2000, type: 'frost_elemental', team: 'red', name: 'Frost Elemental' },
+        
+        // Neutral objectives
+        { x: 4400, y: 4800, type: 'ancient_titan', team: 'neutral', name: 'Ancient Titan' },
+        { x: 3400, y: 3000, type: 'void_herald', team: 'neutral', name: 'Void Herald' },
+        
+        // River camps
+        { x: 3800, y: 3800, type: 'river_spirit', team: 'neutral', name: 'River Spirit' },
+        { x: 4000, y: 4000, type: 'river_spirit', team: 'neutral', name: 'River Spirit' },
+    ],
 
-	// === CREATURE TYPES - Original designs ===
-	creatureTypes: {
-		// Crystal Golem - Large tank creature with shield ability
-		crystal_golem: {
-			health: 1800,
-			damage: 65,
-			armor: 30,
-			attackRange: 180,
-			attackSpeed: 0.5,
-			speed: 140,
-			exp: 120,
-			respawnTime: 90000,
-			radius: 40,
-			color: '#00ffff',
-			icon: '💎',
-			abilities: {
-				crystalShield: {
-					trigger: 'health_below_50',
-					effect: 'damage_reduction',
-					value: 0.3,
-					duration: 3000,
-				},
-			},
-			minions: [
-				{ type: 'crystal_shard', count: 2 },
-			],
-		},
-		
-		// Shadow Wisps - Fast attackers that multiply
-		shadow_wisps: {
-			health: 400,
-			damage: 35,
-			armor: 5,
-			attackRange: 200,
-			attackSpeed: 1.2,
-			speed: 280,
-			exp: 45,
-			respawnTime: 60000,
-			radius: 18,
-			color: '#4a0080',
-			icon: '👻',
-			count: 4,
-			abilities: {
-				phaseShift: {
-					trigger: 'on_hit',
-					chance: 0.15,
-					effect: 'dodge',
-				},
-			},
-		},
-		
-		// Stone Beetles - Armored creatures that burrow
-		stone_beetle: {
-			health: 600,
-			damage: 45,
-			armor: 40,
-			attackRange: 120,
-			attackSpeed: 0.7,
-			speed: 180,
-			exp: 55,
-			respawnTime: 70000,
-			radius: 25,
-			color: '#8b4513',
-			icon: '🪲',
-			count: 3,
-			abilities: {
-				burrow: {
-					trigger: 'combat_start',
-					effect: 'armor_boost',
-					value: 20,
-					duration: 2000,
-				},
-			},
-		},
-		
-		// Ember Spirit - Fire elemental with burn damage
-		ember_spirit: {
-			health: 1400,
-			damage: 55,
-			armor: 15,
-			attackRange: 250,
-			attackSpeed: 0.8,
-			speed: 200,
-			exp: 100,
-			respawnTime: 85000,
-			radius: 35,
-			color: '#ff4500',
-			icon: '🔥',
-			abilities: {
-				burnAura: {
-					trigger: 'passive',
-					effect: 'dot',
-					damage: 15,
-					tickRate: 1000,
-					range: 200,
-				},
-			},
-			buff: {
-				name: 'Ember Blessing',
-				effect: 'burn_on_hit',
-				burnDamage: 25,
-				duration: 90000,
-			},
-		},
-		
-		// Vine Crawlers - Root and trap enemies
-		vine_crawler: {
-			health: 500,
-			damage: 30,
-			armor: 10,
-			attackRange: 180,
-			attackSpeed: 0.9,
-			speed: 220,
-			exp: 50,
-			respawnTime: 65000,
-			radius: 22,
-			color: '#228b22',
-			icon: '🌿',
-			count: 3,
-			abilities: {
-				entangle: {
-					trigger: 'on_hit',
-					chance: 0.2,
-					effect: 'slow',
-					value: 0.4,
-					duration: 1500,
-				},
-			},
-		},
-		
-		// Frost Elemental - Slows and chills
-		frost_elemental: {
-			health: 1600,
-			damage: 50,
-			armor: 20,
-			attackRange: 220,
-			attackSpeed: 0.6,
-			speed: 160,
-			exp: 110,
-			respawnTime: 95000,
-			radius: 38,
-			color: '#87ceeb',
-			icon: '❄️',
-			abilities: {
-				frostAura: {
-					trigger: 'passive',
-					effect: 'slow_aura',
-					value: 0.2,
-					range: 250,
-				},
-			},
-			buff: {
-				name: 'Frost Touch',
-				effect: 'slow_on_hit',
-				slowPercent: 15,
-				duration: 90000,
-			},
-		},
-		
-		// Ancient Titan - Major objective (Dragon equivalent)
-		ancient_titan: {
-			health: 4500,
-			damage: 140,
-			armor: 50,
-			attackRange: 280,
-			attackSpeed: 0.4,
-			speed: 0,
-			exp: 300,
-			respawnTime: 240000,
-			radius: 60,
-			color: '#ffd700',
-			icon: '🗿',
-			abilities: {
-				titanSlam: {
-					trigger: 'every_5_attacks',
-					effect: 'aoe_damage',
-					damage: 100,
-					radius: 300,
-					knockback: 150,
-				},
-				regeneration: {
-					trigger: 'out_of_combat',
-					effect: 'heal',
-					value: 0.02,
-					tickRate: 1000,
-				},
-			},
-			buff: {
-				name: 'Titan\'s Might',
-				adBonus: 20,
-				apBonus: 30,
-				healthBonus: 200,
-				duration: 180000,
-			},
-		},
-		
-		// Void Herald - Major objective (Baron equivalent)
-		void_herald: {
-			health: 7000,
-			damage: 200,
-			armor: 70,
-			attackRange: 320,
-			attackSpeed: 0.35,
-			speed: 0,
-			exp: 500,
-			respawnTime: 360000,
-			radius: 70,
-			color: '#8b008b',
-			icon: '🌀',
-			abilities: {
-				voidPulse: {
-					trigger: 'every_3_attacks',
-					effect: 'mana_burn',
-					value: 50,
-					damage: 80,
-				},
-				dimensionalRift: {
-					trigger: 'health_below_30',
-					effect: 'summon_voidlings',
-					count: 3,
-				},
-			},
-			buff: {
-				name: 'Void Empowerment',
-				adBonus: 50,
-				apBonus: 70,
-				regenBonus: 0.05,
-				minionBuff: true,
-				duration: 180000,
-			},
-		},
-		
-		// River Spirit - Peaceful creature that gives vision
-		river_spirit: {
-			health: 600,
-			damage: 0,
-			armor: 0,
-			attackRange: 0,
-			attackSpeed: 0,
-			speed: 300,
-			exp: 80,
-			respawnTime: 90000,
-			radius: 20,
-			color: '#00bfff',
-			icon: '💧',
-			passive: true,
-			flees: true,
-			onKill: {
-				effect: 'grant_vision',
-				radius: 800,
-				duration: 60000,
-				speedBoost: 0.15,
-				speedDuration: 5000,
-			},
-		},
-		
-		// Minion types for camps
-		crystal_shard: {
-			health: 300,
-			damage: 20,
-			armor: 15,
-			attackRange: 150,
-			attackSpeed: 0.8,
-			speed: 200,
-			exp: 25,
-			radius: 15,
-			color: '#00ffff',
-			icon: '💠',
-		},
-	},
+    // === CREATURE TYPES - Original designs ===
+    creatureTypes: {
+        // Crystal Golem - Large tank creature with shield ability
+        crystal_golem: {
+            health: 1800,
+            damage: 65,
+            armor: 30,
+            attackRange: 180,
+            attackSpeed: 0.5,
+            speed: 140,
+            exp: 120,
+            respawnTime: 90000,
+            spawnDelay: 120000,
+            radius: 40,
+            color: '#00ffff',
+            icon: '💎',
+            abilities: {
+                crystalShield: {
+                    trigger: 'health_below_50',
+                    effect: 'damage_reduction',
+                    value: 0.3,
+                    duration: 3000,
+                },
+            },
+            minions: [
+                { type: 'crystal_shard', count: 2 },
+            ],
+        },
+        
+        // Shadow Wisps - Fast attackers that multiply
+        shadow_wisps: {
+            health: 400,
+            damage: 35,
+            armor: 5,
+            attackRange: 200,
+            attackSpeed: 1.2,
+            speed: 280,
+            exp: 45,
+            respawnTime: 60000,
+            spawnDelay: 60000,
+            radius: 18,
+            color: '#4a0080',
+            icon: '👻',
+            count: 4,
+            abilities: {
+                phaseShift: {
+                    trigger: 'on_hit',
+                    chance: 0.15,
+                    effect: 'dodge',
+                },
+            },
+        },
+        
+        // Stone Beetles - Armored creatures that burrow
+        stone_beetle: {
+            health: 600,
+            damage: 45,
+            armor: 40,
+            attackRange: 120,
+            attackSpeed: 0.7,
+            speed: 180,
+            exp: 55,
+            respawnTime: 70000,
+            spawnDelay: 60000,
+            radius: 25,
+            color: '#8b4513',
+            icon: '🪲',
+            count: 3,
+            abilities: {
+                burrow: {
+                    trigger: 'combat_start',
+                    effect: 'armor_boost',
+                    value: 20,
+                    duration: 2000,
+                },
+            },
+        },
+        
+        // Ember Spirit - Fire elemental with burn damage
+        ember_spirit: {
+            health: 1400,
+            damage: 55,
+            armor: 15,
+            attackRange: 250,
+            attackSpeed: 0.8,
+            speed: 200,
+            exp: 100,
+            respawnTime: 85000,
+            spawnDelay: 60000,
+            radius: 35,
+            color: '#ff4500',
+            icon: '🔥',
+            abilities: {
+                burnAura: {
+                    trigger: 'passive',
+                    effect: 'dot',
+                    damage: 15,
+                    tickRate: 1000,
+                    range: 200,
+                },
+            },
+            buff: {
+                name: 'Ember Blessing',
+                effect: 'burn_on_hit',
+                burnDamage: 25,
+                duration: 90000,
+            },
+        },
+        
+        // Vine Crawlers - Root and trap enemies
+        vine_crawler: {
+            health: 500,
+            damage: 30,
+            armor: 10,
+            attackRange: 180,
+            attackSpeed: 0.9,
+            speed: 220,
+            exp: 50,
+            respawnTime: 65000,
+            spawnDelay: 60000,
+            radius: 22,
+            color: '#228b22',
+            icon: '🌿',
+            count: 3,
+            abilities: {
+                entangle: {
+                    trigger: 'on_hit',
+                    chance: 0.2,
+                    effect: 'slow',
+                    value: 0.4,
+                    duration: 1500,
+                },
+            },
+        },
+        
+        // Frost Elemental - Slows and chills
+        frost_elemental: {
+            health: 1600,
+            damage: 50,
+            armor: 20,
+            attackRange: 220,
+            attackSpeed: 0.6,
+            speed: 160,
+            exp: 110,
+            respawnTime: 95000,
+            spawnDelay: 60000,
+            radius: 38,
+            color: '#87ceeb',
+            icon: '❄️',
+            abilities: {
+                frostAura: {
+                    trigger: 'passive',
+                    effect: 'slow_aura',
+                    value: 0.2,
+                    range: 250,
+                },
+            },
+            buff: {
+                name: 'Frost Touch',
+                effect: 'slow_on_hit',
+                slowPercent: 15,
+                duration: 90000,
+            },
+        },
+        
+        // Ancient Titan - Major objective (Dragon equivalent)
+        ancient_titan: {
+            health: 4500,
+            damage: 140,
+            armor: 50,
+            attackRange: 280,
+            attackSpeed: 0.4,
+            speed: 0,
+            exp: 300,
+            respawnTime: 240000,
+            spawnDelay: 120000,
+            radius: 60,
+            color: '#ffd700',
+            icon: '🗿',
+            abilities: {
+                titanSlam: {
+                    trigger: 'every_5_attacks',
+                    effect: 'aoe_damage',
+                    damage: 100,
+                    radius: 300,
+                    knockback: 150,
+                },
+                regeneration: {
+                    trigger: 'out_of_combat',
+                    effect: 'heal',
+                    value: 0.02,
+                    tickRate: 1000,
+                },
+            },
+            buff: {
+                name: 'Titan\'s Might',
+                adBonus: 20,
+                apBonus: 30,
+                healthBonus: 200,
+                duration: 180000,
+            },
+        },
+        
+        // Void Herald - Major objective (Baron equivalent)
+        void_herald: {
+            health: 7000,
+            damage: 200,
+            armor: 70,
+            attackRange: 320,
+            attackSpeed: 0.35,
+            speed: 0,
+            exp: 500,
+            respawnTime: 360000,
+            spawnDelay: 120000,
+            radius: 70,
+            color: '#8b008b',
+            icon: '🌀',
+            abilities: {
+                voidPulse: {
+                    trigger: 'every_3_attacks',
+                    effect: 'mana_burn',
+                    value: 50,
+                    damage: 80,
+                },
+                dimensionalRift: {
+                    trigger: 'health_below_30',
+                    effect: 'summon_voidlings',
+                    count: 3,
+                },
+            },
+            buff: {
+                name: 'Void Empowerment',
+                adBonus: 50,
+                apBonus: 70,
+                regenBonus: 0.05,
+                minionBuff: true,
+                duration: 180000,
+            },
+        },
+        
+        // River Spirit - Peaceful creature that gives vision
+        river_spirit: {
+            health: 600,
+            damage: 0,
+            armor: 0,
+            attackRange: 0,
+            attackSpeed: 0,
+            speed: 300,
+            exp: 80,
+            respawnTime: 90000,
+            spawnDelay: 30000,
+            radius: 20,
+            color: '#00bfff',
+            icon: '💧',
+            passive: true,
+            flees: true,
+            onKill: {
+                effect: 'grant_vision',
+                radius: 800,
+                duration: 60000,
+                speedBoost: 0.15,
+                speedDuration: 5000,
+            },
+        },
+        
+        // Minion types for camps
+        crystal_shard: {
+            health: 300,
+            damage: 20,
+            armor: 15,
+            attackRange: 150,
+            attackSpeed: 0.8,
+            speed: 200,
+            exp: 25,
+            spawnDelay: 30000,
+            radius: 15,
+            color: '#00ffff',
+            icon: '💠',
+        },
+    },
 
     // === SPELL SETTINGS ===
     spells: {
@@ -691,15 +701,15 @@ const CONFIG = {
         fog: 'rgba(0, 0, 0, 0.7)',
     },
 
-	// === UI SETTINGS - Add coordinates display ===
-	ui: {
-		healthBarWidth: 70,
-		healthBarHeight: 10,
-		healthBarOffset: 45,
-		minimapSize: 220,
-		killFeedDuration: 5000,
-		showCoordinates: false, // New setting
-	},
+    // === UI SETTINGS - Add coordinates display ===
+    ui: {
+        healthBarWidth: 70,
+        healthBarHeight: 10,
+        healthBarOffset: 45,
+        minimapSize: 220,
+        killFeedDuration: 5000,
+        showCoordinates: false, // New setting
+    },
     
     // === AI NAMES ===
     aiNames: [
@@ -711,52 +721,52 @@ const CONFIG = {
         'Echo', 'Viper', 'Onyx', 'Titan', 'Apex',
         'Zephyr', 'Demon', 'Angel', 'Spirit', 'Legend',
     ],
-	
-		// === TOWER PROJECTILE SETTINGS ===
-	towerProjectile: {
-		pierceWalls: true, // Đạn trụ xuyên tường
-	},
+    
+        // === TOWER PROJECTILE SETTINGS ===
+    towerProjectile: {
+        pierceWalls: true, // Đạn trụ xuyên tường
+    },
 
-	// === SCREEN BACKGROUNDS ===
-	screenBackgrounds: {
-		start: {
-			type: 'gradient', // 'gradient', 'image', 'solid'
-			gradient: {
-				colors: ['#0d1b2a', '#1b263b', '#0d1b2a'],
-				angle: 135,
-			},
-			// image: 'assets/bg_start.jpg', // nếu type = 'image'
-			// solid: '#0d1b2a', // nếu type = 'solid'
-		},
-		pregame: {
-			type: 'gradient',
-			gradient: {
-				colors: ['#0d1b2a', '#1b263b', '#0d1b2a'],
-				angle: 135,
-			},
-		},
-		settings: {
-			type: 'gradient',
-			gradient: {
-				colors: ['#0d1b2a', '#1b263b', '#0d1b2a'],
-				angle: 135,
-			},
-		},
-		pause: {
-			type: 'gradient',
-			gradient: {
-				colors: ['rgba(0,0,0,0.8)', 'rgba(0,0,0,0.9)'],
-				angle: 180,
-			},
-		},
-		gameover: {
-			type: 'gradient',
-			gradient: {
-				colors: ['#0d1b2a', '#1b263b', '#0d1b2a'],
-				angle: 135,
-			},
-		},
-	},
+    // === SCREEN BACKGROUNDS ===
+    screenBackgrounds: {
+        start: {
+            type: 'gradient', // 'gradient', 'image', 'solid'
+            gradient: {
+                colors: ['#0d1b2a', '#1b263b', '#0d1b2a'],
+                angle: 135,
+            },
+            // image: 'assets/bg_start.jpg', // nếu type = 'image'
+            // solid: '#0d1b2a', // nếu type = 'solid'
+        },
+        pregame: {
+            type: 'gradient',
+            gradient: {
+                colors: ['#0d1b2a', '#1b263b', '#0d1b2a'],
+                angle: 135,
+            },
+        },
+        settings: {
+            type: 'gradient',
+            gradient: {
+                colors: ['#0d1b2a', '#1b263b', '#0d1b2a'],
+                angle: 135,
+            },
+        },
+        pause: {
+            type: 'gradient',
+            gradient: {
+                colors: ['rgba(0,0,0,0.8)', 'rgba(0,0,0,0.9)'],
+                angle: 180,
+            },
+        },
+        gameover: {
+            type: 'gradient',
+            gradient: {
+                colors: ['#0d1b2a', '#1b263b', '#0d1b2a'],
+                angle: 135,
+            },
+        },
+    },
 };
 
 if (typeof module !== 'undefined' && module.exports) {

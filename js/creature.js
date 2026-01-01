@@ -32,9 +32,12 @@ const CreatureManager = {
                 creatures: [],
                 respawnTimer: 0,
                 isCleared: false,
+                spawnDelayTimer: 0,
+                hasSpawned: false,
             };
             
-            this.spawnCamp(camp);
+            // Don't spawn immediately - wait for spawn delay
+            // this.spawnCamp(camp);
             this.camps.push(camp);
         }
     },
@@ -116,17 +119,34 @@ const CreatureManager = {
     
     update(deltaTime, entities) {
         for (const camp of this.camps) {
-            if (camp.isCleared) {
+            // Handle initial spawn delay
+            if (!camp.hasSpawned) {
+                camp.spawnDelayTimer += deltaTime;
+                const creatureType = CONFIG.creatureTypes[camp.type];
+                const spawnDelay = creatureType?.spawnDelay || 0;
+                
+                if (camp.spawnDelayTimer >= spawnDelay) {
+                    this.spawnCamp(camp);
+                    camp.hasSpawned = true;
+                }
+            } else if (camp.isCleared) {
+                // Handle respawn after camp is cleared
                 camp.respawnTimer -= deltaTime;
                 if (camp.respawnTimer <= 0) {
                     this.spawnCamp(camp);
+                    camp.isCleared = false;
+                    camp.hasSpawned = true;
                 }
             } else {
+                // Check if camp is cleared
                 const alive = camp.creatures.filter(c => c.isAlive);
                 if (alive.length === 0) {
                     camp.isCleared = true;
                     const creatureType = CONFIG.creatureTypes[camp.type];
                     camp.respawnTimer = creatureType?.respawnTime || 60000;
+                    // Reset spawn delay for next respawn
+                    camp.hasSpawned = false;
+                    camp.spawnDelayTimer = 0;
                 }
             }
         }
@@ -160,7 +180,7 @@ const CreatureManager = {
         ctx.strokeStyle = camp.team === 'neutral' ? CONFIG.colors.neutral :
                           camp.team === 'blue' ? CONFIG.colors.blueTeam : CONFIG.colors.redTeam;
         ctx.lineWidth = 2;
-        ctx.globalAlpha = camp.isCleared ? 0.2 : 0.3;
+        ctx.globalAlpha = (!camp.hasSpawned || camp.isCleared) ? 0.2 : 0.3;
         ctx.setLineDash([8, 8]);
         ctx.beginPath();
         ctx.arc(camp.x, camp.y, roamRadius, 0, Math.PI * 2);
@@ -168,7 +188,20 @@ const CreatureManager = {
         ctx.setLineDash([]);
         ctx.globalAlpha = 1;
         
-        if (camp.isCleared) {
+        // Show timer for initial spawn delay
+        if (!camp.hasSpawned) {
+            const spawnDelay = creatureType?.spawnDelay || 0;
+            const remaining = Math.ceil((spawnDelay - camp.spawnDelayTimer) / 1000);
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#fbbf24';
+            ctx.textAlign = 'center';
+            ctx.fillText(
+                remaining + 's',
+                camp.x,
+                camp.y + 5
+            );
+        } else if (camp.isCleared) {
+            // Show respawn timer
             ctx.font = '14px Arial';
             ctx.fillStyle = '#fff';
             ctx.textAlign = 'center';
