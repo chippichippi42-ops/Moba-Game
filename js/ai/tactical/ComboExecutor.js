@@ -21,7 +21,9 @@ class ComboExecutor {
     executeBestCombo(hero, target, condition) {
         const now = Date.now();
         if (now - this.lastComboTime < this.comboCooldown) return false;
-        
+
+        if (!hero || !hero.heroData) return false;
+
         // Get available combos from hero data
         const combos = hero.heroData.aiHints?.combos || [];
         

@@ -55,7 +55,7 @@ class LaneBehavior {
         if (!lanePos) return;
         
         // Apply movement with waypoints
-        this.controller.systems.movementOptimizer.setMovementTarget(lanePos, 'laning');
+        this.controller.movementOptimizer.setMovementTarget(lanePos, 'laning');
         
         // Farm minions if available
         this.farmMinions();
@@ -64,11 +64,13 @@ class LaneBehavior {
     tryLastHit() {
         const now = Date.now();
         if (now - this.lastFarmTime < this.farmCooldown) return;
-        
+
         const hero = this.controller.hero;
         const heroAttackRange = hero.stats?.attackRange || 500;
         const heroAttackDamage = hero.stats?.attackDamage || 50;
-        
+
+        if (typeof MinionManager === 'undefined' || !MinionManager.getMinionsInRange) return false;
+
         const nearbyMinions = MinionManager.getMinionsInRange(hero.x, hero.y, heroAttackRange + 100)
             .filter(m => m.team !== hero.team);
         
@@ -97,7 +99,9 @@ class LaneBehavior {
     farmMinions() {
         const hero = this.controller.hero;
         const heroAttackRange = hero.stats?.attackRange || 500;
-        
+
+        if (typeof MinionManager === 'undefined' || !MinionManager.getMinionsInRange) return;
+
         const nearbyMinions = MinionManager.getMinionsInRange(hero.x, hero.y, heroAttackRange + 100)
             .filter(m => m.team !== hero.team);
         
@@ -142,7 +146,7 @@ class LaneBehavior {
                     x: bestMinion.x + (Math.random() - 0.5) * 50,
                     y: bestMinion.y + (Math.random() - 0.5) * 50
                 };
-                this.controller.systems.movementOptimizer.setMovementTarget(targetPos, 'farming');
+                this.controller.movementOptimizer.setMovementTarget(targetPos, 'farming');
             }
         }
     }
@@ -157,8 +161,11 @@ class LaneBehavior {
         if (healthPercent < 0.5) return false;
         
         // Check if there are enemy minions nearby
-        const enemyMinions = MinionManager.getMinionsInRange(hero.x, hero.y, 800)
-            .filter(m => m.team !== hero.team);
+        let enemyMinions = [];
+        if (typeof MinionManager !== 'undefined' && MinionManager.getMinionsInRange) {
+            enemyMinions = MinionManager.getMinionsInRange(hero.x, hero.y, 800)
+                .filter(m => m.team !== hero.team);
+        }
         
         // Only jungle if no enemy minions or random chance based on jungle rate
         if (enemyMinions.length === 0 && Math.random() < jungleRate) {
@@ -170,7 +177,7 @@ class LaneBehavior {
     }
     
     findNearestJungleCamp() {
-        if (!CreatureManager.camps || CreatureManager.camps.length === 0) {
+        if (typeof CreatureManager === 'undefined' || !CreatureManager.camps || CreatureManager.camps.length === 0) {
             return null;
         }
         
@@ -192,7 +199,11 @@ class LaneBehavior {
     }
     
     getLanePosition(lane, progress) {
-        const waypoints = this.controller.hero.team === CONFIG.teams.BLUE 
+        if (typeof MinionManager === 'undefined' || !MinionManager.waypoints) {
+            return { x: CONFIG.map.width / 2, y: CONFIG.map.height / 2 };
+        }
+
+        const waypoints = this.controller.hero.team === CONFIG.teams.BLUE
             ? MinionManager.waypoints.blue[lane]
             : MinionManager.waypoints.red[lane];
         

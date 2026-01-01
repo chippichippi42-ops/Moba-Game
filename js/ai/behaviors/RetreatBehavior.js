@@ -34,8 +34,11 @@ class RetreatBehavior {
     tryEscapeAbilities() {
         const now = Date.now();
         if (now - this.lastEscapeAttempt < this.escapeCooldown) return;
-        
+
         const hero = this.controller.hero;
+
+        if (typeof GameMap === 'undefined' || !GameMap.getSpawnPoint) return false;
+
         const basePoint = GameMap.getSpawnPoint(hero.team);
         
         // Try to use dash/blink abilities
@@ -66,7 +69,10 @@ class RetreatBehavior {
         
         // Try to use flash
         if (hero.spell === 'flash' && hero.spellCooldown <= 0) {
-            const enemies = Combat.getEnemiesInRange(hero, 500);
+            let enemies = [];
+            if (typeof Combat !== 'undefined') {
+                enemies = Combat.getEnemiesInRange(hero, 500) || [];
+            }
             if (enemies.length > 0) {
                 const escapeAngle = Utils.angleBetweenPoints(hero.x, hero.y, basePoint.x, basePoint.y);
                 hero.useSpell(
@@ -77,29 +83,35 @@ class RetreatBehavior {
                 return true;
             }
         }
-        
+
         return false;
     }
     
     moveToSafety() {
         const hero = this.controller.hero;
+
+        if (typeof GameMap === 'undefined' || !GameMap.getSpawnPoint) return;
+
         const basePoint = GameMap.getSpawnPoint(hero.team);
-        
+
         // Find the safest path to base
         const safePosition = this.findSafePosition();
-        
+
         if (safePosition) {
-            this.controller.systems.movementOptimizer.setMovementTarget(safePosition, 'retreating');
+            this.controller.movementOptimizer.setMovementTarget(safePosition, 'retreating');
         } else {
             // Fallback to direct path to base
-            this.controller.systems.movementOptimizer.setMovementTarget(basePoint, 'retreating');
+            this.controller.movementOptimizer.setMovementTarget(basePoint, 'retreating');
         }
     }
     
     findSafePosition() {
         const hero = this.controller.hero;
+
+        if (typeof GameMap === 'undefined' || !GameMap.getSpawnPoint) return null;
+
         const basePoint = GameMap.getSpawnPoint(hero.team);
-        
+
         // Check if direct path to base is safe
         const directPathSafe = this.isPathSafe(hero.x, hero.y, basePoint.x, basePoint.y);
         
@@ -127,42 +139,57 @@ class RetreatBehavior {
     
     isPathSafe(startX, startY, endX, endY) {
         // Check if path is clear of enemies
-        const enemies = Combat.getEnemiesInRange({ x: startX, y: startY }, 800);
-        
+        let enemies = [];
+        if (typeof Combat !== 'undefined') {
+            enemies = Combat.getEnemiesInRange({ x: startX, y: startY }, 800) || [];
+        }
+
         // Simple check - if there are enemies nearby, path might not be safe
         return enemies.length === 0;
     }
     
     canStopRetreating() {
         const hero = this.controller.hero;
-        
+
         // Stop retreating if health is good
         const maxHealth = hero.stats?.maxHealth || hero.health || 100;
         const healthPercent = (hero.health || 0) / maxHealth;
         if (healthPercent > 0.7) return true;
-        
+
         // Stop retreating if no enemies nearby
-        const enemies = Combat.getEnemiesInRange(hero, 1000);
+        let enemies = [];
+        if (typeof Combat !== 'undefined') {
+            enemies = Combat.getEnemiesInRange(hero, 1000) || [];
+        }
         if (enemies.length === 0) return true;
-        
+
         // Stop retreating if we're near base
+        if (typeof GameMap === 'undefined' || !GameMap.getSpawnPoint) return false;
+
         const basePoint = GameMap.getSpawnPoint(hero.team);
         const distToBase = Utils.distance(hero.x, hero.y, basePoint.x, basePoint.y);
         if (distToBase < 1000) return true;
-        
+
         return false;
     }
     
     // Use defensive positioning
     useDefensivePositioning() {
         const hero = this.controller.hero;
-        const enemies = Combat.getEnemiesInRange(hero, 800);
-        
+
+        let enemies = [];
+        if (typeof Combat !== 'undefined') {
+            enemies = Combat.getEnemiesInRange(hero, 800) || [];
+        }
+
         if (enemies.length === 0) return;
-        
+
         // Try to position behind minions or obstacles
-        const minions = MinionManager.getMinionsInRange(hero.x, hero.y, 500)
-            .filter(m => m.team === hero.team);
+        let minions = [];
+        if (typeof MinionManager !== 'undefined' && MinionManager.getMinionsInRange) {
+            minions = MinionManager.getMinionsInRange(hero.x, hero.y, 500)
+                .filter(m => m.team === hero.team);
+        }
         
         if (minions.length > 0) {
             // Move behind minions
@@ -172,11 +199,11 @@ class RetreatBehavior {
                 x: minion.x + Math.cos(angle) * 100,
                 y: minion.y + Math.sin(angle) * 100
             };
-            
-            this.controller.systems.movementOptimizer.setMovementTarget(safePos, 'defensive');
+
+            this.controller.movementOptimizer.setMovementTarget(safePos, 'defensive');
             return true;
         }
-        
+
         return false;
     }
 }

@@ -69,19 +69,21 @@ class DodgeBehavior {
     
     tryDodgeAbilities() {
         const hero = this.controller.hero;
-        
+
         // This would be more complex in a full implementation
         // For now, we'll use the dodge system
-        const shouldDodge = this.controller.systems.dodgeSystem.shouldDodgeAbilities();
-        
+        if (!this.controller.dodgeSystem) return false;
+
+        const shouldDodge = this.controller.dodgeSystem.shouldDodgeAbilities();
+
         if (shouldDodge) {
-            const dodgeDirection = this.controller.systems.dodgeSystem.getDodgeDirection();
+            const dodgeDirection = this.controller.dodgeSystem.getDodgeDirection();
             if (dodgeDirection) {
                 this.performAbilityDodge(dodgeDirection);
                 return true;
             }
         }
-        
+
         return false;
     }
     
@@ -99,7 +101,7 @@ class DodgeBehavior {
                     x: hero.x + Math.cos(avoidDirection) * 100,
                     y: hero.y + Math.sin(avoidDirection) * 100
                 };
-                this.controller.systems.movementOptimizer.setMovementTarget(avoidPos, 'avoiding');
+                this.controller.movementOptimizer.setMovementTarget(avoidPos, 'avoiding');
                 return true;
             }
         }
@@ -126,7 +128,7 @@ class DodgeBehavior {
         }
         
         // Check towers
-        if (TowerManager && TowerManager.towers) {
+        if (typeof TowerManager !== 'undefined' && TowerManager.towers) {
             for (const tower of TowerManager.towers) {
                 if (tower.team !== hero.team && tower.isAlive) {
                     const dist = Utils.distance(hero.x, hero.y, tower.x, tower.y);
@@ -191,33 +193,33 @@ class DodgeBehavior {
     
     performDodge(projectile) {
         const hero = this.controller.hero;
-        
+
         // Calculate dodge direction perpendicular to projectile
         const dodgeAngle = projectile.angle + (Math.random() > 0.5 ? Math.PI / 2 : -Math.PI / 2);
         const dodgeDist = CONFIG.aiDodge.dodgeSideMargin;
-        
+
         const dodgePos = {
             x: hero.x + Math.cos(dodgeAngle) * dodgeDist,
             y: hero.y + Math.sin(dodgeAngle) * dodgeDist
         };
-        
+
         // Make sure dodge position is safe
-        if (!GameMap.checkWallCollision(dodgePos.x, dodgePos.y, hero.radius)) {
-            this.controller.systems.movementOptimizer.setMovementTarget(dodgePos, 'dodging');
+        if (typeof GameMap === 'undefined' || !GameMap.checkWallCollision(dodgePos.x, dodgePos.y, hero.radius)) {
+            this.controller.movementOptimizer.setMovementTarget(dodgePos, 'dodging');
         }
     }
     
     performAbilityDodge(dodgeDirection) {
         const hero = this.controller.hero;
         const dodgeDist = 150;
-        
+
         const dodgePos = {
             x: hero.x + Math.cos(dodgeDirection) * dodgeDist,
             y: hero.y + Math.sin(dodgeDirection) * dodgeDist
         };
-        
-        if (!GameMap.checkWallCollision(dodgePos.x, dodgePos.y, hero.radius)) {
-            this.controller.systems.movementOptimizer.setMovementTarget(dodgePos, 'dodging');
+
+        if (typeof GameMap === 'undefined' || !GameMap.checkWallCollision(dodgePos.x, dodgePos.y, hero.radius)) {
+            this.controller.movementOptimizer.setMovementTarget(dodgePos, 'dodging');
         }
     }
     

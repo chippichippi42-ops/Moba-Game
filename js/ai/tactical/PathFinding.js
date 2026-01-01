@@ -240,17 +240,17 @@ class PathFinding {
     isPathBlocked(start, end) {
         // Simple line of sight check
         const steps = 10;
-        
+
         for (let i = 1; i <= steps; i++) {
             const t = i / steps;
             const x = start.x + (end.x - start.x) * t;
             const y = start.y + (end.y - start.y) * t;
-            
-            if (GameMap.checkWallCollision(x, y, 30)) {
+
+            if (typeof GameMap !== 'undefined' && GameMap.checkWallCollision(x, y, 30)) {
                 return true;
             }
         }
-        
+
         return false;
     }
     

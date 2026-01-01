@@ -166,16 +166,19 @@ class LLMDecisionEngine {
             visibleHeroes: 0,
             missingHeroes: 0
         };
-        
+
         if (HeroManager && HeroManager.heroes) {
             let levelSum = 0;
             let healthSum = 0;
             let visibleCount = 0;
-            
+
             for (const hero of HeroManager.heroes) {
                 if (hero.team === enemyTeam) {
-                    const isVisible = this.controller.systems.visionSystem.isHeroVisible(hero);
-                    
+                    // Safe access to vision system
+                    const isVisible = this.controller.visionSystem &&
+                                       typeof this.controller.visionSystem.isHeroVisible === 'function' &&
+                                       this.controller.visionSystem.isHeroVisible(hero);
+
                     if (isVisible) {
                         enemyState.heroes.push({
                             id: hero.id,
@@ -185,26 +188,33 @@ class LLMDecisionEngine {
                             position: { x: hero.x, y: hero.y },
                             visible: true
                         });
-                        
+
                         levelSum += hero.level;
                         healthSum += hero.health;
                         visibleCount++;
                     } else {
+                        // Safe access to getLastSeenPosition
+                        let lastSeen = null;
+                        if (this.controller.visionSystem &&
+                            typeof this.controller.visionSystem.getLastSeenPosition === 'function') {
+                            lastSeen = this.controller.visionSystem.getLastSeenPosition(hero.id);
+                        }
+
                         enemyState.heroes.push({
                             id: hero.id,
                             visible: false,
-                            lastSeen: this.controller.systems.visionSystem.getLastSeenPosition(hero.id)
+                            lastSeen: lastSeen
                         });
                     }
                 }
             }
-            
+
             enemyState.averageLevel = visibleCount > 0 ? levelSum / visibleCount : 0;
             enemyState.totalHealth = healthSum;
             enemyState.visibleHeroes = visibleCount;
             enemyState.missingHeroes = enemyState.heroes.length - visibleCount;
         }
-        
+
         return enemyState;
     }
     

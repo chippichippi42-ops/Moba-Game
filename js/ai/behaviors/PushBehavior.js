@@ -56,14 +56,18 @@ class PushBehavior {
     
     findTargetTower() {
         const hero = this.controller.hero;
-        
+
         // Get the next attackable tower in our lane
-        this.targetTower = TowerManager.getNextAttackableTower(hero.team, this.controller.behaviors.laneBehavior.getAssignedLane());
+        if (typeof TowerManager === 'undefined' || !TowerManager.getNextAttackableTower) return;
+
+        this.targetTower = TowerManager.getNextAttackableTower(hero.team, this.controller.laneBehavior.getAssignedLane());
     }
     
     getNearbyAlliedMinions() {
         const hero = this.controller.hero;
-        
+
+        if (typeof MinionManager === 'undefined' || !MinionManager.getMinionsInRange) return [];
+
         return MinionManager.getMinionsInRange(hero.x, hero.y, 400)
             .filter(m => m.team === hero.team);
     }
@@ -73,7 +77,7 @@ class PushBehavior {
         
         // Move to optimal position near tower
         const towerPos = this.getOptimalTowerPosition();
-        this.controller.systems.movementOptimizer.setMovementTarget(towerPos, 'pushing');
+        this.controller.movementOptimizer.setMovementTarget(towerPos, 'pushing');
     }
     
     getOptimalTowerPosition() {
@@ -103,9 +107,13 @@ class PushBehavior {
         if (healthPercent < 0.4) return false;
         
         // Don't push if enemies are nearby and we're at disadvantage
-        const enemies = Combat.getEnemiesInRange(hero, 1000);
-        const allies = Combat.getAlliesInRange(hero, 1000);
-        
+        let enemies = [];
+        let allies = [];
+        if (typeof Combat !== 'undefined') {
+            enemies = Combat.getEnemiesInRange(hero, 1000) || [];
+            allies = Combat.getAlliesInRange(hero, 1000) || [];
+        }
+
         if (enemies.length > allies.length + 1) return false;
         
         return true;
