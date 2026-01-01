@@ -30,7 +30,7 @@ class StrategicAnalyzer {
     }
     
     updateGamePhase() {
-        const gameTime = GameManager ? GameManager.gameTime : 0;
+        const gameTime = (typeof Game !== 'undefined') ? Game.gameTime : 0;
         
         if (gameTime < 300000) { // First 5 minutes
             this.gamePhase = 'early';
@@ -101,7 +101,7 @@ class StrategicAnalyzer {
         };
         
         // Find all heroes on the team
-        if (HeroManager && HeroManager.heroes) {
+        if (typeof HeroManager !== 'undefined' && HeroManager.heroes) {
             for (const hero of HeroManager.heroes) {
                 if (hero.team === team && hero.isAlive) {
                     heroes.push(hero);

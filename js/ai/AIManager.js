@@ -16,7 +16,7 @@ const AIManager = new (class AIManager {
 
         // Advanced AI Systems
         this.advancedEvaluator = new AdvancedSmartEvaluator();
-        this.ollamaIntegrator = new OllamaIntegrator(AI_CONFIG.external_ai.ollama);
+        this.ollamaIntegrator = new OllamaIntegrator(typeof AI_CONFIG !== 'undefined' ? AI_CONFIG.external_ai.ollama : {});
         this.smartDecisionCache = new SmartDecisionCache();
         this.promptBuilder = new AdvancedPromptBuilder();
         this.responseFusion = new ResponseFusion();

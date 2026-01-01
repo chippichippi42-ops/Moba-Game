@@ -220,8 +220,8 @@ class AIController {
                 id: a.id,
                 healthPercent: (a.health / a.stats.maxHealth) * 100
             })),
-            blueScore: typeof GameManager !== 'undefined' ? GameManager.blueScore : 0,
-            redScore: typeof GameManager !== 'undefined' ? GameManager.redScore : 0,
+            blueScore: typeof Game !== 'undefined' && Game.blueScore ? Game.blueScore : 0,
+            redScore: typeof Game !== 'undefined' && Game.redScore ? Game.redScore : 0,
             towerUnderAttackNearby: false, // Simplified
             objectiveThreat: false, // Simplified
             minionWavePushedIn: false, // Simplified
