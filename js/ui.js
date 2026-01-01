@@ -647,8 +647,8 @@ const UI = {
             }
             
             @media (max-width: 768px) {
-                #teamStatusPanel { width: 170px; }
-                #teamStatusPanel.collapsed { width: 110px; }
+                #teamStatusPanel { width: 160px; }
+                #teamStatusPanel.collapsed { width: 100px; }
                 #kdaDisplay { padding: 8px 12px; bottom: 110px; }
                 .kda-value { font-size: 18px; }
                 .respawn-title { font-size: 28px; }
@@ -1165,6 +1165,8 @@ const UI = {
     
     addKillFeed(killer, victim, type) {
         let killerName = 'Unknown';
+        let killerTeam = null;
+        let killerType = 'unknown';
         
         // Check killer type to get proper name
         if (!killer) {
@@ -1172,23 +1174,44 @@ const UI = {
         } else if (killer.type === 'hero') {
             // Hero: use playerName or name
             killerName = killer.playerName || killer.name || 'Unknown';
+            killerTeam = killer.team;
+            killerType = 'hero';
         } else if (killer.type === 'tower') {
             // Tower: use name or "Tower"
             killerName = killer.name || 'Tower';
+            killerTeam = killer.team;
+            killerType = 'tower';
         } else if (killer.type === 'minion') {
             // Minion: use name or "Minion"
             killerName = killer.name || 'Minion';
+            killerTeam = killer.team;
+            killerType = 'minion';
         } else if (killer.type === 'creature') {
             // Creature: use name or "Monster"
             killerName = killer.name || 'Monster';
+            killerType = 'creature';
         } else {
             // Fallback: try to get name or playerName
             killerName = killer.playerName || killer.name || 'Unknown';
+            killerTeam = killer.team;
         }
         
         let victimName = typeof victim === 'string' ? victim : (victim?.playerName || victim?.name || 'Unknown');
+        let victimTeam = typeof victim === 'string' ? null : victim?.team;
+        let victimType = typeof victim === 'string' ? 'unknown' : (victim?.type || 'unknown');
         
-        const entry = { killer: killerName, victim: victimName, type, timestamp: Date.now() };
+        const entry = { 
+            killer: killerName, 
+            killerTeam: killerTeam,
+            killerType: killerType,
+            killerIsPlayer: killer?.isPlayer || false,
+            victim: victimName,
+            victimTeam: victimTeam,
+            victimType: victimType,
+            victimIsPlayer: victim?.isPlayer || false,
+            type, 
+            timestamp: Date.now() 
+        };
         this.killFeed.unshift(entry);
         if (this.killFeed.length > this.maxKillFeedEntries) this.killFeed.pop();
         this.renderKillFeedEntry(entry);
@@ -1197,13 +1220,38 @@ const UI = {
     renderKillFeedEntry(entry) {
         if (!this.elements.killFeed) return;
         
+        const player = HeroManager.player;
+        const playerTeam = player?.team;
+        
+        // Determine killer color
+        const getEntityColor = (isPlayer, team, entityType) => {
+            if (entityType === 'hero') {
+                if (isPlayer) return '#00FF00'; // Player: Bright lime green
+                if (team === playerTeam) return '#00CCFF'; // Teammate: Light cyan
+                if (team !== null && team !== playerTeam) return '#FF0000'; // Enemy: Red
+            }
+            // Towers, minions, creatures, unknown
+            if (entityType === 'creature') return '#FF0000'; // Monsters: Red
+            return '#FFFFFF'; // Unknown/Towers/Minions: White
+        };
+        
+        const killerColor = getEntityColor(entry.killerIsPlayer, entry.killerTeam, entry.killerType);
+        const victimColor = getEntityColor(entry.victimIsPlayer, entry.victimTeam, entry.victimType);
+        
         const div = document.createElement('div');
         div.className = 'kill-entry';
         
         if (entry.type === 'kill') {
-            div.innerHTML = `<span class="killer">${entry.killer}</span><span class="action">killed</span><span class="victim">${entry.victim}</span>`;
+            div.innerHTML = `
+                <span class="killer" style="color: ${killerColor};">${entry.killer}</span>
+                <span class="action">⚔️</span>
+                <span class="victim kill-victim-strikethrough" style="color: ${victimColor};">${entry.victim}</span>
+            `;
         } else if (entry.type === 'tower') {
-            div.innerHTML = `<span class="victim">${entry.victim}</span><span class="action">was destroyed</span>`;
+            div.innerHTML = `
+                <span class="victim kill-victim-strikethrough" style="color: ${victimColor};">${entry.victim}</span>
+                <span class="action">was destroyed</span>
+            `;
         }
         
         this.elements.killFeed.insertBefore(div, this.elements.killFeed.firstChild);
