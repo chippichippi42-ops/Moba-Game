@@ -656,6 +656,55 @@ class Hero {
     }
     
     /**
+     * Unstick from wall after dash/blink/leap
+     * Move hero away from wall toward the direction they came from or nearest free space
+     */
+    unstickFromWall() {
+        // Check if stuck in wall
+        if (!GameMap.checkWallCollision(this.x, this.y, this.radius)) {
+            return; // Not in wall
+        }
+        
+        // Try to move in 8 directions: back, front-left, front-right, left, right, back-left, back-right, front
+        const directions = [
+            { x: Math.cos(this.facingAngle + Math.PI), y: Math.sin(this.facingAngle + Math.PI) }, // Back
+            { x: Math.cos(this.facingAngle - Math.PI / 4), y: Math.sin(this.facingAngle - Math.PI / 4) }, // Front-left
+            { x: Math.cos(this.facingAngle + Math.PI / 4), y: Math.sin(this.facingAngle + Math.PI / 4) }, // Front-right
+            { x: Math.cos(this.facingAngle - Math.PI / 2), y: Math.sin(this.facingAngle - Math.PI / 2) }, // Left
+            { x: Math.cos(this.facingAngle + Math.PI / 2), y: Math.sin(this.facingAngle + Math.PI / 2) }, // Right
+            { x: Math.cos(this.facingAngle - 3*Math.PI / 4), y: Math.sin(this.facingAngle - 3*Math.PI / 4) }, // Back-left
+            { x: Math.cos(this.facingAngle + 3*Math.PI / 4), y: Math.sin(this.facingAngle + 3*Math.PI / 4) }, // Back-right
+            { x: Math.cos(this.facingAngle), y: Math.sin(this.facingAngle) }, // Front
+        ];
+        
+        const pushDistance = this.radius + 5; // Push distance
+        
+        for (const dir of directions) {
+            const testX = this.x + dir.x * pushDistance;
+            const testY = this.y + dir.y * pushDistance;
+            
+            if (!GameMap.checkWallCollision(testX, testY, this.radius)) {
+                // Found free space
+                this.x = testX;
+                this.y = testY;
+                return;
+            }
+        }
+        
+        // If no direction works, try larger distance
+        for (const dir of directions) {
+            const testX = this.x + dir.x * pushDistance * 2;
+            const testY = this.y + dir.y * pushDistance * 2;
+            
+            if (!GameMap.checkWallCollision(testX, testY, this.radius)) {
+                this.x = testX;
+                this.y = testY;
+                return;
+            }
+        }
+    }
+    
+    /**
      * Execute dash
      */
     executeDash(result) {
@@ -720,6 +769,7 @@ class Hero {
         // Move to final position
         this.x = finalX;
         this.y = finalY;
+        this.unstickFromWall();
     }
     
     /**
@@ -748,7 +798,23 @@ class Hero {
         if (!GameMap.checkWallCollision(result.targetX, result.targetY, this.radius)) {
             this.x = result.targetX;
             this.y = result.targetY;
+        } else {
+            // Target position is in wall, find nearest valid position
+            const testRadius = 50;
+            const steps = 12;
+            for (let i = 1; i <= steps; i++) {
+                const angle = (i / steps) * Math.PI * 2;
+                const testX = result.targetX + Math.cos(angle) * testRadius;
+                const testY = result.targetY + Math.sin(angle) * testRadius;
+                
+                if (!GameMap.checkWallCollision(testX, testY, this.radius)) {
+                    this.x = testX;
+                    this.y = testY;
+                    return;
+                }
+            }
         }
+        this.unstickFromWall();
     }
     
     /**
@@ -761,6 +827,7 @@ class Hero {
         setTimeout(() => {
             this.x = result.targetX;
             this.y = result.targetY;
+            this.unstickFromWall();
             this.untargetable = false;
             
             // Deal damage on landing
@@ -1348,10 +1415,11 @@ class Hero {
      * Render name
      */
     renderName(ctx) {
+        // Display username (playerName) instead of hero name
         ctx.font = 'bold 12px Arial';
         ctx.fillStyle = this.color;
         ctx.textAlign = 'center';
-        ctx.fillText(this.name, this.x, this.y - this.radius - 35);
+        ctx.fillText(this.playerName, this.x, this.y - this.radius - 35);
         
         // Level
         ctx.font = '10px Arial';

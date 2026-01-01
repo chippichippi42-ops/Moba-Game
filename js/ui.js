@@ -331,39 +331,39 @@ const UI = {
         const player = HeroManager.player;
         if (!player) return;
         
-        const allies = HeroManager.getTeamHeroes(player.team).filter(h => h !== player);
+        const allTeamMembers = [player, ...HeroManager.getTeamHeroes(player.team).filter(h => h !== player)];
         
         // Rebuild nếu số lượng thay đổi
-        if (listEl.children.length !== allies.length) {
-            this.buildTeamStatusItems(allies);
+        if (listEl.children.length !== allTeamMembers.length) {
+            this.buildTeamStatusItems(HeroManager.getTeamHeroes(player.team).filter(h => h !== player));
         }
         
-        // Update từng ally
-        allies.forEach((ally, index) => {
+        // Update từng member
+        allTeamMembers.forEach((member, index) => {
             const item = listEl.children[index];
             if (!item) return;
             
             // Update dead state
-            item.classList.toggle('dead', !ally.isAlive);
+            item.classList.toggle('dead', !member.isAlive);
             
             // Update health bar
             const healthFill = item.querySelector('.ally-health-fill');
             if (healthFill) {
-                const healthPercent = (ally.health / ally.stats.maxHealth) * 100;
+                const healthPercent = (member.health / member.stats.maxHealth) * 100;
                 healthFill.style.width = healthPercent + '%';
             }
             
             // Update mana bar
             const manaFill = item.querySelector('.ally-mana-fill');
             if (manaFill) {
-                const manaPercent = (ally.mana / ally.stats.maxMana) * 100;
+                const manaPercent = (member.mana / member.stats.maxMana) * 100;
                 manaFill.style.width = manaPercent + '%';
             }
             
             // Update ult indicator
             const ultIndicator = item.querySelector('.ally-ult-indicator');
             if (ultIndicator) {
-                const hasUlt = ally.abilityLevels['t'] > 0 && ally.abilityCooldowns['t'] <= 0;
+                const hasUlt = member.abilityLevels['t'] > 0 && member.abilityCooldowns['t'] <= 0;
                 ultIndicator.classList.toggle('ready', hasUlt);
                 ultIndicator.classList.toggle('not-ready', !hasUlt);
             }
@@ -371,8 +371,8 @@ const UI = {
             // Update respawn timer
             const respawnTimer = item.querySelector('.ally-respawn-timer');
             if (respawnTimer) {
-                if (!ally.isAlive && ally.respawnTimer > 0) {
-                    respawnTimer.textContent = Math.ceil(ally.respawnTimer / 1000);
+                if (!member.isAlive && member.respawnTimer > 0) {
+                    respawnTimer.textContent = Math.ceil(member.respawnTimer / 1000);
                     respawnTimer.style.display = 'block';
                 } else {
                     respawnTimer.style.display = 'none';
@@ -382,7 +382,7 @@ const UI = {
             // Update level
             const levelEl = item.querySelector('.ally-level');
             if (levelEl) {
-                levelEl.textContent = ally.level;
+                levelEl.textContent = member.level;
             }
         });
     },
@@ -404,17 +404,25 @@ const UI = {
             assassin: '#6366f1',
         };
         
-        for (const ally of allies) {
+        // Include player + allies
+        const player = HeroManager.player;
+        const allTeamMembers = [player, ...allies].filter(h => h);
+        
+        for (const member of allTeamMembers) {
             const item = document.createElement('div');
             item.className = 'ally-status-item';
+            const isPlayer = member === player;
+            
             item.innerHTML = `
-                <div class="ally-icon" style="background: ${roleColors[ally.role] || '#64748b'}">
-                    ${ally.heroData.icon}
+                <div class="ally-icon" style="background: ${roleColors[member.role] || '#64748b'}">
+                    ${member.heroData.icon}
                     <div class="ally-ult-indicator not-ready"></div>
-                    <span class="ally-level">${ally.level}</span>
                 </div>
                 <div class="ally-info">
-                    <div class="ally-name">${ally.playerName}</div>
+                    <div class="ally-name-container">
+                        <div class="ally-username">${member.playerName}${isPlayer ? ' (You)' : ''}</div>
+                        <div class="ally-heroname">${member.name}</div>
+                    </div>
                     <div class="ally-bars">
                         <div class="ally-health-bar">
                             <div class="ally-health-fill" style="width: 100%"></div>
@@ -661,6 +669,23 @@ const UI = {
             }
 
             #coordinatesDisplay.hidden { display: none; }
+
+            .ally-name-container {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .ally-username {
+                font-size: 11px;
+                font-weight: bold;
+                color: #e2e8f0;
+            }
+
+            .ally-heroname {
+                font-size: 9px;
+                color: #cbd5e1;
+            }
         `;
         document.head.appendChild(style);
     },
@@ -849,39 +874,39 @@ const UI = {
         const player = HeroManager.player;
         if (!player) return;
         
-        const allies = HeroManager.getTeamHeroes(player.team).filter(h => h !== player);
+        const allTeamMembers = [player, ...HeroManager.getTeamHeroes(player.team).filter(h => h !== player)];
         
-        if (listEl.children.length !== allies.length) {
-            this.buildTeamStatusItems(allies);
+        if (listEl.children.length !== allTeamMembers.length) {
+            this.buildTeamStatusItems(HeroManager.getTeamHeroes(player.team).filter(h => h !== player));
         }
         
-        allies.forEach((ally, index) => {
+        allTeamMembers.forEach((member, index) => {
             const item = listEl.children[index];
             if (!item) return;
             
-            item.classList.toggle('dead', !ally.isAlive);
+            item.classList.toggle('dead', !member.isAlive);
             
             const healthFill = item.querySelector('.ally-health-fill');
             if (healthFill) {
-                healthFill.style.width = ((ally.health / ally.stats.maxHealth) * 100) + '%';
+                healthFill.style.width = ((member.health / member.stats.maxHealth) * 100) + '%';
             }
             
             const manaFill = item.querySelector('.ally-mana-fill');
             if (manaFill) {
-                manaFill.style.width = ((ally.mana / ally.stats.maxMana) * 100) + '%';
+                manaFill.style.width = ((member.mana / member.stats.maxMana) * 100) + '%';
             }
             
             const ultIndicator = item.querySelector('.ally-ult-indicator');
             if (ultIndicator) {
-                const hasUlt = ally.abilityLevels['t'] > 0 && ally.abilityCooldowns['t'] <= 0;
+                const hasUlt = member.abilityLevels['t'] > 0 && member.abilityCooldowns['t'] <= 0;
                 ultIndicator.classList.toggle('ready', hasUlt);
                 ultIndicator.classList.toggle('not-ready', !hasUlt);
             }
             
             const respawnTimer = item.querySelector('.ally-respawn-timer');
             if (respawnTimer) {
-                if (!ally.isAlive && ally.respawnTimer > 0) {
-                    respawnTimer.textContent = Math.ceil(ally.respawnTimer / 1000);
+                if (!member.isAlive && member.respawnTimer > 0) {
+                    respawnTimer.textContent = Math.ceil(member.respawnTimer / 1000);
                     respawnTimer.style.display = 'block';
                 } else {
                     respawnTimer.style.display = 'none';
@@ -904,16 +929,25 @@ const UI = {
             assassin: '#6366f1',
         };
         
-        for (const ally of allies) {
+        // Include player + allies
+        const player = HeroManager.player;
+        const allTeamMembers = [player, ...allies].filter(h => h);
+        
+        for (const member of allTeamMembers) {
             const item = document.createElement('div');
             item.className = 'ally-status-item';
+            const isPlayer = member === player;
+            
             item.innerHTML = `
-                <div class="ally-icon" style="background: ${roleColors[ally.role] || '#64748b'}">
-                    ${ally.heroData.icon}
+                <div class="ally-icon" style="background: ${roleColors[member.role] || '#64748b'}">
+                    ${member.heroData.icon}
                     <div class="ally-ult-indicator not-ready"></div>
                 </div>
                 <div class="ally-info">
-                    <div class="ally-name">${ally.playerName}</div>
+                    <div class="ally-name-container">
+                        <div class="ally-username">${member.playerName}${isPlayer ? ' (You)' : ''}</div>
+                        <div class="ally-heroname">${member.name}</div>
+                    </div>
                     <div class="ally-bars">
                         <div class="ally-health-bar">
                             <div class="ally-health-fill" style="width: 100%"></div>
