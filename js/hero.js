@@ -1011,10 +1011,7 @@ class Hero {
         // Calculate exp reward for hero kill
         const heroKillExp = 100 + this.level * 20;
         
-        // Distribute experience using new system
-        Combat.distributeExperience(this, killer, heroKillExp);
-        
-        // === NEW KILL CREDIT LOGIC ===
+        // === GET KILL CREDIT FIRST (before damageLog is cleared) ===
         // Bước 1: Lấy tất cả tướng tham gia trong 5s cuối
         const participantsData = Combat.getHeroesInLastFiveSecondsWithDamage(this, killer);
         
@@ -1029,6 +1026,8 @@ class Hero {
             // → tướng gây sát thương GẦN NHẤT (timestamp gần nhất) nhận kill
             creditHero = Combat.getMostRecentDamageHero(participantsData);
         }
+        // Nếu killer là minion/tower/creature nhưng KHÔNG có tướng nào tham gia
+        // → creditHero vẫn = null (không ai nhận kill)
         
         // Bước 3: Cộng kill cho tướng nhận credit
         if (creditHero) {
@@ -1043,12 +1042,16 @@ class Hero {
             }
         }
         
+        // === DISTRIBUTE EXPERIENCE (after damageLog data is extracted) ===
+        Combat.distributeExperience(this, killer, heroKillExp);
+        
         // Death effect
         EffectManager.createExplosion(this.x, this.y, 50, this.color);
         Camera.shake(10, 300);
         
-        // Announcement - pass tướng nhận credit thực sự
-        UI.addKillFeed(creditHero, this, 'kill');
+        // Announcement - hiển thị killer object (có thể là hero, minion, tower, creature)
+        // Nếu creditHero tồn tại → hiển thị creditHero, nếu không → hiển thị killer (minion/tower/etc)
+        UI.addKillFeed(creditHero || killer, this, 'kill');
     }
     
     /**
