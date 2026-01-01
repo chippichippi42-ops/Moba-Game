@@ -52,31 +52,31 @@ const HeroManager = {
     /**
      * Tạo hero mới
      */
-	createHero(heroId, team, isPlayer = false, playerName = null) {
-		const heroData = HeroRegistry.get(heroId);
-		if (!heroData) {
-			console.error(`Hero not found: ${heroId}`);
-			return null;
-		}
-		
-		const spawnPoint = GameMap.getSpawnPoint(team);
-		const hero = new Hero({
-			heroData: heroData,
-			team: team,
-			x: spawnPoint.x + Utils.random(-50, 50),
-			y: spawnPoint.y + Utils.random(-50, 50),
-			isPlayer: isPlayer,
-			playerName: playerName || heroData.name,
-		});
-		
-		this.heroes.push(hero);
-		
-		if (isPlayer) {
-			this.player = hero;
-		}
-		
-		return hero;
-	},
+    createHero(heroId, team, isPlayer = false, playerName = null) {
+        const heroData = HeroRegistry.get(heroId);
+        if (!heroData) {
+            console.error(`Hero not found: ${heroId}`);
+            return null;
+        }
+        
+        const spawnPoint = GameMap.getSpawnPoint(team);
+        const hero = new Hero({
+            heroData: heroData,
+            team: team,
+            x: spawnPoint.x + Utils.random(-50, 50),
+            y: spawnPoint.y + Utils.random(-50, 50),
+            isPlayer: isPlayer,
+            playerName: playerName || heroData.name,
+        });
+        
+        this.heroes.push(hero);
+        
+        if (isPlayer) {
+            this.player = hero;
+        }
+        
+        return hero;
+    },
     
     /**
      * Update all heroes
@@ -145,7 +145,7 @@ class Hero {
         this.type = 'hero';
         this.heroData = config.heroData;
         this.name = this.heroData.name;
-		this.playerName = config.playerName || this.name;
+        this.playerName = config.playerName || this.name;
         this.role = this.heroData.role;
         
         this.x = config.x;
@@ -217,7 +217,7 @@ class Hero {
         this.totalDamageDealt = 0;
         
         // Ability points
-		this.abilityPoints = 1;
+        this.abilityPoints = 1;
     }
     
     /**
@@ -271,43 +271,43 @@ class Hero {
         }
     }
     
-	/**
-	 * Update hero
-	 */
-	update(deltaTime, entities) {
-		// QUAN TRỌNG: Cập nhật cooldowns ngay cả khi đang chờ hồi sinh
-		this.updateCooldowns(deltaTime);
-		
-		// Respawn logic
-		if (this.isDead) {
-			this.respawnTimer -= deltaTime;
-			if (this.respawnTimer <= 0) {
-				this.respawn();
-			}
-			return;
-		}
-		
-		if (!this.isAlive) return;
-		
-		// Regeneration
-		this.updateRegen(deltaTime);
-		
-		// Base healing
-		this.updateBaseHealing(deltaTime);
-		
-		// Update buffs/debuffs
-		this.updateBuffs(deltaTime);
-		
-		// Passive update
-		this.updatePassive(deltaTime);
-		
-		// Movement (for player or AI will set vx/vy)
-		if (this.isPlayer) {
-			this.updatePlayerMovement(deltaTime);
-		}
-		
-		this.applyMovement(deltaTime);
-	}
+    /**
+     * Update hero
+     */
+    update(deltaTime, entities) {
+        // QUAN TRỌNG: Cập nhật cooldowns ngay cả khi đang chờ hồi sinh
+        this.updateCooldowns(deltaTime);
+        
+        // Respawn logic
+        if (this.isDead) {
+            this.respawnTimer -= deltaTime;
+            if (this.respawnTimer <= 0) {
+                this.respawn();
+            }
+            return;
+        }
+        
+        if (!this.isAlive) return;
+        
+        // Regeneration
+        this.updateRegen(deltaTime);
+        
+        // Base healing
+        this.updateBaseHealing(deltaTime);
+        
+        // Update buffs/debuffs
+        this.updateBuffs(deltaTime);
+        
+        // Passive update
+        this.updatePassive(deltaTime);
+        
+        // Movement (for player or AI will set vx/vy)
+        if (this.isPlayer) {
+            this.updatePlayerMovement(deltaTime);
+        }
+        
+        this.applyMovement(deltaTime);
+    }
     
     /**
      * Update cooldowns
@@ -420,75 +420,75 @@ class Hero {
         }
     }
     
-	/**
-	 * Player movement from input - FIX: Reset velocity khi không có input
-	 */
-	updatePlayerMovement(deltaTime) {
-		// Cập nhật facing direction theo chuột trước
-		const worldMouse = Camera.screenToWorld(Input.mouseX, Input.mouseY);
-		this.facingAngle = Utils.angleBetweenPoints(this.x, this.y, worldMouse.x, worldMouse.y);
-		
-		let moveX = 0;
-		let moveY = 0;
-		
-		// Kiểm tra từng phím một cách rõ ràng
-		const wDown = Input.isKeyDown('w') || Input.isKeyDown('W');
-		const sDown = Input.isKeyDown('s') || Input.isKeyDown('S');
-		const aDown = Input.isKeyDown('a') || Input.isKeyDown('A');
-		const dDown = Input.isKeyDown('d') || Input.isKeyDown('D');
-		
-		// W - đi về phía trước (hướng facing)
-		if (wDown) {
-			moveX += Math.cos(this.facingAngle);
-			moveY += Math.sin(this.facingAngle);
-		}
-		// S - đi lùi (ngược hướng facing)
-		if (sDown) {
-			moveX -= Math.cos(this.facingAngle);
-			moveY -= Math.sin(this.facingAngle);
-		}
-		// A - đi sang trái (vuông góc với facing, -90 độ)
-		if (aDown) {
-			const leftAngle = this.facingAngle - Math.PI / 2;
-			moveX += Math.cos(leftAngle);
-			moveY += Math.sin(leftAngle);
-		}
-		// D - đi sang phải (vuông góc với facing, +90 độ)
-		if (dDown) {
-			const rightAngle = this.facingAngle + Math.PI / 2;
-			moveX += Math.cos(rightAngle);
-			moveY += Math.sin(rightAngle);
-		}
-		
-		// Normalize diagonal movement
-		if (moveX !== 0 || moveY !== 0) {
-			const length = Math.sqrt(moveX * moveX + moveY * moveY);
-			moveX /= length;
-			moveY /= length;
-		}
-		
-		// Check for CC effects
-		const stunned = Array.isArray(this.debuffs) && this.debuffs.some(d => d.type === 'stun' || d.type === 'knockup');
-		if (stunned) {
-			moveX = 0;
-			moveY = 0;
-		}
-		
-		// Apply speed - CHỈ KHI CÓ INPUT
-		let speed = this.stats.moveSpeed;
-		
-		// Slow effects
-		if (Array.isArray(this.debuffs)) {
-			const slow = this.debuffs.find(d => d.type === 'slow');
-			if (slow) {
-				speed *= (1 - slow.percent / 100);
-			}
-		}
-		
-		// Set velocity - sẽ là 0 nếu không có phím nào được nhấn
-		this.vx = moveX * speed;
-		this.vy = moveY * speed;
-	}
+    /**
+     * Player movement from input - FIX: Reset velocity khi không có input
+     */
+    updatePlayerMovement(deltaTime) {
+        // Cập nhật facing direction theo chuột trước
+        const worldMouse = Camera.screenToWorld(Input.mouseX, Input.mouseY);
+        this.facingAngle = Utils.angleBetweenPoints(this.x, this.y, worldMouse.x, worldMouse.y);
+        
+        let moveX = 0;
+        let moveY = 0;
+        
+        // Kiểm tra từng phím một cách rõ ràng
+        const wDown = Input.isKeyDown('w') || Input.isKeyDown('W');
+        const sDown = Input.isKeyDown('s') || Input.isKeyDown('S');
+        const aDown = Input.isKeyDown('a') || Input.isKeyDown('A');
+        const dDown = Input.isKeyDown('d') || Input.isKeyDown('D');
+        
+        // W - đi về phía trước (hướng facing)
+        if (wDown) {
+            moveX += Math.cos(this.facingAngle);
+            moveY += Math.sin(this.facingAngle);
+        }
+        // S - đi lùi (ngược hướng facing)
+        if (sDown) {
+            moveX -= Math.cos(this.facingAngle);
+            moveY -= Math.sin(this.facingAngle);
+        }
+        // A - đi sang trái (vuông góc với facing, -90 độ)
+        if (aDown) {
+            const leftAngle = this.facingAngle - Math.PI / 2;
+            moveX += Math.cos(leftAngle);
+            moveY += Math.sin(leftAngle);
+        }
+        // D - đi sang phải (vuông góc với facing, +90 độ)
+        if (dDown) {
+            const rightAngle = this.facingAngle + Math.PI / 2;
+            moveX += Math.cos(rightAngle);
+            moveY += Math.sin(rightAngle);
+        }
+        
+        // Normalize diagonal movement
+        if (moveX !== 0 || moveY !== 0) {
+            const length = Math.sqrt(moveX * moveX + moveY * moveY);
+            moveX /= length;
+            moveY /= length;
+        }
+        
+        // Check for CC effects
+        const stunned = Array.isArray(this.debuffs) && this.debuffs.some(d => d.type === 'stun' || d.type === 'knockup');
+        if (stunned) {
+            moveX = 0;
+            moveY = 0;
+        }
+        
+        // Apply speed - CHỈ KHI CÓ INPUT
+        let speed = this.stats.moveSpeed;
+        
+        // Slow effects
+        if (Array.isArray(this.debuffs)) {
+            const slow = this.debuffs.find(d => d.type === 'slow');
+            if (slow) {
+                speed *= (1 - slow.percent / 100);
+            }
+        }
+        
+        // Set velocity - sẽ là 0 nếu không có phím nào được nhấn
+        this.vx = moveX * speed;
+        this.vy = moveY * speed;
+    }
     
     /**
      * Apply movement
@@ -885,45 +885,45 @@ class Hero {
     /**
      * Basic attack
      */
-	basicAttack(target) {
-		if (this.attackCooldown > 0) return false;
-		if (!target || !target.isAlive) return false;
-		if (target.untargetable) return false;
-		
-		// Check range
-		const dist = Utils.distance(this.x, this.y, target.x, target.y);
-		if (dist > this.stats.attackRange + target.radius) return false;
-		
-		// Check CC
-		if (Array.isArray(this.debuffs) && this.debuffs.some(d => d.type === 'stun' || d.type === 'disarm')) {
-			return false;
-		}
-		
-		// Execute attack
-		const result = this.heroData.basicAttack.execute(this, target);
-		
-		if (result.type === 'projectile') {
-			ProjectileManager.create({
-				...result,
-				x: this.x,
-				y: this.y,
-				// Lấy pierceWalls từ heroData nếu có
-				pierceWalls: this.heroData.basicAttack.pierceWalls || false,
-			});
-		} else {
-			// Melee attack - instant damage
-			Combat.dealDamage(this, target, result.damage, result.damageType);
-		}
-		
-		this.lastAttackTarget = target;
-		this.attackCooldown = 1000 / this.stats.attackSpeed;
-		
-		if (this.invisible) {
-			this.breakInvisibility();
-		}
-		
-		return true;
-	}
+    basicAttack(target) {
+        if (this.attackCooldown > 0) return false;
+        if (!target || !target.isAlive) return false;
+        if (target.untargetable) return false;
+        
+        // Check range
+        const dist = Utils.distance(this.x, this.y, target.x, target.y);
+        if (dist > this.stats.attackRange + target.radius) return false;
+        
+        // Check CC
+        if (Array.isArray(this.debuffs) && this.debuffs.some(d => d.type === 'stun' || d.type === 'disarm')) {
+            return false;
+        }
+        
+        // Execute attack
+        const result = this.heroData.basicAttack.execute(this, target);
+        
+        if (result.type === 'projectile') {
+            ProjectileManager.create({
+                ...result,
+                x: this.x,
+                y: this.y,
+                // Lấy pierceWalls từ heroData nếu có
+                pierceWalls: this.heroData.basicAttack.pierceWalls || false,
+            });
+        } else {
+            // Melee attack - instant damage
+            Combat.dealDamage(this, target, result.damage, result.damageType);
+        }
+        
+        this.lastAttackTarget = target;
+        this.attackCooldown = 1000 / this.stats.attackSpeed;
+        
+        if (this.invisible) {
+            this.breakInvisibility();
+        }
+        
+        return true;
+    }
     
     /**
      * Take damage
@@ -999,36 +999,36 @@ class Hero {
     /**
      * Die
      */
-	die(killer) {
-			this.isAlive = false;
-			this.isDead = true;
-			this.deaths++;
-			
-			// Calculate respawn time
-			const gameMinutes = Game.gameTime / 60000;
-			this.respawnTimer = CONFIG.game.respawnBaseTime + gameMinutes * CONFIG.game.respawnTimePerMinute;
-			
-			// Calculate exp reward for hero kill
-			const heroKillExp = 100 + this.level * 20;
-			
-			// Distribute experience using new system
-			Combat.distributeExperience(this, killer, heroKillExp);
-			
-			// Give kill credit
-			if (killer && killer.type === 'hero') {
-				killer.kills++;
-			}
-			
-			// Get and credit assists
-			Combat.getAssists(this, killer);
-			
-			// Death effect
-			EffectManager.createExplosion(this.x, this.y, 50, this.color);
-			Camera.shake(10, 300);
-			
-			// Announcement
-			UI.addKillFeed(killer, this, 'kill');
-		}
+    die(killer) {
+            this.isAlive = false;
+            this.isDead = true;
+            this.deaths++;
+            
+            // Calculate respawn time
+            const gameMinutes = Game.gameTime / 60000;
+            this.respawnTimer = CONFIG.game.respawnBaseTime + gameMinutes * CONFIG.game.respawnTimePerMinute;
+            
+            // Calculate exp reward for hero kill
+            const heroKillExp = 100 + this.level * 20;
+            
+            // Distribute experience using new system
+            Combat.distributeExperience(this, killer, heroKillExp);
+            
+            // Give kill credit
+            if (killer && killer.type === 'hero') {
+                killer.kills++;
+            }
+            
+            // Get and credit assists
+            Combat.getAssists(this, killer);
+            
+            // Death effect
+            EffectManager.createExplosion(this.x, this.y, 50, this.color);
+            Camera.shake(10, 300);
+            
+            // Announcement
+            UI.addKillFeed(killer, this, 'kill');
+        }
     
     /**
      * Respawn
