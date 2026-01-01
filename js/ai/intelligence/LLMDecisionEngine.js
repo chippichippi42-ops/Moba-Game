@@ -249,7 +249,8 @@ class LLMDecisionEngine {
         
         // Analyze current situation
         const enemies = Combat.getEnemiesInRange(hero, 1000);
-        const healthPercent = hero.health / hero.stats.maxHealth;
+        const maxHealth = hero.stats?.maxHealth || hero.health || 100;
+        const healthPercent = (hero.health || 0) / maxHealth;
         
         // LLM Quality-based decisions
         if (this.llmQuality > 0.7) { // High quality LLM
@@ -263,7 +264,7 @@ class LLMDecisionEngine {
                 decision.action = 'retreat';
                 decision.priority = 0.95;
                 decision.reasoning = 'Low health - retreat to safety';
-            } else if (context.enemyState.missingHeroes > 1) {
+            } else if (context.enemyState && context.enemyState.missingHeroes > 1) {
                 decision.type = 'caution';
                 decision.action = 'play_safe';
                 decision.priority = 0.8;
@@ -358,7 +359,8 @@ class LLMDecisionEngine {
         let score = 0;
         
         // Health factor - prefer low health targets
-        const healthPercent = target.health / target.stats.maxHealth;
+        const targetMaxHealth = target.stats?.maxHealth || target.health || 100;
+        const healthPercent = (target.health || 0) / targetMaxHealth;
         score += (1 - healthPercent) * 50;
         
         // Threat factor - prefer high threat targets
@@ -367,7 +369,8 @@ class LLMDecisionEngine {
         
         // Distance factor - prefer closer targets
         const distance = Utils.distance(this.controller.hero.x, this.controller.hero.y, target.x, target.y);
-        const maxRange = this.controller.hero.stats.attackRange * 2;
+        const heroAttackRange = this.controller.hero.stats?.attackRange || 500;
+        const maxRange = heroAttackRange * 2;
         score += (1 - Math.min(distance / maxRange, 1)) * 30;
         
         // Role factor

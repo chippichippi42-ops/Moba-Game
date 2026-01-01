@@ -137,7 +137,8 @@ class RetreatBehavior {
         const hero = this.controller.hero;
         
         // Stop retreating if health is good
-        const healthPercent = hero.health / hero.stats.maxHealth;
+        const maxHealth = hero.stats?.maxHealth || hero.health || 100;
+        const healthPercent = (hero.health || 0) / maxHealth;
         if (healthPercent > 0.7) return true;
         
         // Stop retreating if no enemies nearby

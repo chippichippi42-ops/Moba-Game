@@ -92,9 +92,10 @@ class CombatBehavior {
     // Use defensive abilities if needed
     useDefensiveAbilities() {
         const hero = this.controller.hero;
-        const healthPercent = hero.health / hero.stats.maxHealth;
+        const maxHealth = hero.stats?.maxHealth || hero.health || 100;
+        const healthPercent = (hero.health || 0) / maxHealth;
         
-        if (healthPercent < 0.3) {
+        if (healthPercent < 0.3 && hero.heroData && hero.heroData.abilities) {
             // Look for healing or shield abilities
             for (const key of ['e', 'r', 'q']) {
                 const ability = hero.heroData.abilities[key];
@@ -102,7 +103,8 @@ class CombatBehavior {
                 
                 if ((ability.effects && ability.effects.includes('heal')) ||
                     (ability.effects && ability.effects.includes('shield'))) {
-                    if (hero.abilityCooldowns[key] <= 0 && hero.abilityLevels[key] > 0) {
+                    if (hero.abilityCooldowns && hero.abilityCooldowns[key] <= 0 && 
+                        hero.abilityLevels && hero.abilityLevels[key] > 0) {
                         hero.useAbility(key, hero.x, hero.y, hero);
                         return true;
                     }

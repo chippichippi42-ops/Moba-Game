@@ -76,8 +76,10 @@ class JungleBehavior {
         }
         
         const dist = Utils.distance(hero.x, hero.y, creature.x, creature.y);
+        const heroAttackRange = hero.stats?.attackRange || 500;
+        const creatureRadius = creature.radius || 30;
         
-        if (dist <= hero.stats.attackRange + creature.radius) {
+        if (dist <= heroAttackRange + creatureRadius) {
             hero.basicAttack(creature);
             
             // Use abilities if appropriate
@@ -96,11 +98,14 @@ class JungleBehavior {
         // Use abilities based on difficulty
         const skillUsage = this.controller.getDifficultySetting('skillUsage');
         
+        if (!hero.heroData || !hero.heroData.abilities) return false;
+        
         for (const key of ['q', 'e', 'r']) {
             const ability = hero.heroData.abilities[key];
             if (!ability) continue;
             
-            if (hero.abilityCooldowns[key] <= 0 && hero.abilityLevels[key] > 0) {
+            if (hero.abilityCooldowns && hero.abilityCooldowns[key] <= 0 && 
+                hero.abilityLevels && hero.abilityLevels[key] > 0) {
                 if (Math.random() < skillUsage) {
                     hero.useAbility(key, creature.x, creature.y, creature);
                     return true;
@@ -116,7 +121,8 @@ class JungleBehavior {
         
         // Calculate optimal position for attacking creature
         const angle = Utils.angleBetweenPoints(creature.x, creature.y, hero.x, hero.y);
-        const optimalRange = hero.stats.attackRange * 0.9;
+        const heroAttackRange = hero.stats?.attackRange || 500;
+        const optimalRange = heroAttackRange * 0.9;
         
         const targetPos = {
             x: creature.x + Math.cos(angle) * optimalRange,
@@ -130,7 +136,8 @@ class JungleBehavior {
         const hero = this.controller.hero;
         
         // Stop if low health
-        const healthPercent = hero.health / hero.stats.maxHealth;
+        const maxHealth = hero.stats?.maxHealth || hero.health || 100;
+        const healthPercent = (hero.health || 0) / maxHealth;
         if (healthPercent < 0.3) return true;
         
         // Stop if enemies are nearby

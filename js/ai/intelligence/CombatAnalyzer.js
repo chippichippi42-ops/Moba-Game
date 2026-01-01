@@ -125,10 +125,14 @@ class CombatAnalyzer {
     calculateEnemyThreat(enemy) {
         let threat = 0;
         
-        // Base threat from stats
-        threat += enemy.stats.attackDamage * 0.5;
-        threat += enemy.stats.abilityPower * 0.3;
-        threat += (1 - enemy.health / enemy.stats.maxHealth) * 20; // Lower health = less threat
+        // Base threat from stats with safe access
+        const enemyAD = enemy.stats?.attackDamage || 50;
+        const enemyAP = enemy.stats?.abilityPower || 0;
+        const enemyMaxHealth = enemy.stats?.maxHealth || enemy.health || 100;
+        
+        threat += enemyAD * 0.5;
+        threat += enemyAP * 0.3;
+        threat += (1 - (enemy.health || 0) / enemyMaxHealth) * 20; // Lower health = less threat
         
         // Role-based threat
         switch (enemy.role) {
@@ -140,7 +144,7 @@ class CombatAnalyzer {
         }
         
         // Level difference
-        const levelDiff = enemy.level - this.controller.hero.level;
+        const levelDiff = (enemy.level || 1) - (this.controller.hero.level || 1);
         threat += levelDiff * 10;
         
         return threat;
@@ -159,9 +163,13 @@ class CombatAnalyzer {
         for (const member of team) {
             if (member.type === 'hero') {
                 // Health and damage contribution
-                const healthPercent = member.health / member.stats.maxHealth;
-                score += member.stats.attackDamage * healthPercent;
-                score += member.stats.abilityPower * healthPercent * 0.7;
+                const memberMaxHealth = member.stats?.maxHealth || member.health || 100;
+                const healthPercent = (member.health || 0) / memberMaxHealth;
+                const memberAD = member.stats?.attackDamage || 50;
+                const memberAP = member.stats?.abilityPower || 0;
+                
+                score += memberAD * healthPercent;
+                score += memberAP * healthPercent * 0.7;
                 
                 // Level contribution
                 score += member.level * 50;
@@ -182,7 +190,9 @@ class CombatAnalyzer {
     
     shouldEngage(enemies, allies) {
         const combatScore = this.combatData.combatScore;
-        const healthPercent = this.controller.hero.health / this.controller.hero.stats.maxHealth;
+        const hero = this.controller.hero;
+        const maxHealth = hero.stats?.maxHealth || hero.health || 100;
+        const healthPercent = (hero.health || 0) / maxHealth;
         
         // Don't engage if we're at a disadvantage or low health
         if (combatScore < -50 || healthPercent < 0.3) {
@@ -201,7 +211,9 @@ class CombatAnalyzer {
     
     shouldRetreat(enemies, allies) {
         const combatScore = this.combatData.combatScore;
-        const healthPercent = this.controller.hero.health / this.controller.hero.stats.maxHealth;
+        const hero = this.controller.hero;
+        const maxHealth = hero.stats?.maxHealth || hero.health || 100;
+        const healthPercent = (hero.health || 0) / maxHealth;
         
         // Retreat if we're at a significant disadvantage
         if (combatScore < -100) {
@@ -273,7 +285,8 @@ class CombatAnalyzer {
         if (!target || target.type !== 'hero') return false;
         
         // Focus low health targets
-        const healthPercent = target.health / target.stats.maxHealth;
+        const targetMaxHealth = target.stats?.maxHealth || target.health || 100;
+        const healthPercent = (target.health || 0) / targetMaxHealth;
         if (healthPercent < 0.3) return true;
         
         // Focus high threat targets

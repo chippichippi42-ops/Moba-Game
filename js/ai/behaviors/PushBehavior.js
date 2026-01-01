@@ -41,7 +41,10 @@ class PushBehavior {
         }
         
         // Attack tower if in range
-        if (dist <= hero.stats.attackRange + this.targetTower.radius) {
+        const heroAttackRange = hero.stats?.attackRange || 500;
+        const towerRadius = this.targetTower.radius || 100;
+        
+        if (dist <= heroAttackRange + towerRadius) {
             if (this.targetTower.currentTarget && this.targetTower.currentTarget.type === 'minion') {
                 hero.basicAttack(this.targetTower);
             }
@@ -81,7 +84,8 @@ class PushBehavior {
         
         // Calculate position at max attack range from tower
         const angle = Utils.angleBetweenPoints(tower.x, tower.y, hero.x, hero.y);
-        const optimalRange = hero.stats.attackRange * 0.9;
+        const heroAttackRange = hero.stats?.attackRange || 500;
+        const optimalRange = heroAttackRange * 0.9;
         
         return {
             x: tower.x + Math.cos(angle) * optimalRange,
@@ -94,7 +98,8 @@ class PushBehavior {
         const hero = this.controller.hero;
         
         // Don't push if low health
-        const healthPercent = hero.health / hero.stats.maxHealth;
+        const maxHealth = hero.stats?.maxHealth || hero.health || 100;
+        const healthPercent = (hero.health || 0) / maxHealth;
         if (healthPercent < 0.4) return false;
         
         // Don't push if enemies are nearby and we're at disadvantage
