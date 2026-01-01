@@ -45,10 +45,18 @@ class DecisionMaker {
     analyzeSituation(entities) {
         const myTeam = this.controller.hero.team;
         const enemyTeam = myTeam === CONFIG.teams.BLUE ? CONFIG.teams.RED : CONFIG.teams.BLUE;
-        
-        const nearbyEnemies = Combat.getEnemiesInRange(this.controller.hero, 1000);
-        const nearbyAllies = Combat.getAlliesInRange(this.controller.hero, 1000);
-        const nearbyMinions = MinionManager.getMinionsInRange(this.controller.hero.x, this.controller.hero.y, 600);
+
+        let nearbyEnemies = [];
+        let nearbyAllies = [];
+        if (typeof Combat !== 'undefined') {
+            nearbyEnemies = Combat.getEnemiesInRange(this.controller.hero, 1000) || [];
+            nearbyAllies = Combat.getAlliesInRange(this.controller.hero, 1000) || [];
+        }
+
+        let nearbyMinions = [];
+        if (typeof MinionManager !== 'undefined' && MinionManager.getMinionsInRange) {
+            nearbyMinions = MinionManager.getMinionsInRange(this.controller.hero.x, this.controller.hero.y, 600) || [];
+        }
         
         const hero = this.controller.hero;
         const maxHealth = hero.stats?.maxHealth || hero.health || 100;
@@ -61,22 +69,29 @@ class DecisionMaker {
             const enemyMaxHealth = e.stats?.maxHealth || e.health || 100;
             return (e.health || 0) / enemyMaxHealth < 0.3;
         });
-        
-        const nearbyEnemyTower = TowerManager.towers.find(t => 
-            t.team !== myTeam && t.isAlive && 
-            Utils.distance(this.controller.hero.x, this.controller.hero.y, t.x, t.y) < 800
-        );
-        
-        const nearbyAllyTower = TowerManager.towers.find(t => 
-            t.team === myTeam && t.isAlive && 
-            Utils.distance(this.controller.hero.x, this.controller.hero.y, t.x, t.y) < 800
-        );
+
+        let nearbyEnemyTower = null;
+        let nearbyAllyTower = null;
+        if (typeof TowerManager !== 'undefined' && TowerManager.towers) {
+            nearbyEnemyTower = TowerManager.towers.find(t =>
+                t.team !== myTeam && t.isAlive &&
+                Utils.distance(this.controller.hero.x, this.controller.hero.y, t.x, t.y) < 800
+            );
+
+            nearbyAllyTower = TowerManager.towers.find(t =>
+                t.team === myTeam && t.isAlive &&
+                Utils.distance(this.controller.hero.x, this.controller.hero.y, t.x, t.y) < 800
+            );
+        }
         
         const myMinions = nearbyMinions.filter(m => m.team === myTeam);
         const enemyMinions = nearbyMinions.filter(m => m.team !== myTeam);
-        
-        const basePoint = GameMap.getSpawnPoint(myTeam);
-        const distFromBase = Utils.distance(this.controller.hero.x, this.controller.hero.y, basePoint.x, basePoint.y);
+
+        let distFromBase = 0;
+        if (typeof GameMap !== 'undefined' && GameMap.getSpawnPoint) {
+            const basePoint = GameMap.getSpawnPoint(myTeam);
+            distFromBase = Utils.distance(this.controller.hero.x, this.controller.hero.y, basePoint.x, basePoint.y);
+        }
         
         // Check for incoming projectiles
         const incomingProjectiles = this.detectIncomingProjectiles();
@@ -107,8 +122,8 @@ class DecisionMaker {
     }
     
     detectIncomingProjectiles() {
-        if (!ProjectileManager || !ProjectileManager.projectiles) return [];
-        
+        if (typeof ProjectileManager === 'undefined' || !ProjectileManager.projectiles) return [];
+
         const incoming = [];
         const hero = this.controller.hero;
         
@@ -136,8 +151,8 @@ class DecisionMaker {
     }
     
     detectNearbyJungleCamps() {
-        if (!CreatureManager.camps || CreatureManager.camps.length === 0) return [];
-        
+        if (typeof CreatureManager === 'undefined' || !CreatureManager.camps || CreatureManager.camps.length === 0) return [];
+
         const nearby = [];
         const hero = this.controller.hero;
         
@@ -263,10 +278,14 @@ class DecisionMaker {
         if (situation.lowHpEnemies.length > 0) {
             this.currentTarget = situation.lowHpEnemies[0];
         } else if (situation.enemyHeroes.length > 0) {
-            this.currentTarget = this.controller.systems.targetSelector.selectBestTarget(
-                situation.enemyHeroes,
-                this.controller.hero
-            );
+            if (this.controller.targetSelector && typeof this.controller.targetSelector.selectBestTarget === 'function') {
+                this.currentTarget = this.controller.targetSelector.selectBestTarget(
+                    situation.enemyHeroes,
+                    this.controller.hero
+                );
+            } else {
+                this.currentTarget = situation.enemyHeroes[0];
+            }
         } else if (situation.enemyMinions.length > 0) {
             this.currentTarget = situation.enemyMinions[0];
         } else {

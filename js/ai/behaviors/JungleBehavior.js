@@ -40,7 +40,7 @@ class JungleBehavior {
     }
     
     findNearestJungleCamp() {
-        if (!CreatureManager.camps || CreatureManager.camps.length === 0) {
+        if (typeof CreatureManager === 'undefined' || !CreatureManager.camps || CreatureManager.camps.length === 0) {
             return null;
         }
         
@@ -128,8 +128,8 @@ class JungleBehavior {
             x: creature.x + Math.cos(angle) * optimalRange,
             y: creature.y + Math.sin(angle) * optimalRange
         };
-        
-        this.controller.systems.movementOptimizer.setMovementTarget(targetPos, 'jungling');
+
+        this.controller.movementOptimizer.setMovementTarget(targetPos, 'jungling');
     }
     
     shouldStopJungling() {
@@ -141,7 +141,10 @@ class JungleBehavior {
         if (healthPercent < 0.3) return true;
         
         // Stop if enemies are nearby
-        const enemies = Combat.getEnemiesInRange(hero, 800);
+        let enemies = [];
+        if (typeof Combat !== 'undefined') {
+            enemies = Combat.getEnemiesInRange(hero, 800) || [];
+        }
         if (enemies.length > 0) return true;
         
         // Stop if no camps available

@@ -47,12 +47,13 @@ class VisionSystem {
     
     updateHeroVision(hero) {
         // Check for visible enemies
-        if (HeroManager && HeroManager.heroes) {
+        if (typeof HeroManager !== 'undefined' && HeroManager.heroes) {
             for (const otherHero of HeroManager.heroes) {
                 if (otherHero.team !== hero.team && otherHero.isAlive) {
                     const dist = Utils.distance(hero.x, hero.y, otherHero.x, otherHero.y);
-                    
-                    if (dist <= hero.stats.visionRange) {
+                    const visionRange = hero.stats?.visionRange || 1000;
+
+                    if (dist <= visionRange) {
                         // Check line of sight
                         if (this.hasLineOfSight(hero, otherHero)) {
                             this.visibleEnemies.set(otherHero.id, otherHero);

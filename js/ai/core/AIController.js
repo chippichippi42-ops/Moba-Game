@@ -16,13 +16,20 @@ class AIController {
         this.stateMachine = new AIState(this, difficulty);
         this.decisionMaker = new DecisionMaker(this, difficulty);
         
+        // Tactical Systems
+        this.visionSystem = systems.visionSystem;
+        this.pathFinding = systems.pathFinding;
+        this.dodgeSystem = systems.dodgeSystem;
+        this.comboExecutor = systems.comboExecutor;
+        this.targetSelector = systems.targetSelector;
+
         // Advanced AI Systems
         this.advancedEvaluator = systems.advancedEvaluator;
         this.ollamaIntegrator = systems.ollamaIntegrator;
         this.smartDecisionCache = systems.smartDecisionCache;
         this.promptBuilder = systems.promptBuilder;
         this.responseFusion = systems.responseFusion;
-        
+
         // Behavior systems
         this.laneBehavior = new LaneBehavior(this);
         this.combatBehavior = new CombatBehavior(this);
@@ -44,7 +51,14 @@ class AIController {
     initialize() {
         // Set initial state
         this.stateMachine.setState('laning');
-        
+
+        // Initialize tactical systems
+        if (this.visionSystem) this.visionSystem.initialize();
+        if (this.pathFinding) this.pathFinding.initialize();
+        if (this.dodgeSystem) this.dodgeSystem.initialize();
+        if (this.comboExecutor) this.comboExecutor.initialize();
+        if (this.targetSelector) this.targetSelector.initialize();
+
         // Initialize behaviors
         this.laneBehavior.initialize();
         this.combatBehavior.initialize();
@@ -52,7 +66,7 @@ class AIController {
         this.pushBehavior.initialize();
         this.dodgeBehavior.initialize();
         this.jungleBehavior.initialize();
-        
+
         // Initialize intelligence systems
         this.strategicAnalyzer.initialize();
         this.combatAnalyzer.initialize();
@@ -62,16 +76,22 @@ class AIController {
     
     update(deltaTime, entities) {
         if (!this.hero.isAlive || this.hero.isDead) return;
-        
+
         // Update state machine
         this.stateMachine.update(deltaTime, entities);
-        
+
+        // Update tactical systems
+        if (this.visionSystem) this.visionSystem.update(deltaTime, entities);
+        if (this.pathFinding) this.pathFinding.update(deltaTime);
+        if (this.dodgeSystem) this.dodgeSystem.update(deltaTime);
+        if (this.comboExecutor) this.comboExecutor.update(deltaTime);
+
         // Update intelligence systems
         this.strategicAnalyzer.update(deltaTime, entities);
         this.combatAnalyzer.update(deltaTime, entities);
         this.movementOptimizer.update(deltaTime);
         this.llmDecisionEngine.update(deltaTime, entities);
-        
+
         // Advanced 10-Layer Smart Evaluation
         const heroState = this.hero.getState();
         const gameState = this.getGameState();
@@ -205,8 +225,37 @@ class AIController {
 
     getGameState() {
         const hero = this.hero;
-        const nearbyEnemies = Combat.getEnemiesInRange(hero, 1000);
-        const nearbyAllies = Combat.getAlliesInRange(hero, 1000);
+
+        if (typeof Combat === 'undefined') {
+            return {
+                nearbyEnemies: [],
+                nearbyAllies: [],
+                blueScore: 0,
+                redScore: 0,
+                towerUnderAttackNearby: false,
+                objectiveThreat: false,
+                minionWavePushedIn: false,
+                waveFrozen: false,
+                wavePushing: false,
+                inUnvardedArea: false,
+                teamFightActive: false,
+                teammateCritical: false,
+                enemyMissingDuration: 0,
+                goodRotationWindow: true,
+                teamMomentum: 0,
+                goldDifferential: 0,
+                incomingCCChain: false,
+                predictedEnemyGank: false,
+                objectiveContestedSoon: false,
+                deathProbability: 0,
+                killOpportunity: false,
+                nearObjective: false,
+                hasEscapeRoute: true
+            };
+        }
+
+        const nearbyEnemies = Combat.getEnemiesInRange(hero, 1000) || [];
+        const nearbyAllies = Combat.getAlliesInRange(hero, 1000) || [];
         
         // Helper to safely get max health
         const getMaxHealth = (entity) => {

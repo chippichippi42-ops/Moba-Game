@@ -148,16 +148,16 @@ class MovementOptimizer {
     findSafeDirection() {
         const hero = this.controller.hero;
         const testAngles = [0, Math.PI/4, Math.PI/2, 3*Math.PI/4, Math.PI, 5*Math.PI/4, 3*Math.PI/2, 7*Math.PI/4];
-        
+
         for (const angle of testAngles) {
             const testX = hero.x + Math.cos(angle) * 200;
             const testY = hero.y + Math.sin(angle) * 200;
-            
-            if (!GameMap.checkWallCollision(testX, testY, hero.radius)) {
+
+            if (typeof GameMap === 'undefined' || !GameMap.checkWallCollision(testX, testY, hero.radius)) {
                 return angle;
             }
         }
-        
+
         return null;
     }
     
@@ -198,8 +198,8 @@ class MovementOptimizer {
         const testDist = 50;
         const testX = hero.x + Math.cos(angle) * testDist;
         const testY = hero.y + Math.sin(angle) * testDist;
-        
-        if (GameMap.checkWallCollision(testX, testY, hero.radius)) {
+
+        if (typeof GameMap !== 'undefined' && GameMap.checkWallCollision(testX, testY, hero.radius)) {
             // Try alternative angles
             const alternativeAngles = [
                 angle + Math.PI / 4,
@@ -213,8 +213,8 @@ class MovementOptimizer {
             for (const altAngle of alternativeAngles) {
                 const altX = hero.x + Math.cos(altAngle) * testDist;
                 const altY = hero.y + Math.sin(altAngle) * testDist;
-                
-                if (!GameMap.checkWallCollision(altX, altY, hero.radius)) {
+
+                if (typeof GameMap === 'undefined' || !GameMap.checkWallCollision(altX, altY, hero.radius)) {
                     angle = altAngle;
                     break;
                 }
@@ -244,8 +244,15 @@ class MovementOptimizer {
         // Use A* pathfinding
         const start = { x: this.controller.hero.x, y: this.controller.hero.y };
         const end = { x: targetPosition.x, y: targetPosition.y };
-        
-        this.waypoints = this.controller.systems.pathFinding.findPath(start, end, this.controller.hero.radius);
+
+        if (!this.controller.pathFinding) {
+            // Fallback to direct path if pathfinding not available
+            this.waypoints = [end];
+            this.currentWaypointIndex = 0;
+            return;
+        }
+
+        this.waypoints = this.controller.pathFinding.findPath(start, end, this.controller.hero.radius);
         this.currentWaypointIndex = 0;
         
         // Update path quality based on waypoints

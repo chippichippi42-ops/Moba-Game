@@ -44,7 +44,7 @@ class DodgeSystem {
     }
     
     shouldDodgeProjectiles(hero) {
-        if (!ProjectileManager || !ProjectileManager.projectiles) return false;
+        if (typeof ProjectileManager === 'undefined' || !ProjectileManager.projectiles) return false;
         
         const now = Date.now();
         if (now - this.lastDodgeTime < this.dodgeCooldown) return false;

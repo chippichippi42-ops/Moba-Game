@@ -117,8 +117,11 @@ class TargetSelector {
         threat += cooldownScore * threatFactors.cooldowns * 10;
         
         // Position (distance to our allies)
-        const allies = Combat.getAlliesInRange(hero, 1000);
-        const distanceToAllies = allies.length > 0 ? 
+        let allies = [];
+        if (typeof Combat !== 'undefined') {
+            allies = Combat.getAlliesInRange(hero, 1000) || [];
+        }
+        const distanceToAllies = allies.length > 0 ?
             Math.min(...allies.map(ally => Utils.distance(target.x, target.y, ally.x, ally.y))) : 1000;
         const positionScore = 1 - Math.min(distanceToAllies / 1000, 1);
         threat += positionScore * threatFactors.position * 100;
