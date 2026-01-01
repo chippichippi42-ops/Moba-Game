@@ -11,8 +11,10 @@ class CombatAnalyzer {
         this.combatData = {};
         this.lastCombatAnalysis = 0;
         this.analysisCooldown = 1000; // 1 second cooldown
+        this.abilityAnalyzer = new AIAbilityAnalyzer();
+        this.lastAbilityUseTime = 0;
     }
-    
+
     initialize() {
         // Initialization if needed
     }
@@ -276,28 +278,297 @@ class CombatAnalyzer {
     getCombatData() {
         return this.combatData;
     }
-    
+
     getCombatScore() {
         return this.combatData.combatScore || 0;
     }
-    
+
     shouldFocusTarget(target) {
         if (!target || target.type !== 'hero') return false;
-        
+
         // Focus low health targets
         const targetMaxHealth = target.stats?.maxHealth || target.health || 100;
         const healthPercent = (target.health || 0) / targetMaxHealth;
         if (healthPercent < 0.3) return true;
-        
+
         // Focus high threat targets
         const threat = this.calculateEnemyThreat(target);
         if (threat > 150) return true;
-        
+
         // Focus targets we can kill
         const damageOutput = this.calculateTotalDamageOutput(target);
         if (damageOutput > target.health * 1.2) return true;
-        
+
         return false;
+    }
+
+    // ===== AI SKILL USAGE PATTERNS =====
+
+    /**
+     * Pattern 1: ESCAPE - When HP is low and being chased
+     */
+    analyzeEscapePattern(hero, enemies) {
+        const difficulty = this.controller.difficulty;
+        const mods = CONFIG.aiDifficultyMods[difficulty];
+        if (!mods) return null;
+
+        const heroMaxHealth = hero.stats?.maxHealth || hero.health || 100;
+        const healthPercent = (hero.health || 0) / heroMaxHealth;
+
+        // Check if HP is below threshold
+        if (healthPercent < mods.escapeHPThreshold) {
+            // Check if being chased (enemies close)
+            const nearbyEnemies = enemies.filter(e => {
+                const dist = Utils.distance(hero.x, hero.y, e.x, e.y);
+                return dist < 800 && dist > 200; // Chasing distance
+            });
+
+            if (nearbyEnemies.length > 0) {
+                // Find best escape skill
+                const situation = {
+                    hp: healthPercent,
+                    maxHp: heroMaxHealth,
+                    nearbyEnemies: nearbyEnemies.length,
+                    distance: 400
+                };
+
+                const escapeSkill = this.abilityAnalyzer.findBestEscapeSkill(hero, situation);
+                return { pattern: 'ESCAPE', skill: escapeSkill, priority: 5 };
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Pattern 2: CC (Crowd Control) - When enemy close or running away
+     */
+    analyzeCCPattern(hero, enemies) {
+        const difficulty = this.controller.difficulty;
+        const mods = CONFIG.aiDifficultyMods[difficulty];
+        if (!mods) return null;
+
+        // Check if should use CC based on frequency
+        if (Math.random() > mods.useCCFrequency) return null;
+
+        // Find targets for CC
+        for (const enemy of enemies) {
+            const dist = Utils.distance(hero.x, hero.y, enemy.x, enemy.y);
+
+            // CC when enemy is close or running away
+            if (dist < 600 || (dist < 800 && this.isEnemyRunningAway(hero, enemy))) {
+                const ccSkill = this.abilityAnalyzer.findBestCCSkill(hero, enemy);
+                if (ccSkill) {
+                    return { pattern: 'CC', skill: ccSkill, target: enemy, priority: 3 };
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Pattern 3: BURST - When target HP is low
+     */
+    analyzeBurstPattern(hero, enemies) {
+        const difficulty = this.controller.difficulty;
+        const mods = CONFIG.aiDifficultyMods[difficulty];
+        if (!mods) return null;
+
+        // Find vulnerable targets
+        for (const enemy of enemies) {
+            if (enemy.type !== 'hero') continue;
+
+            const enemyMaxHealth = enemy.stats?.maxHealth || enemy.health || 100;
+            const healthPercent = (enemy.health || 0) / enemyMaxHealth;
+
+            // Check if enemy HP is below threshold
+            if (healthPercent < mods.burstThreshold) {
+                const dist = Utils.distance(hero.x, hero.y, enemy.x, enemy.y);
+                if (dist < 800) {
+                    const burstCombo = this.abilityAnalyzer.findBestBurstCombo(hero, enemy);
+                    if (burstCombo && burstCombo.length > 0) {
+                        return { pattern: 'BURST', skills: burstCombo, target: enemy, priority: 4 };
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Pattern 4: SUSTAIN - When hero HP drops below 60% in fight
+     */
+    analyzeSustainPattern(hero, enemies) {
+        const difficulty = this.controller.difficulty;
+        const mods = CONFIG.aiDifficultyMods[difficulty];
+        if (!mods) return null;
+
+        const heroMaxHealth = hero.stats?.maxHealth || hero.health || 100;
+        const healthPercent = (hero.health || 0) / heroMaxHealth;
+
+        // Check if in fight and HP is low
+        const inCombat = enemies.filter(e => {
+            const dist = Utils.distance(hero.x, hero.y, e.x, e.y);
+            return dist < 600;
+        }).length > 0;
+
+        if (inCombat && healthPercent < mods.sustainThreshold) {
+            // Use sustain abilities based on difficulty
+            const sustainCheck = Math.random();
+            const shouldUseSustain = {
+                easy: sustainCheck < 0.3,
+                normal: sustainCheck < 0.5,
+                hard: sustainCheck < 0.7,
+                nightmare: sustainCheck < 0.9
+            };
+
+            if (shouldUseSustain[difficulty]) {
+                const sustainAbility = this.abilityAnalyzer.findSustainAbility(hero);
+                if (sustainAbility) {
+                    return { pattern: 'SUSTAIN', skill: sustainAbility, priority: 2 };
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Pattern 5: POSITIONING - Use mobility skills in teamfight
+     */
+    analyzePositioningPattern(hero, enemies, allies) {
+        const difficulty = this.controller.difficulty;
+
+        // Only Hard+ uses positioning
+        if (difficulty !== 'hard' && difficulty !== 'veryhard' && difficulty !== 'nightmare') {
+            return null;
+        }
+
+        // Check if in teamfight
+        const nearbyEnemies = enemies.filter(e => {
+            const dist = Utils.distance(hero.x, hero.y, e.x, e.y);
+            return dist < 1200;
+        });
+
+        const nearbyAllies = allies.filter(a => {
+            const dist = Utils.distance(hero.x, hero.y, a.x, a.y);
+            return dist < 1200;
+        });
+
+        // Teamfight condition
+        if (nearbyEnemies.length >= 3 && nearbyAllies.length >= 2) {
+            // Check if not in ideal position (too far from allies or too close to enemies)
+            const avgAllyDist = nearbyAllies.reduce((sum, ally) => {
+                return sum + Utils.distance(hero.x, hero.y, ally.x, ally.y);
+            }, 0) / nearbyAllies.length;
+
+            const avgEnemyDist = nearbyEnemies.reduce((sum, enemy) => {
+                return sum + Utils.distance(hero.x, hero.y, enemy.x, enemy.y);
+            }, 0) / nearbyEnemies.length;
+
+            // Not ideal: too close to enemies or too far from allies
+            if (avgEnemyDist < 400 || avgAllyDist > 600) {
+                // Use mobility skills to reposition
+                const mobilitySkills = this.abilityAnalyzer.getAbilitiesByType(hero, 'Mobility');
+                const mobilitySkillsEsc = this.abilityAnalyzer.getAbilitiesByType(hero, 'Escape');
+
+                const allMobility = [...mobilitySkills, ...mobilitySkillsEsc];
+
+                for (const skillObj of allMobility) {
+                    if (this.abilityAnalyzer.isAbilityCooldownReady(hero, skillObj.key)) {
+                        return { pattern: 'POSITIONING', skill: skillObj, priority: 3 };
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Pattern 6: ENGAGE - Use engage/dash abilities
+     */
+    analyzeEngagePattern(hero, enemies) {
+        const difficulty = this.controller.difficulty;
+
+        // Find engage targets
+        for (const enemy of enemies) {
+            const dist = Utils.distance(hero.x, hero.y, enemy.x, enemy.y);
+
+            // Target in range but not engaged
+            if (dist > 400 && dist < 900) {
+                // Check if not already in combat
+                if (!this.isAlreadyEngaged(hero, enemy)) {
+                    // Use engage abilities
+                    const engageSkills = this.abilityAnalyzer.getAbilitiesByType(hero, 'Engage');
+                    for (const skillObj of engageSkills) {
+                        if (this.abilityAnalyzer.isAbilityCooldownReady(hero, skillObj.key)) {
+                            return { pattern: 'ENGAGE', skill: skillObj, target: enemy, priority: 2 };
+                        }
+                    }
+
+                    // Also check dash abilities
+                    const mobilitySkills = this.abilityAnalyzer.getAbilitiesByType(hero, 'Mobility');
+                    for (const skillObj of mobilitySkills) {
+                        const ability = skillObj.ability;
+                        if (ability && (ability.type === 'dash' || ability.isDash)) {
+                            if (this.abilityAnalyzer.isAbilityCooldownReady(hero, skillObj.key)) {
+                                return { pattern: 'ENGAGE', skill: skillObj, target: enemy, priority: 2 };
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Run all skill usage patterns and return best action
+     */
+    analyzeSkillUsagePatterns(hero, enemies, allies) {
+        const patterns = [];
+
+        // Analyze all patterns
+        patterns.push(this.analyzeEscapePattern(hero, enemies));
+        patterns.push(this.analyzeCCPattern(hero, enemies));
+        patterns.push(this.analyzeBurstPattern(hero, enemies));
+        patterns.push(this.analyzeSustainPattern(hero, enemies));
+        patterns.push(this.analyzePositioningPattern(hero, enemies, allies));
+        patterns.push(this.analyzeEngagePattern(hero, enemies));
+
+        // Filter null patterns and sort by priority
+        const validPatterns = patterns.filter(p => p !== null);
+        validPatterns.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+        return validPatterns.length > 0 ? validPatterns[0] : null;
+    }
+
+    /**
+     * Check if enemy is running away (moving away from hero)
+     */
+    isEnemyRunningAway(hero, enemy) {
+        const dx = enemy.x - hero.x;
+        const dy = enemy.y - hero.y;
+
+        // Enemy velocity
+        const enemyVx = enemy.vx || 0;
+        const enemyVy = enemy.vy || 0;
+
+        // Dot product to check if moving away
+        const dotProduct = dx * enemyVx + dy * enemyVy;
+        return dotProduct > 0;
+    }
+
+    /**
+     * Check if already engaged with target
+     */
+    isAlreadyEngaged(hero, enemy) {
+        const dist = Utils.distance(hero.x, hero.y, enemy.x, enemy.y);
+        return dist < 400; // Already close
     }
 }
 

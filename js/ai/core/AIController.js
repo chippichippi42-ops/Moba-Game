@@ -11,11 +11,11 @@ class AIController {
         this.difficulty = difficulty;
         this.difficultySettings = CONFIG.aiDifficulty[difficulty];
         this.systems = systems;
-        
+
         // State management
         this.stateMachine = new AIState(this, difficulty);
         this.decisionMaker = new DecisionMaker(this, difficulty);
-        
+
         // Tactical Systems
         this.visionSystem = systems.visionSystem;
         this.pathFinding = systems.pathFinding;
@@ -30,6 +30,9 @@ class AIController {
         this.promptBuilder = systems.promptBuilder;
         this.responseFusion = systems.responseFusion;
 
+        // Ability Analysis System
+        this.abilityAnalyzer = new AIAbilityAnalyzer();
+
         // Behavior systems
         this.laneBehavior = new LaneBehavior(this);
         this.combatBehavior = new CombatBehavior(this);
@@ -37,13 +40,13 @@ class AIController {
         this.pushBehavior = new PushBehavior(this);
         this.dodgeBehavior = new DodgeBehavior(this);
         this.jungleBehavior = new JungleBehavior(this);
-        
+
         // Intelligence systems
         this.strategicAnalyzer = new StrategicAnalyzer(this);
         this.combatAnalyzer = new CombatAnalyzer(this);
         this.movementOptimizer = new MovementOptimizer(this);
         this.llmDecisionEngine = new LLMDecisionEngine(this);
-        
+
         // Initialize
         this.initialize();
     }
