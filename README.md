@@ -28,7 +28,7 @@ http://localhost:8000
 ### Điều Khiển (PC)
 - **W/A/S/D**: Di chuyển (W: lên, S: xuống, A: trái, D: phải)
 - **Q**: Chiêu 1
-- **E**: Chiêu 2  
+- **E**: Chiêu 2
 - **R**: Chiêu 3
 - **T**: Chiêu Ultimate
 - **F**: Bổ trợ (Hồi máu/Tốc biến/Tốc hành)
@@ -72,7 +72,69 @@ http://localhost:8000
 | **Thường** | Cho người chơi bình thường - AI có khả năng né đạn cơ bản và sử dụng combo đơn giản |
 | **Khó** | Cho người chơi giỏi - AI bắt đầu sử dụng LLM cơ bản và né kỹ năng CC, có pathfinding thông minh |
 | **Cực Khó** | Cho người chơi rất giỏi - AI với LLM nâng cao, dự đoán đối thủ, combo phức tạp và targeting thông minh |
-| **Ác Mộng** | Gần như không thể đánh bại - AI hoàn hảo với LLM tiên tiến, né tất cả kỹ năng, combo hoàn hảo và nhận thức toàn cầu
+| **Ác Mộng** | Gần như không thể đánh bại - AI hoàn hảo với LLM tiên tiến, né tất cả kỹ năng, combo hoàn hảo và nhận thức toàn cầu |
+
+### Cài Đặt Độ Khó AI - Chi Tiết
+
+Game có 4 mức độ khó với các tham số tùy chỉnh:
+
+| Tham Số | Dễ | Thường | Khó | Ác Mộng |
+|---------|-----|--------|------|----------|
+| **Ngưỡng HP trốn chạy** | 20% | 30% | 35% | 40% |
+| **Tần suất dùng CC** | 30% | 60% | 75% | 90% |
+| **Ngưỡng HP nổ sát thương** | 20% | 40% | 50% | 60% |
+| **Ngưỡng HP hồi máu** | 50% | 60% | 65% | 70% |
+| **Độ trễ quyết định** | 500ms | 300ms | 150ms | 50ms |
+| **Hồi chiêu tái dùng** | 3000ms | 2000ms | 1000ms | 500ms |
+| **Tỷ lệ trúng chiêu** | 45% | 57% | 72% | 98% |
+| **Có LLM?** | ❌ | ❌ | ✅ Cơ bản | ✅ Tiên tiến |
+| **Dự đoán địch** | ❌ | ❌ | ✅ | ✅ Nâng cao |
+
+### AI Ability Analyzer & Skill Patterns
+
+Hệ thống mới phân tích kỹ năng của tướng và đưa ra quyết định thông minh:
+
+#### 6 Mẫu Hành Vi Kỹ Năng (Skill Usage Patterns):
+
+1. **ESCAPE** (Trốn chạy)
+   - Kích hoạt khi HP thấp và đang bị truy đuổi
+   - Sử dụng kỹ năng Escape/Dash phù hợp nhất
+   - Ngưỡng HP thay đổi theo độ khó
+
+2. **CC** (Crowd Control)
+   - Dùng khi địch gần hoặc đang chạy trốn
+   - Tần suất dùng dựa trên độ khó (30% - 90%)
+   - Tự động chọn kỹ năng CC tốt nhất
+
+3. **BURST** (Nổ sát thương)
+   - Kích hoạt khi mục tiêu HP thấp
+   - Tự động tìm combo burst tối ưu
+   - Ngưỡng HP địch: 20% - 60% tùy độ khó
+
+4. **SUSTAIN** (Hồi máu/Khiên chắn)
+   - Dùng khi HP thấp trong giao tranh
+   - Tự động tìm kỹ năng hồi máu/khiên
+   - Tần suất dùng tăng theo độ khó
+
+5. **POSITIONING** (Định vị)
+   - Chỉ hoạt động ở mức Khó trở lên
+   - Sử dụng kỹ năng cơ động để di chuyển tốt hơn
+   - Hoạt động trong teamfight (3+ địch, 2+ đồng đội)
+
+6. **ENGAGE** (Tiếp cận)
+   - Dùng kỹ năng dash/tiếp cận khi mục tiêu trong tầm
+   - Tất cả độ khó đều sử dụng
+   - Tự động chọn kỹ năng Engage tốt nhất
+
+#### Phân Loại Kỹ Năng (Ability Categorization):
+
+Hệ thống tự động phân loại kỹ năng của tướng:
+- **CC**: Khống chế (stun, slow, root)
+- **Engage**: Tiếp cận (dash, gap closer)
+- **Escape**: Trốn chạy (flash, dash out)
+- **Burst**: Sát thương cao trong thời gian ngắn
+- **Sustain**: Hồi máu/khiên chắn (heal, shield)
+- **Mobility**: Tăng cơ động (movement speed, dashes)
 
 ### Hệ Thống AI Mới
 
@@ -103,30 +165,64 @@ Game hiện tại đã được nâng cấp với **Hệ Thống AI Khổng Lồ
 ```
 js/ai/
 ├── AIManager.js                    # Quản lý tất cả AI
+├── utils/
+│   ├── AIAbilityAnalyzer.js        # NEW: Phân tích kỹ năng
+│   ├── PerformanceMonitor.js      # Theo dõi FPS
+│   ├── SpatialGrid.js            # Tối ưu collision detection
+│   └── VisionSystem.js          # Vision & awareness
 ├── core/
-│   ├── AIController.js             # Core orchestrator
-│   ├── AIState.js                  # State machine
-│   └── DecisionMaker.js            # Decision logic
+│   ├── AIController.js           # Core orchestrator
+│   ├── AIState.js               # State machine
+│   └── DecisionMaker.js         # Decision logic
 ├── intelligence/
-│   ├── StrategicAnalyzer.js        # Phân tích chiến lược
-│   ├── CombatAnalyzer.js           # Phân tích chiến đấu
-│   ├── MovementOptimizer.js        # Tối ưu di chuyển + A*
-│   └── LLMDecisionEngine.js        # LLM integration
+│   ├── StrategicAnalyzer.js       # Phân tích chiến lược
+│   ├── CombatAnalyzer.js        # Phân tích chiến đấu (with skill patterns)
+│   ├── MovementOptimizer.js      # Tối ưu di chuyển + A*
+│   └── LLMDecisionEngine.js     # LLM integration
 ├── behaviors/
-│   ├── LaneBehavior.js             # Laning
-│   ├── CombatBehavior.js           # Fighting
-│   ├── RetreatBehavior.js          # Escaping
-│   ├── PushBehavior.js             # Objective push
-│   ├── DodgeBehavior.js            # Kiting & positioning
-│   └── JungleBehavior.js           # Jungle clear
-├── tactical/
-│   ├── DodgeSystem.js              # Dodge obstacles/abilities/projectiles
-│   ├── ComboExecutor.js            # Smart combo execution
-│   ├── TargetSelector.js           # Multi-criteria targeting
-│   └── PathFinding.js              # A* + dynamic pathfinding
-└── utils/
-    └── VisionSystem.js             # Vision & awareness
+│   ├── LaneBehavior.js          # Laning
+│   ├── CombatBehavior.js        # Fighting
+│   ├── RetreatBehavior.js       # Escaping
+│   ├── PushBehavior.js         # Objective push
+│   ├── DodgeBehavior.js        # Kiting & positioning
+│   └── JungleBehavior.js       # Jungle clear
+└── tactical/
+    ├── DodgeSystem.js           # Dodge obstacles/abilities/projectiles
+    ├── ComboExecutor.js        # Smart combo execution
+    ├── TargetSelector.js       # Multi-criteria targeting
+    └── PathFinding.js         # A* + dynamic pathfinding
 ```
+
+## ⚖️ Game Scaling
+
+### Minion & Creature Progression
+
+Lính và quái rừng sẽ tự động tăng sức mạnh theo thời gian trận đấu:
+
+| Loại Tăng Tốc | Lính | Quái Rừng |
+|---------------|------|-----------|
+| **Máu** | +5% mỗi phút | +4% mỗi phút |
+| **Sát Thương** | +6% mỗi phút | +5% mỗi phút |
+| **Cập Nhật** | Mỗi 60 giây | Mỗi 60 giây |
+
+**Ví dụ:**
+- Sau 5 phút: Lính có ~28% máu và ~34% sát thương cao hơn
+- Sau 10 phút: Lính có ~57% máu và ~77% sát thương cao hơn
+- Quái rừng tăng chậm hơn để cân bằng với hero
+
+### Tower Spacing
+
+Khoảng cách giữa các trụ đã được tăng 17.5% để tạo không gian chiến thuật tốt hơn:
+
+| Trụ | Cũ | Mới |
+|------|-----|------|
+| **Trụ Ngoài** | 1500 | 1760 |
+| **Trụ Trong** | 2800 | 3290 |
+| **Trụ Ức Chế** | 4200 | 4940 |
+
+- Cả hai đội đều được tăng khoảng cách
+- Tạo thêm không gian cho giao tranh
+- Tăng tính chiến thuật khi đẩy đường
 
 ## 🗺️ Bản Đồ
 
@@ -140,7 +236,7 @@ js/ai/
 
 ### Trụ Công Trình (mỗi đường có 3 trụ)
 - **Trụ Ngoài**: 6000 HP, 500 sát thương
-- **Trụ Trong**: 7500 HP, 650 sát thương  
+- **Trụ Trong**: 7500 HP, 650 sát thương
 - **Trụ Ức Chế**: 9000 HP, 800 sát thương
 
 ### Trụ Chính
@@ -186,8 +282,8 @@ moba-game/
 │   ├── camera.js       # Camera & viewport
 │   ├── projectile.js   # Đạn & hiệu ứng
 │   ├── tower.js        # Trụ & công trình
-│   ├── minion.js       # Lính
-│   ├── creature.js     # Quái rừng
+│   ├── minion.js       # Lính (with scaling)
+│   ├── creature.js     # Quái rừng (with scaling)
 │   ├── hero.js         # Tướng
 │   ├── combat.js       # Hệ thống chiến đấu
 │   ├── ai.js           # AI System (Legacy Proxy)
@@ -222,6 +318,8 @@ Chỉnh sửa file `js/config.js` để thay đổi:
 - Kích thước bản đồ
 - Tất cả tham số AI mới:
   - `aiDifficulty`: Cài đặt cho từng độ khó
+  - `aiDifficultyMods`: Cài đặt cho kỹ năng (HP threshold, frequency, etc)
+  - `gameScaling`: Cài đặt scaling cho lính và quái
   - `aiMovement`: Di chuyển và pathfinding
   - `aiDodge`: Hệ thống né tránh
   - `aiCombo`: Thực thi combo
@@ -242,6 +340,14 @@ CONFIG.aiDifficulty.hard.dodgeAbilityCC = 0.6;
 // Tăng tầm nhìn cho AI "Cực Khó"
 CONFIG.aiVision.mapAwarenessRefreshRate = 300;
 CONFIG.aiVision.lastSeenTimeout = 8000;
+
+// Tùy chỉnh scaling lính
+CONFIG.gameScaling.minion.healthPerMinute = 1.05;  // 5% mỗi phút
+CONFIG.gameScaling.minion.damagePerMinute = 1.06;  // 6% mỗi phút
+
+// Tùy chỉnh ngưỡng kỹ năng
+CONFIG.aiDifficultyMods.hard.escapeHPThreshold = 0.35;  // Trốn khi 35% HP
+CONFIG.aiDifficultyMods.nightmare.useCCFrequency = 0.90;  // Dùng CC 90% thời gian
 
 // Đặt độ khó tùy chỉnh
 CONFIG.aiDifficulty.custom = {
@@ -274,6 +380,7 @@ aiHints: {
         }
     ]
 }
+```
 
 ## ⚡ Tối Ưu Hiệu Năng
 

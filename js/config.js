@@ -861,6 +861,56 @@ const CONFIG = {
         },
     },
 
+    // === AI DIFFICULTY MODIFIERS (Ability Usage Patterns) ===
+    aiDifficultyMods: {
+        easy: {
+            escapeHPThreshold: 0.20,
+            useCCFrequency: 0.30,
+            burstThreshold: 0.20,
+            sustainThreshold: 0.50,
+            decisionDelay: 500,
+            abilityReuseCooldown: 3000,
+        },
+        normal: {
+            escapeHPThreshold: 0.30,
+            useCCFrequency: 0.60,
+            burstThreshold: 0.40,
+            sustainThreshold: 0.60,
+            decisionDelay: 300,
+            abilityReuseCooldown: 2000,
+        },
+        hard: {
+            escapeHPThreshold: 0.35,
+            useCCFrequency: 0.75,
+            burstThreshold: 0.50,
+            sustainThreshold: 0.65,
+            decisionDelay: 150,
+            abilityReuseCooldown: 1000,
+        },
+        nightmare: {
+            escapeHPThreshold: 0.40,
+            useCCFrequency: 0.90,
+            burstThreshold: 0.60,
+            sustainThreshold: 0.70,
+            decisionDelay: 50,
+            abilityReuseCooldown: 500,
+        }
+    },
+
+    // === MINION & CREATURE SCALING ===
+    gameScaling: {
+        minion: {
+            healthPerMinute: 1.05,  // 5% per minute
+            damagePerMinute: 1.06,  // 6% per minute
+            scaleInterval: 60000,   // Every 60 seconds
+        },
+        creature: {
+            healthPerMinute: 1.04,  // 4% per minute
+            damagePerMinute: 1.05,  // 5% per minute
+            scaleInterval: 60000,   // Every 60 seconds
+        },
+    },
+
     // === MOVEMENT BEHAVIOR CONFIG ===
     aiMovement: {
         // Waypoint system

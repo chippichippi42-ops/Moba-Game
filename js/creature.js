@@ -513,6 +513,8 @@ class Creature {
         
         const typeData = CONFIG.creatureTypes[this.creatureType];
         if (typeData) {
+            this.baseMaxHealth = typeData.health;
+            this.baseDamage = typeData.damage;
             this.maxHealth = typeData.health;
             this.health = typeData.health;
             this.damage = typeData.damage;
@@ -530,6 +532,8 @@ class Creature {
             this.flees = typeData.flees || false;
             this.onKill = typeData.onKill || null;
         } else {
+            this.baseMaxHealth = 500;
+            this.baseDamage = 30;
             this.maxHealth = 500;
             this.health = 500;
             this.damage = 30;
@@ -543,32 +547,36 @@ class Creature {
             this.icon = '';
             this.abilities = {};
         }
-        
+
         this.roamRadius = 350;
         this.leashRange = 500;
-        
+
         this.isAlive = true;
         this.state = 'idle';
         this.target = null;
         this.attackCooldown = 0;
         this.aggroList = new Map();
-        
+
         this.roamTimer = Utils.random(2000, 5000);
         this.roamTarget = null;
-        
+
         this.vx = 0;
         this.vy = 0;
         this.facingAngle = 0;
-        
+
         this.abilityState = {};
         this.attackCount = 0;
         this.abilityTriggered = {};
         this.abilityTimers = {};
-        
+
         this.inCombat = false;
         this.lastCombatTime = 0;
         this.combatTimeout = 5000;
-        
+
+        // Scaling
+        this.spawnTime = Date.now();
+        this.lastScaleCheck = 0;
+
         // Buffs from abilities
         this.damageReductionBuff = null;
         this.armorBuff = null;
@@ -576,26 +584,64 @@ class Creature {
     
     update(deltaTime, entities) {
         if (!this.isAlive) return;
-        
+
         if (GameMap.checkWallCollision(this.x, this.y, this.radius)) {
             const safePos = GameMap.findSafeSpawnPosition(this.homeX, this.homeY, this.radius);
             this.x = safePos.x;
             this.y = safePos.y;
         }
-        
+
+        // Apply scaling
+        this.applyScaling(deltaTime);
+
         // Update combat state
         if (Date.now() - this.lastCombatTime > this.combatTimeout) {
             this.inCombat = false;
         }
-        
+    }
+
+    applyScaling(deltaTime) {
+        const now = Date.now();
+        const elapsedTime = now - this.spawnTime;
+        const config = CONFIG.gameScaling?.creature;
+
+        if (!config) return;
+
+        // Check scaling interval
+        if (now - this.lastScaleCheck >= config.scaleInterval) {
+            this.lastScaleCheck = now;
+
+            // Calculate scaling factor
+            const minutesElapsed = elapsedTime / 60000; // Convert to minutes
+            const healthMultiplier = 1 + (minutesElapsed * (config.healthPerMinute - 1));
+            const damageMultiplier = 1 + (minutesElapsed * (config.damagePerMinute - 1));
+
+            // Apply scaling to max health and damage
+            this.maxHealth = this.baseMaxHealth * healthMultiplier;
+            this.damage = this.baseDamage * damageMultiplier;
+        }
+    }
+
+    update(deltaTime, entities) {
+        if (!this.isAlive) return;
+
+        if (GameMap.checkWallCollision(this.x, this.y, this.radius)) {
+            const safePos = GameMap.findSafeSpawnPosition(this.homeX, this.homeY, this.radius);
+            this.x = safePos.x;
+            this.y = safePos.y;
+        }
+
+        // Apply scaling
+        this.applyScaling(deltaTime);
+
         this.attackCooldown -= deltaTime;
         this.updateAI(deltaTime, entities);
         this.updateMovement(deltaTime);
-        
+
         // Update abilities via API
         CreatureAbilityAPI.updatePassives(this, deltaTime, entities);
     }
-    
+
     updateAI(deltaTime, entities) {
         if (this.passive && this.flees) {
             this.updateFleeingBehavior(deltaTime, entities);
