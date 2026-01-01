@@ -11,6 +11,10 @@ class PathFinding {
         this.gridSize = 100; // 100px grid cells
         this.lastGridUpdate = 0;
         this.gridUpdateInterval = 5000; // Update grid every 5 seconds
+
+        // Path caching for performance
+        this.pathCache = new Map();
+        this.pathCacheTime = 200; // Reuse path every 200ms
     }
     
     initialize() {
@@ -63,23 +67,48 @@ class PathFinding {
     }
     
     findPath(start, end, radius = 50) {
+        // Generate cache key
+        const key = `${Math.round(start.x)},${Math.round(start.y)},${Math.round(end.x)},${Math.round(end.y)}`;
+
+        // Check cache first
+        if (this.pathCache.has(key)) {
+            const cached = this.pathCache.get(key);
+            if (Date.now() - cached.time < this.pathCacheTime) {
+                return cached.path;
+            }
+        }
+
         // Convert world coordinates to grid coordinates
         const startGrid = this.worldToGrid(start.x, start.y);
         const endGrid = this.worldToGrid(end.x, end.y);
-        
+
         // Check if start or end is invalid
         if (!startGrid || !endGrid) {
             return [end]; // Direct path if grid conversion fails
         }
-        
+
         // Run A* algorithm
         const path = this.aStar(startGrid, endGrid);
-        
+
         if (path && path.length > 0) {
             // Convert grid path to world coordinates
-            return path.map(node => this.gridToWorld(node.x, node.y));
+            const worldPath = path.map(node => this.gridToWorld(node.x, node.y));
+
+            // Cache the path
+            this.pathCache.set(key, {
+                path: worldPath,
+                time: Date.now()
+            });
+
+            // Maintain cache size
+            if (this.pathCache.size > 50) {
+                const oldestKey = this.pathCache.keys().next().value;
+                this.pathCache.delete(oldestKey);
+            }
+
+            return worldPath;
         }
-        
+
         // Fallback to direct path
         return [end];
     }

@@ -160,6 +160,62 @@ class StrategicAnalyzer {
         const priority = this.getObjectivePriority(objectiveType);
         return priority > 1.0; // Focus on high priority objectives
     }
+
+    // Bush ambush tactics
+    shouldAmbushFromBush() {
+        const hero = this.controller.hero;
+
+        if (typeof GameMap === 'undefined' || !GameMap.isInBush) return false;
+        if (typeof Combat === 'undefined') return false;
+
+        // Check if in bush
+        const inBush = GameMap.isInBush(hero.x, hero.y);
+        if (!inBush) return false;
+
+        // Check if enemies nearby but can't see us
+        const nearbyEnemies = Combat.getEnemiesInRange(hero, 800);
+        const unseen = nearbyEnemies.filter(e =>
+            !GameMap.canSee(e.x, e.y, hero.x, hero.y)
+        );
+
+        // If there are enemies that can't see us, ambush
+        const maxHealth = hero.stats?.maxHealth || hero.health || 100;
+        const healthPercent = (hero.health || 0) / maxHealth;
+
+        if (unseen.length > 0 && healthPercent > 0.6) {
+            return true;
+        }
+        return false;
+    }
+
+    findBushAmbushPosition(target) {
+        if (typeof GameMap === 'undefined' || !GameMap.getBushes) return null;
+
+        // Find bushes near target to hide in
+        const bushes = GameMap.getBushes();
+        let bestBush = null;
+        let bestScore = -Infinity;
+
+        for (const bush of bushes) {
+            const distToBush = Utils.distance(
+                this.controller.hero.x, this.controller.hero.y,
+                bush.x, bush.y
+            );
+
+            const distToTarget = Utils.distance(bush.x, bush.y, target.x, target.y);
+
+            // Bush should be close to target and close to us
+            if (distToTarget < 400 && distToBush < 500) {
+                const score = 1 / (distToBush + 1) + 1 / (distToTarget + 1);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestBush = bush;
+                }
+            }
+        }
+
+        return bestBush;
+    }
 }
 
 // Export for module systems

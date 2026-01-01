@@ -13,15 +13,27 @@ class DecisionMaker {
         this.currentStrategy = 'FARM_SAFE';
         this.currentTarget = null;
         this.currentObjective = null;
+
+        // Decision hysteresis
+        this.lastDecision = null;
+        this.decisionStability = 2000; // ms to keep decision
+        this.lastDecisionChangeTime = 0;
+        this.decisionConfidence = 0;
     }
     
     makeDecision(deltaTime, entities, aggressiveness = 'balanced') {
         const now = Date.now();
+        const timeSinceLastChange = now - this.lastDecisionChangeTime;
         const decisionInterval = this.controller.getDifficultySetting('decisionInterval');
-        
+
+        // If within stability window, keep current decision
+        if (timeSinceLastChange < this.decisionStability && this.lastDecision) {
+            return { action: this.lastDecision, target: this.currentTarget };
+        }
+
         if (now - this.lastDecisionTime >= decisionInterval || typeof deltaTime === 'string') {
             const situation = this.analyzeSituation(entities);
-            
+
             // Apply aggressiveness to situation if needed
             if (aggressiveness === 'aggressive') {
                 situation.hasAdvantage = true;
@@ -31,15 +43,40 @@ class DecisionMaker {
                 situation.shouldRetreat = situation.healthPercent < 0.6;
             }
 
-            this.currentStrategy = this.determineStrategy(situation);
-            this.updateTarget(situation);
+            const newDecision = this.determineStrategy(situation);
+            const confidence = this.calculateDecisionConfidence(situation, newDecision);
+
+            // Only change decision if confidence is high or threat is critical
+            const isThreatCritical = situation.shouldRetreat || situation.inDanger;
+
+            if (confidence > 0.7 || isThreatCritical) {
+                this.lastDecision = newDecision;
+                this.lastDecisionChangeTime = now;
+                this.decisionConfidence = confidence;
+                this.updateTarget(situation);
+            }
+
+            this.currentStrategy = this.lastDecision;
             this.lastDecisionTime = now;
         }
-        
+
         return {
-            action: this.currentStrategy,
+            action: this.lastDecision,
             target: this.currentTarget
         };
+    }
+
+    calculateDecisionConfidence(situation, decision) {
+        let confidence = 0.5;
+
+        // Increase confidence based on situation
+        if (situation.canKill && decision === 'ALL_IN') confidence += 0.3;
+        if (situation.shouldRetreat && decision === 'RETREAT') confidence += 0.4;
+        if (situation.hasAdvantage && decision === 'HARASS') confidence += 0.2;
+        if (situation.healthPercent > 0.6 && situation.enemyHeroes.length === 0 && decision === 'FARM_SAFE') confidence += 0.2;
+
+        // Cap confidence at 1.0
+        return Math.min(confidence, 1.0);
     }
     
     analyzeSituation(entities) {
