@@ -511,15 +511,12 @@ class Creature {
         
         this.team = CONFIG.teams.NEUTRAL;
         
-        // Apply scaling based on game time
-        const scaleFactor = this.calculateScaleFactor();
-        
         const typeData = CONFIG.creatureTypes[this.creatureType];
         if (typeData) {
-            this.maxHealth = typeData.health * scaleFactor.health;
-            this.health = this.maxHealth;
-            this.damage = typeData.damage * scaleFactor.damage;
-            this.armor = (typeData.armor || 0) * scaleFactor.armor;
+            this.maxHealth = typeData.health;
+            this.health = typeData.health;
+            this.damage = typeData.damage;
+            this.armor = typeData.armor || 0;
             this.attackRange = typeData.attackRange || 150;
             this.attackSpeed = typeData.attackSpeed || 0.8;
             this.speed = typeData.speed || 200;
@@ -533,10 +530,10 @@ class Creature {
             this.flees = typeData.flees || false;
             this.onKill = typeData.onKill || null;
         } else {
-            this.maxHealth = 500 * scaleFactor.health;
-            this.health = this.maxHealth;
-            this.damage = 30 * scaleFactor.damage;
-            this.armor = 10 * scaleFactor.armor;
+            this.maxHealth = 500;
+            this.health = 500;
+            this.damage = 30;
+            this.armor = 10;
             this.attackRange = 150;
             this.attackSpeed = 0.8;
             this.speed = 200;
@@ -575,27 +572,6 @@ class Creature {
         // Buffs from abilities
         this.damageReductionBuff = null;
         this.armorBuff = null;
-    }
-    
-    /**
-     * Calculate scaling factor based on game time
-     */
-    calculateScaleFactor() {
-        if (typeof Game === 'undefined' || !Game.gameTime) {
-            return { health: 1, damage: 1, armor: 1 };
-        }
-        
-        const config = typeof CONFIG !== 'undefined' && CONFIG.MINION_SCALING 
-            ? CONFIG.MINION_SCALING 
-            : { healthPerMinute: 1.05, damagePerMinute: 1.06, scaleInterval: 60000 };
-        
-        const gameTimeMinutes = Game.gameTime / config.scaleInterval;
-        
-        return {
-            health: Math.pow(config.healthPerMinute, gameTimeMinutes),
-            damage: Math.pow(config.damagePerMinute, gameTimeMinutes),
-            armor: 1 + (gameTimeMinutes * 0.02), // 2% per minute
-        };
     }
     
     update(deltaTime, entities) {

@@ -1444,49 +1444,6 @@ const CONFIG = {
             },
         },
     },
-    
-    // === AI DIFFICULTY MODIFIERS ===
-    AI_DIFFICULTY_MODS: {
-        easy: {
-            escapeHPThreshold: 0.20,
-            useCCFrequency: 0.30,
-            burstThreshold: 0.20,
-            sustainThreshold: 0.50,
-            decisionDelay: 500,
-            abilityReuseCooldown: 3000,
-        },
-        normal: {
-            escapeHPThreshold: 0.30,
-            useCCFrequency: 0.60,
-            burstThreshold: 0.40,
-            sustainThreshold: 0.60,
-            decisionDelay: 300,
-            abilityReuseCooldown: 2000,
-        },
-        hard: {
-            escapeHPThreshold: 0.35,
-            useCCFrequency: 0.75,
-            burstThreshold: 0.50,
-            sustainThreshold: 0.65,
-            decisionDelay: 150,
-            abilityReuseCooldown: 1000,
-        },
-        nightmare: {
-            escapeHPThreshold: 0.40,
-            useCCFrequency: 0.90,
-            burstThreshold: 0.60,
-            sustainThreshold: 0.70,
-            decisionDelay: 50,
-            abilityReuseCooldown: 500,
-        },
-    },
-    
-    // === MINION SCALING CONFIG ===
-    MINION_SCALING: {
-        healthPerMinute: 1.05,
-        damagePerMinute: 1.06,
-        scaleInterval: 60000,
-    },
 };
 
 if (typeof module !== 'undefined' && module.exports) {

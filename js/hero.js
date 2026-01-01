@@ -134,20 +134,6 @@ const HeroManager = {
         this.heroes = [];
         this.player = null;
     },
-    
-    /**
-     * Clear all heroes completely (used on game reset)
-     */
-    clearAll() {
-        // Force clear all heroes
-        for (const hero of this.heroes) {
-            if (hero.cleanup) {
-                hero.cleanup();
-            }
-        }
-        this.heroes = [];
-        this.player = null;
-    },
 };
 
 /**
