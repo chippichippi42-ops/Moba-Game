@@ -176,10 +176,11 @@ const MinionManager = {
 
         const lanes = ['top', 'mid', 'bot'];
 
-        for (const team of [CONFIG.teams.BLUE, CONFIG.teams.RED]) {
+        // Use lowercase team keys
+        for (const teamKey of ['blue', 'red']) {
             for (const lane of lanes) {
-                const spawnPoint = spawnPoints[team];
-                const waypoints = this.waypoints[team][lane];
+                const spawnPoint = spawnPoints[teamKey];
+                const waypoints = this.waypoints[teamKey][lane];
 
                 // Spawn melee minions
                 for (let i = 0; i < CONFIG.minion.spawn.meleeCount; i++) {
@@ -187,7 +188,7 @@ const MinionManager = {
                     const minion = new Minion({
                         x: spawnPoint.x + offset,
                         y: spawnPoint.y,
-                        team: team,
+                        team: teamKey === 'blue' ? CONFIG.teams.BLUE : CONFIG.teams.RED,
                         type: 'melee',
                         lane: lane,
                         waypoints: waypoints,
@@ -201,7 +202,7 @@ const MinionManager = {
                     const minion = new Minion({
                         x: spawnPoint.x + offset,
                         y: spawnPoint.y,
-                        team: team,
+                        team: teamKey === 'blue' ? CONFIG.teams.BLUE : CONFIG.teams.RED,
                         type: 'ranged',
                         lane: lane,
                         waypoints: waypoints,

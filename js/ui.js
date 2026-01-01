@@ -564,21 +564,21 @@ const UI = {
             if (ability.icon) {
                 const img = new Image();
                 
-                // Attach error handler BEFORE setting src
+                // Add error handler BEFORE setting src
                 img.addEventListener('error', () => {
-                    // Silently fallback to text mode - no console error
+                    // Silently fallback to text mode
                     if (!iconLoaded) {
                         skillIcon.textContent = key.toUpperCase();
                     }
-                });
+                }, { once: true });
                 
-                // Attach load handler
+                // Add load handler
                 img.addEventListener('load', () => {
                     iconLoaded = true;
                     skillIcon.innerHTML = '';
                     skillIcon.appendChild(img);
                     skillIcon.style.background = 'transparent';
-                });
+                }, { once: true });
                 
                 // Set image styling
                 img.style.cssText = `
@@ -588,7 +588,7 @@ const UI = {
                     display: block;
                 `;
                 
-                // Set src AFTER all handlers are attached
+                // Set src AFTER all handlers attached
                 img.src = ability.icon;
                 img.alt = key.toUpperCase();
             } else {
