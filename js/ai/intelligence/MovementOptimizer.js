@@ -339,15 +339,90 @@ class MovementOptimizer {
     
     dodgeToSide() {
         const hero = this.controller.hero;
-        const angle = Utils.angleBetweenPoints(hero.x, hero.y, 
+        const angle = Utils.angleBetweenPoints(hero.x, hero.y,
             this.movementState.targetPosition.x, this.movementState.targetPosition.y);
-        
+
         // Dodge perpendicular to movement direction
         const dodgeAngle = angle + (Math.random() > 0.5 ? Math.PI/2 : -Math.PI/2);
         const dodgeX = hero.x + Math.cos(dodgeAngle) * 200;
         const dodgeY = hero.y + Math.sin(dodgeAngle) * 200;
-        
+
         this.setMovementTarget({ x: dodgeX, y: dodgeY }, 'dodge');
+    }
+
+    // Tactical dash abilities
+    useDashToChase(target) {
+        const hero = this.controller.hero;
+
+        // Predict target position after 0.5s
+        const predictedX = target.x + (target.vx || 0) * 0.5;
+        const predictedY = target.y + (target.vy || 0) * 0.5;
+
+        const dashAbility = this.findDashAbility();
+        if (!dashAbility) return false;
+
+        const distance = Utils.distance(hero.x, hero.y, predictedX, predictedY);
+        if (distance > dashAbility.moveDistance) {
+            const angle = Utils.angleBetweenPoints(hero.x, hero.y, predictedX, predictedY);
+            const dashX = hero.x + Math.cos(angle) * dashAbility.moveDistance;
+            const dashY = hero.y + Math.sin(angle) * dashAbility.moveDistance;
+            hero.useAbility(dashAbility.key, dashX, dashY);
+            return true;
+        }
+        return false;
+    }
+
+    useDashToEscape(threatPosition) {
+        const hero = this.controller.hero;
+        const dashAbility = this.findDashAbility();
+
+        if (!dashAbility) return false;
+
+        const angle = Utils.angleBetweenPoints(threatPosition.x, threatPosition.y, hero.x, hero.y);
+        const escapeX = hero.x + Math.cos(angle) * dashAbility.moveDistance;
+        const escapeY = hero.y + Math.sin(angle) * dashAbility.moveDistance;
+
+        // Validate escape position not blocked
+        if (typeof GameMap === 'undefined' || !GameMap.checkWallCollision(escapeX, escapeY, hero.radius)) {
+            hero.useAbility(dashAbility.key, escapeX, escapeY);
+            return true;
+        }
+        return false;
+    }
+
+    useDashForPositioning(targetPos) {
+        const hero = this.controller.hero;
+        const distance = Utils.distance(hero.x, hero.y, targetPos.x, targetPos.y);
+        const dashAbility = this.findDashAbility();
+
+        if (distance > 300 && dashAbility && hero.abilityCooldowns[dashAbility.key] <= 0) {
+            const angle = Utils.angleBetweenPoints(hero.x, hero.y, targetPos.x, targetPos.y);
+            const dashX = hero.x + Math.cos(angle) * Math.min(distance, dashAbility.moveDistance);
+            const dashY = hero.y + Math.sin(angle) * Math.min(distance, dashAbility.moveDistance);
+            hero.useAbility(dashAbility.key, dashX, dashY);
+            return true;
+        }
+        return false;
+    }
+
+    findDashAbility() {
+        const hero = this.controller.hero;
+        if (!hero.heroData || !hero.heroData.abilities) return null;
+        if (!hero.abilityCooldowns) return null;
+
+        for (const key of ['e', 'r', 'q']) {
+            const ability = hero.heroData.abilities[key];
+            if (ability && (ability.isDash || ability.type === 'dash' || ability.type === 'blink')) {
+                if (hero.abilityCooldowns[key] <= 0 && hero.abilityLevels[key] > 0) {
+                    return {
+                        key: key,
+                        moveDistance: ability.moveDistance || 300,
+                        ...ability
+                    };
+                }
+            }
+        }
+        return null;
     }
 }
 

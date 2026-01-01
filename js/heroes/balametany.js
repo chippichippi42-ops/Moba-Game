@@ -94,17 +94,17 @@ const HeroBalametany = {
                     damageType: this.damageType,
                     owner: hero,
                     color: '#6366f1',
-					onHit: (target) => {
-						// Kiểm tra target có method addDebuff không
-						if (target && typeof target.addDebuff === 'function') {
-							target.addDebuff({
-								type: 'mark',
-								source: hero,
-								duration: this.markDuration,
-								bonusDamage: this.markBonusDamage,
-							});
-						}
-					},
+                    onHit: (target) => {
+                        // Kiểm tra target có method addDebuff không
+                        if (target && typeof target.addDebuff === 'function') {
+                            target.addDebuff({
+                                type: 'mark',
+                                source: hero,
+                                duration: this.markDuration,
+                                bonusDamage: this.markBonusDamage,
+                            });
+                        }
+                    },
                 };
             },
         },
