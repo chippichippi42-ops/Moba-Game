@@ -554,18 +554,37 @@ const UI = {
             justify-content: center;
             font-size: 32px;
             position: relative;
+            font-weight: bold;
+            color: white;
+            background: #333;
         `;
         
         // Try to load custom icon
         const player = HeroManager.player;
-        let hasCustomIcon = false;
+        let iconLoaded = false;
         
         if (player && player.heroData && player.heroData.abilities[key]) {
             const ability = player.heroData.abilities[key];
             if (ability.icon) {
-                const img = document.createElement('img');
-                img.src = ability.icon;
-                img.alt = key.toUpperCase();
+                const img = new Image();
+                
+                // Attach error handler BEFORE setting src
+                img.addEventListener('error', () => {
+                    // Silently fallback to text mode - no console error
+                    if (!iconLoaded) {
+                        skillIcon.textContent = key.toUpperCase();
+                    }
+                });
+                
+                // Attach load handler
+                img.addEventListener('load', () => {
+                    iconLoaded = true;
+                    skillIcon.innerHTML = '';
+                    skillIcon.appendChild(img);
+                    skillIcon.style.background = 'transparent';
+                });
+                
+                // Set image styling
                 img.style.cssText = `
                     width: 100%;
                     height: 100%;
@@ -573,37 +592,14 @@ const UI = {
                     display: block;
                 `;
                 
-                img.onerror = () => {
-                    img.style.display = 'none';
-                    showFallbackIcon();
-                };
-                
-                img.onload = () => {
-                    hasCustomIcon = true;
-                };
-                
-                skillIcon.appendChild(img);
+                // Set src AFTER all handlers are attached
+                img.src = ability.icon;
+                img.alt = key.toUpperCase();
             } else {
-                showFallbackIcon();
+                skillIcon.textContent = key.toUpperCase();
             }
         } else {
-            showFallbackIcon();
-        }
-        
-        function showFallbackIcon() {
             skillIcon.textContent = key.toUpperCase();
-            skillIcon.style.cssText = `
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 32px;
-                font-weight: bold;
-                color: white;
-                background: #333;
-                position: relative;
-            `;
         }
         
         iconContainer.appendChild(skillIcon);

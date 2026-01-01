@@ -74,7 +74,7 @@ const MinionManager = {
         };
     },
 
-	 /**
+     /**
      * Lấy vị trí trụ chính để spawn lính
      */
     getMainTowerSpawnPoint(team) {
@@ -128,7 +128,7 @@ const MinionManager = {
         }
     },
 
-	/**
+    /**
      * Cập nhật UI đếm ngược wave đầu
      */
     updateFirstWaveCountdown() {
@@ -158,7 +158,7 @@ const MinionManager = {
         countdownEl.textContent = `Minions spawning in: ${seconds}s`;
     },
 
-	/**
+    /**
      * Ẩn UI đếm ngược
      */
     hideFirstWaveCountdown() {
@@ -212,7 +212,7 @@ const MinionManager = {
         }
     },
 
-	/**
+    /**
      * Clear tất cả lính (cho restart)
      */
     clear() {
@@ -227,25 +227,34 @@ const MinionManager = {
         if (countdownEl) countdownEl.remove();
     },
 
-	/**
-	 * Hide countdown immediately (for pause)
-	 */
-	hideCountdownForPause() {
-		const countdownEl = document.getElementById('firstWaveCountdown');
-		if (countdownEl) {
-			countdownEl.style.display = 'none';
-		}
-	},
+    /**
+     * Hide countdown immediately (for pause)
+     */
+    hideCountdownForPause() {
+        const countdownEl = document.getElementById('firstWaveCountdown');
+        if (countdownEl) {
+            countdownEl.style.display = 'none';
+        }
+    },
 
-	/**
-	 * Show countdown (for resume)
-	 */
-	showCountdownForResume() {
-		const countdownEl = document.getElementById('firstWaveCountdown');
-		if (countdownEl && !this.firstWaveSpawned) {
-			countdownEl.style.display = 'block';
-		}
-	},
+    /**
+     * Show countdown (for resume)
+     */
+    showCountdownForResume() {
+        const countdownEl = document.getElementById('firstWaveCountdown');
+        if (countdownEl && !this.firstWaveSpawned) {
+            countdownEl.style.display = 'block';
+        }
+    },
+    
+    /**
+     * Render all minions
+     */
+    render(ctx) {
+        for (const minion of this.minions) {
+            minion.render(ctx);
+        }
+    },
 };
 
 /**
