@@ -114,6 +114,68 @@ const Combat = {
     },
     
     /**
+     * Lấy tất cả tướng gây sát thương trong 5 giây cuối + kèm damage data
+     * Trả về array of {hero, damageAmount, timestamp}
+     */
+    getHeroesInLastFiveSecondsWithDamage(target, killer) {
+        const key = target.id;
+        const targetLog = this.damageLog.get(key);
+        
+        const participantsData = [];
+        const now = Date.now();
+        const window = 5000; // 5 giây
+        
+        if (targetLog) {
+            for (const [sourceId, data] of targetLog) {
+                // Nếu source là tướng và trong 5 giây
+                if (data.source && data.source.type === 'hero' && now - data.timestamp < window) {
+                    participantsData.push({
+                        hero: data.source,
+                        damageAmount: data.amount,
+                        timestamp: data.timestamp,
+                    });
+                }
+            }
+        }
+        
+        // Nếu killer là tướng nhưng không trong danh sách → thêm vào
+        if (killer && killer.type === 'hero') {
+            const killerExists = participantsData.find(p => p.hero === killer);
+            if (!killerExists) {
+                participantsData.push({
+                    hero: killer,
+                    damageAmount: 0,
+                    timestamp: now,
+                });
+            }
+        }
+        
+        // Clear log sau khi dùng xong
+        this.damageLog.delete(key);
+        
+        return participantsData;
+    },
+    
+    /**
+     * Tìm tướng gây sát thương GẦN NHẤT (timestamp gần nhất)
+     * Nếu cùng timestamp, lấy tướng đầu tiên
+     */
+    getMostRecentDamageHero(participantsData) {
+        if (participantsData.length === 0) return null;
+        if (participantsData.length === 1) return participantsData[0].hero;
+        
+        // Tìm tướng có timestamp cao nhất (gây sát thương gần nhất)
+        let mostRecent = participantsData[0];
+        for (const p of participantsData) {
+            if (p.timestamp > mostRecent.timestamp) {
+                mostRecent = p;
+            }
+        }
+        
+        return mostRecent.hero;
+    },
+    
+    /**
      * Distribute experience to participating heroes
      * @param {Object} target - The killed entity
      * @param {Object} killer - Who dealt the killing blow (could be minion/tower/hero)
