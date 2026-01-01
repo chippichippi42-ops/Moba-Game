@@ -5,7 +5,7 @@
  * Complete AI system with 19 specialized classes
  */
 
-class AIManager {
+const AIManager = new (class AIManager {
     constructor() {
         this.controllers = [];
         this.visionSystem = new VisionSystem();
@@ -18,13 +18,18 @@ class AIManager {
         this.initializeSystems();
     }
     
+    init() {
+        this.controllers = [];
+        this.initializeSystems();
+    }
+    
     initializeSystems() {
         // Initialize systems with config
-        this.visionSystem.initialize();
-        this.pathFinding.initialize();
-        this.dodgeSystem.initialize();
-        this.comboExecutor.initialize();
-        this.targetSelector.initialize();
+        if (this.visionSystem) this.visionSystem.initialize();
+        if (this.pathFinding) this.pathFinding.initialize();
+        if (this.dodgeSystem) this.dodgeSystem.initialize();
+        if (this.comboExecutor) this.comboExecutor.initialize();
+        if (this.targetSelector) this.targetSelector.initialize();
     }
     
     createController(hero, difficulty) {
@@ -42,7 +47,9 @@ class AIManager {
     
     update(deltaTime, entities) {
         // Update shared systems
-        this.visionSystem.update(deltaTime, entities);
+        if (this.visionSystem) {
+            this.visionSystem.update(deltaTime, entities);
+        }
         
         // Update all controllers
         for (const controller of this.controllers) {
@@ -63,7 +70,7 @@ class AIManager {
     removeController(hero) {
         this.controllers = this.controllers.filter(c => c.hero !== hero);
     }
-}
+})();
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
