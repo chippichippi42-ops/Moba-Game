@@ -1,0 +1,71 @@
+/**
+ * ========================================
+ * MOBA Arena - Advanced AI Manager
+ * ========================================
+ * Complete AI system with 19 specialized classes
+ */
+
+class AIManager {
+    constructor() {
+        this.controllers = [];
+        this.visionSystem = new VisionSystem();
+        this.pathFinding = new PathFinding();
+        this.dodgeSystem = new DodgeSystem();
+        this.comboExecutor = new ComboExecutor();
+        this.targetSelector = new TargetSelector();
+        
+        // Initialize all systems
+        this.initializeSystems();
+    }
+    
+    initializeSystems() {
+        // Initialize systems with config
+        this.visionSystem.initialize();
+        this.pathFinding.initialize();
+        this.dodgeSystem.initialize();
+        this.comboExecutor.initialize();
+        this.targetSelector.initialize();
+    }
+    
+    createController(hero, difficulty) {
+        const controller = new AIController(hero, difficulty, {
+            visionSystem: this.visionSystem,
+            pathFinding: this.pathFinding,
+            dodgeSystem: this.dodgeSystem,
+            comboExecutor: this.comboExecutor,
+            targetSelector: this.targetSelector
+        });
+        
+        this.controllers.push(controller);
+        return controller;
+    }
+    
+    update(deltaTime, entities) {
+        // Update shared systems
+        this.visionSystem.update(deltaTime, entities);
+        
+        // Update all controllers
+        for (const controller of this.controllers) {
+            controller.update(deltaTime, entities);
+        }
+    }
+    
+    clear() {
+        this.controllers = [];
+    }
+    
+    // Get AI controller for specific hero
+    getController(hero) {
+        return this.controllers.find(c => c.hero === hero);
+    }
+    
+    // Remove controller
+    removeController(hero) {
+        this.controllers = this.controllers.filter(c => c.hero !== hero);
+    }
+}
+
+// Export for module systems
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = AIManager;
+}

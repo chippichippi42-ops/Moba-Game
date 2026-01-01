@@ -12,25 +12,25 @@
     
     <!-- UI Overlay -->
     <div id="uiOverlay">
-		<!-- Start Screen - thêm input tên -->
-		<div id="startScreen" class="screen active">
-			<div class="screen-content">
-				<h1 class="game-title">MOBA ARENA</h1>
-				<p class="subtitle">3v3 Battle</p>
-				
-				<!-- Player Name Input -->
-				<div class="name-input-section">
-					<label for="playerNameInput">Tên Người Chơi:</label>
-					<input type="text" id="playerNameInput" maxlength="12" placeholder="Nhập tên..." value="HDPE">
-				</div>
-				
-				<div class="menu-buttons">
-					<button id="btnPlay" class="btn btn-primary">CHƠI NGAY</button>
-					<button id="btnSettings" class="btn btn-secondary">CÀI ĐẶT</button>
-					<button id="btnQuit" class="btn btn-secondary">THOÁT</button>
-				</div>
-			</div>
-		</div>
+        <!-- Start Screen - thêm input tên -->
+        <div id="startScreen" class="screen active">
+            <div class="screen-content">
+                <h1 class="game-title">MOBA ARENA</h1>
+                <p class="subtitle">3v3 Battle</p>
+                
+                <!-- Player Name Input -->
+                <div class="name-input-section">
+                    <label for="playerNameInput">Tên Người Chơi:</label>
+                    <input type="text" id="playerNameInput" maxlength="12" placeholder="Nhập tên..." value="HDPE">
+                </div>
+                
+                <div class="menu-buttons">
+                    <button id="btnPlay" class="btn btn-primary">CHƠI NGAY</button>
+                    <button id="btnSettings" class="btn btn-secondary">CÀI ĐẶT</button>
+                    <button id="btnQuit" class="btn btn-secondary">THOÁT</button>
+                </div>
+            </div>
+        </div>
         
         <!-- Pre-game Screen -->
         <div id="pregameScreen" class="screen">
@@ -112,10 +112,10 @@
                         <label>Hiển thị FPS:</label>
                         <input type="checkbox" id="showFPS">
                     </div>
-					<div class="setting-row">
-						<label>Hiển thị toạ độ:</label>
-						<input type="checkbox" id="showCoordinates">
-					</div>
+                    <div class="setting-row">
+                        <label>Hiển thị toạ độ:</label>
+                        <input type="checkbox" id="showCoordinates">
+                    </div>
                 </div>
                 
                 <div class="settings-section">
@@ -277,12 +277,34 @@
     <script src="js/creature.js"></script>
     <script src="js/hero.js"></script>
     <script src="js/combat.js"></script>
+    
+    <!-- New AI System -->
+    <script src="js/ai/utils/VisionSystem.js"></script>
+    <script src="js/ai/tactical/PathFinding.js"></script>
+    <script src="js/ai/tactical/DodgeSystem.js"></script>
+    <script src="js/ai/tactical/ComboExecutor.js"></script>
+    <script src="js/ai/tactical/TargetSelector.js"></script>
+    <script src="js/ai/core/AIState.js"></script>
+    <script src="js/ai/core/DecisionMaker.js"></script>
+    <script src="js/ai/core/AIController.js"></script>
+    <script src="js/ai/intelligence/StrategicAnalyzer.js"></script>
+    <script src="js/ai/intelligence/CombatAnalyzer.js"></script>
+    <script src="js/ai/intelligence/MovementOptimizer.js"></script>
+    <script src="js/ai/intelligence/LLMDecisionEngine.js"></script>
+    <script src="js/ai/behaviors/LaneBehavior.js"></script>
+    <script src="js/ai/behaviors/CombatBehavior.js"></script>
+    <script src="js/ai/behaviors/RetreatBehavior.js"></script>
+    <script src="js/ai/behaviors/PushBehavior.js"></script>
+    <script src="js/ai/behaviors/DodgeBehavior.js"></script>
+    <script src="js/ai/behaviors/JungleBehavior.js"></script>
+    <script src="js/ai/AIManager.js"></script>
     <script src="js/ai.js"></script>
+    
     <script src="js/minimap.js"></script>
     <script src="js/input.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/screens.js"></script>
     <script src="js/game.js"></script>
-	<script src="js/audio.js"></script>
+    <script src="js/audio.js"></script>
 </body>
 </html>
