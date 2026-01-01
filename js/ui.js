@@ -1165,6 +1165,8 @@ const UI = {
     
     addKillFeed(killer, victim, type) {
         let killerName = 'Unknown';
+        let killerEntity = killer;
+        let victimEntity = victim;
         
         // Check killer type to get proper name
         if (!killer) {
@@ -1188,7 +1190,14 @@ const UI = {
         
         let victimName = typeof victim === 'string' ? victim : (victim?.playerName || victim?.name || 'Unknown');
         
-        const entry = { killer: killerName, victim: victimName, type, timestamp: Date.now() };
+        const entry = { 
+            killer: killerName, 
+            victim: victimName, 
+            type, 
+            timestamp: Date.now(),
+            killerEntity: killerEntity,
+            victimEntity: victimEntity
+        };
         this.killFeed.unshift(entry);
         if (this.killFeed.length > this.maxKillFeedEntries) this.killFeed.pop();
         this.renderKillFeedEntry(entry);
@@ -1200,10 +1209,43 @@ const UI = {
         const div = document.createElement('div');
         div.className = 'kill-entry';
         
+        // Determine colors based on team relationships
+        const getEntityColor = (entity) => {
+            if (!entity) return 'unknown-color';
+            
+            const player = typeof HeroManager !== 'undefined' ? HeroManager.getPlayer() : null;
+            if (!player) return 'unknown-color';
+            
+            // Check if it's the player
+            if (entity.type === 'hero' && entity.isPlayer) {
+                return 'player-color';
+            }
+            
+            // Check if it's a creature/monster (no team)
+            if (entity.type === 'creature') {
+                return 'monster-color';
+            }
+            
+            // Check team relationship
+            if (entity.team !== undefined && player.team !== undefined) {
+                if (entity.team === player.team) {
+                    return 'ally-color';
+                } else if (entity.team !== player.team && entity.team !== (typeof CONFIG !== 'undefined' ? CONFIG.teams.NEUTRAL : 2)) {
+                    return 'enemy-color';
+                }
+            }
+            
+            return 'unknown-color';
+        };
+        
         if (entry.type === 'kill') {
-            div.innerHTML = `<span class="killer">${entry.killer}</span><span class="action">killed</span><span class="victim">${entry.victim}</span>`;
+            const killerColor = getEntityColor(entry.killerEntity);
+            const victimColor = getEntityColor(entry.victimEntity);
+            
+            div.innerHTML = `<span class="killer ${killerColor}">${entry.killer}</span><span class="action">⚔️</span><span class="victim strikethrough ${victimColor}">${entry.victim}</span>`;
         } else if (entry.type === 'tower') {
-            div.innerHTML = `<span class="victim">${entry.victim}</span><span class="action">was destroyed</span>`;
+            const victimColor = getEntityColor(entry.victimEntity);
+            div.innerHTML = `<span class="victim ${victimColor}">${entry.victim}</span><span class="action">was destroyed</span>`;
         }
         
         this.elements.killFeed.insertBefore(div, this.elements.killFeed.firstChild);

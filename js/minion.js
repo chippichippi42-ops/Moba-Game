@@ -73,8 +73,8 @@ const MinionManager = {
             ],
         };
     },
-	
-	 /**
+    
+     /**
      * Lấy vị trí trụ chính để spawn lính
      */
     getMainTowerSpawnPoint(team) {
@@ -127,8 +127,8 @@ const MinionManager = {
             }
         }
     },
-	
-	    /**
+    
+        /**
      * Cập nhật UI đếm ngược wave đầu
      */
     updateFirstWaveCountdown() {
@@ -162,15 +162,15 @@ const MinionManager = {
         `;
     },
     
-	/**
-	 * Ẩn đếm ngược
-	 */
-	hideFirstWaveCountdown() {
-		const countdownEl = document.getElementById('firstWaveCountdown');
-		if (countdownEl) {
-			countdownEl.remove();
-		}
-	},
+    /**
+     * Ẩn đếm ngược
+     */
+    hideFirstWaveCountdown() {
+        const countdownEl = document.getElementById('firstWaveCountdown');
+        if (countdownEl) {
+            countdownEl.remove();
+        }
+    },
     
     spawnWave() {
         const lanes = ['top', 'mid', 'bot'];
@@ -256,26 +256,26 @@ const MinionManager = {
         const countdownEl = document.getElementById('firstWaveCountdown');
         if (countdownEl) countdownEl.remove();
     },
-	
-	/**
-	 * Hide countdown immediately (for pause)
-	 */
-	hideCountdownForPause() {
-		const countdownEl = document.getElementById('firstWaveCountdown');
-		if (countdownEl) {
-			countdownEl.style.display = 'none';
-		}
-	},
+    
+    /**
+     * Hide countdown immediately (for pause)
+     */
+    hideCountdownForPause() {
+        const countdownEl = document.getElementById('firstWaveCountdown');
+        if (countdownEl) {
+            countdownEl.style.display = 'none';
+        }
+    },
 
-	/**
-	 * Show countdown (for resume)
-	 */
-	showCountdownForResume() {
-		const countdownEl = document.getElementById('firstWaveCountdown');
-		if (countdownEl && !this.firstWaveSpawned) {
-			countdownEl.style.display = 'block';
-		}
-	},
+    /**
+     * Show countdown (for resume)
+     */
+    showCountdownForResume() {
+        const countdownEl = document.getElementById('firstWaveCountdown');
+        if (countdownEl && !this.firstWaveSpawned) {
+            countdownEl.style.display = 'block';
+        }
+    },
 };
 
 /**

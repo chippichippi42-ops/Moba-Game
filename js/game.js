@@ -146,6 +146,14 @@ const Game = {
      * Create game entities
      */
     createGameEntities() {
+        // Clear all existing heroes and AI controllers first
+        if (typeof HeroManager !== 'undefined') {
+            HeroManager.clearAll();
+        }
+        if (typeof AIManager !== 'undefined') {
+            AIManager.clear();
+        }
+        
         // Create player hero
         const player = HeroManager.createHero(
             this.settings.playerHero,
@@ -340,13 +348,13 @@ const Game = {
         EffectManager.render(this.ctx);
     },
     
-	/**
-	 * Pause game - UPDATED
-	 */
-	pause() {
-		this.isPaused = true;
-		Screens.showPause(); // Screens sẽ tự ẩn UI
-	},
+    /**
+     * Pause game - UPDATED
+     */
+    pause() {
+        this.isPaused = true;
+        Screens.showPause(); // Screens sẽ tự ẩn UI
+    },
     
     /**
      * Resume game
