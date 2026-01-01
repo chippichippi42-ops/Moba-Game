@@ -50,36 +50,40 @@ class CombatAnalyzer {
             burstPotential: 0,
             sustainedDamage: 0
         };
-        
+
         for (const enemy of enemies) {
-            if (enemy.type === 'hero') {
-                analysis.totalDamage += enemy.stats.attackDamage;
-                analysis.totalHealth += enemy.health;
-                
+            if (enemy.type === 'hero' && enemy.stats) {
+                analysis.totalDamage += enemy.stats.attackDamage || 0;
+                analysis.totalHealth += enemy.health || 0;
+
                 // Analyze abilities for CC and burst
-                for (const key of ['q', 'e', 'r', 't']) {
-                    const ability = enemy.heroData.abilities[key];
-                    if (ability && enemy.abilityLevels[key] > 0) {
-                        if (ability.effects && ability.effects.includes('stun')) {
-                            analysis.ccCount++;
-                        }
-                        if (ability.baseDamage && ability.baseDamage[0] > 200) {
-                            analysis.burstPotential += ability.baseDamage[0];
+                if (enemy.heroData && enemy.heroData.abilities) {
+                    for (const key of ['q', 'e', 'r', 't']) {
+                        const ability = enemy.heroData.abilities[key];
+                        const abilityLevel = enemy.abilityLevels?.[key] || 0;
+
+                        if (ability && abilityLevel > 0) {
+                            if (ability.effects && ability.effects.includes('stun')) {
+                                analysis.ccCount++;
+                            }
+                            if (ability.baseDamage && ability.baseDamage[0] > 200) {
+                                analysis.burstPotential += ability.baseDamage[0];
+                            }
                         }
                     }
                 }
-                
+
                 // Calculate threat level
                 const threat = this.calculateEnemyThreat(enemy);
                 analysis.threatLevel += threat;
-                analysis.sustainedDamage += enemy.stats.attackDamage * enemy.stats.attackSpeed;
+                analysis.sustainedDamage += (enemy.stats.attackDamage || 0) * (enemy.stats.attackSpeed || 1);
             }
         }
-        
+
         analysis.averageDamage = analysis.count > 0 ? analysis.totalDamage / analysis.count : 0;
         analysis.averageHealth = analysis.count > 0 ? analysis.totalHealth / analysis.count : 0;
         analysis.averageThreat = analysis.count > 0 ? analysis.threatLevel / analysis.count : 0;
-        
+
         return analysis;
     }
     
@@ -92,44 +96,55 @@ class CombatAnalyzer {
             ccPotential: 0,
             burstPotential: 0
         };
-        
+
         for (const ally of allies) {
-            if (ally.type === 'hero') {
-                analysis.totalDamage += ally.stats.attackDamage;
-                analysis.totalHealth += ally.health;
-                
+            if (ally.type === 'hero' && ally.stats) {
+                analysis.totalDamage += ally.stats.attackDamage || 0;
+                analysis.totalHealth += ally.health || 0;
+
                 // Analyze abilities
-                for (const key of ['q', 'e', 'r', 't']) {
-                    const ability = ally.heroData.abilities[key];
-                    if (ability && ally.abilityLevels[key] > 0) {
-                        if (ability.effects && ability.effects.includes('heal')) {
-                            analysis.healPotential += ability.baseDamage[0] || 0;
-                        }
-                        if (ability.effects && ability.effects.includes('stun')) {
-                            analysis.ccPotential++;
-                        }
-                        if (ability.baseDamage && ability.baseDamage[0] > 200) {
-                            analysis.burstPotential += ability.baseDamage[0];
+                if (ally.heroData && ally.heroData.abilities) {
+                    for (const key of ['q', 'e', 'r', 't']) {
+                        const ability = ally.heroData.abilities[key];
+                        const abilityLevel = ally.abilityLevels?.[key] || 0;
+
+                        if (ability && abilityLevel > 0) {
+                            if (ability.effects && ability.effects.includes('heal')) {
+                                analysis.healPotential += ability.baseDamage?.[0] || 0;
+                            }
+                            if (ability.effects && ability.effects.includes('stun')) {
+                                analysis.ccPotential++;
+                            }
+                            if (ability.baseDamage && ability.baseDamage[0] > 200) {
+                                analysis.burstPotential += ability.baseDamage[0];
+                            }
                         }
                     }
                 }
             }
         }
-        
+
         analysis.averageDamage = analysis.count > 0 ? analysis.totalDamage / analysis.count : 0;
         analysis.averageHealth = analysis.count > 0 ? analysis.totalHealth / analysis.count : 0;
-        
+
         return analysis;
     }
     
     calculateEnemyThreat(enemy) {
+        if (!enemy.stats) return 0;
+
         let threat = 0;
-        
+
         // Base threat from stats
-        threat += enemy.stats.attackDamage * 0.5;
-        threat += enemy.stats.abilityPower * 0.3;
-        threat += (1 - enemy.health / enemy.stats.maxHealth) * 20; // Lower health = less threat
-        
+        threat += (enemy.stats.attackDamage || 0) * 0.5;
+        threat += (enemy.stats.abilityPower || 0) * 0.3;
+
+        // Calculate health percentage safely
+        const healthPercent = enemy.stats.maxHealth > 0
+            ? enemy.health / enemy.stats.maxHealth
+            : 1;
+        threat += (1 - healthPercent) * 20; // Lower health = less threat
+
         // Role-based threat
         switch (enemy.role) {
             case 'assassin': threat += 40; break;
@@ -138,11 +153,14 @@ class CombatAnalyzer {
             case 'fighter': threat += 35; break;
             case 'tank': threat += 20; break;
         }
-        
+
         // Level difference
-        const levelDiff = enemy.level - this.controller.hero.level;
-        threat += levelDiff * 10;
-        
+        const hero = this.controller?.hero;
+        if (hero) {
+            const levelDiff = (enemy.level || 1) - (hero.level || 1);
+            threat += levelDiff * 10;
+        }
+
         return threat;
     }
     
@@ -155,17 +173,19 @@ class CombatAnalyzer {
     
     calculateTeamScore(team) {
         let score = 0;
-        
+
         for (const member of team) {
-            if (member.type === 'hero') {
+            if (member.type === 'hero' && member.stats) {
                 // Health and damage contribution
-                const healthPercent = member.health / member.stats.maxHealth;
-                score += member.stats.attackDamage * healthPercent;
-                score += member.stats.abilityPower * healthPercent * 0.7;
-                
+                const healthPercent = member.stats.maxHealth > 0
+                    ? member.health / member.stats.maxHealth
+                    : 1;
+                score += (member.stats.attackDamage || 0) * healthPercent;
+                score += (member.stats.abilityPower || 0) * healthPercent * 0.7;
+
                 // Level contribution
-                score += member.level * 50;
-                
+                score += (member.level || 1) * 50;
+
                 // Role bonus
                 switch (member.role) {
                     case 'tank': score += 100 * healthPercent; break;
@@ -176,88 +196,109 @@ class CombatAnalyzer {
                 }
             }
         }
-        
+
         return score;
     }
     
     shouldEngage(enemies, allies) {
         const combatScore = this.combatData.combatScore;
-        const healthPercent = this.controller.hero.health / this.controller.hero.stats.maxHealth;
-        
+        const hero = this.controller?.hero;
+
+        if (!hero || !hero.stats) return false;
+
+        const healthPercent = hero.stats.maxHealth > 0
+            ? hero.health / hero.stats.maxHealth
+            : 0;
+
         // Don't engage if we're at a disadvantage or low health
         if (combatScore < -50 || healthPercent < 0.3) {
             return false;
         }
-        
+
         // Engage if we have advantage or can secure a kill
         if (combatScore > 50 || this.combatData.killPotential > 0) {
             return true;
         }
-        
+
         // Random factor based on aggression level
-        const aggression = this.controller.getAIParameter('aggressionLevel');
+        const aggression = this.controller.getAIParameter?.('aggressionLevel') || 0.5;
         return Math.random() < aggression;
     }
-    
+
     shouldRetreat(enemies, allies) {
         const combatScore = this.combatData.combatScore;
-        const healthPercent = this.controller.hero.health / this.controller.hero.stats.maxHealth;
-        
+        const hero = this.controller?.hero;
+
+        if (!hero || !hero.stats) return false;
+
+        const healthPercent = hero.stats.maxHealth > 0
+            ? hero.health / hero.stats.maxHealth
+            : 0;
+
         // Retreat if we're at a significant disadvantage
         if (combatScore < -100) {
             return true;
         }
-        
+
         // Retreat if low health and outnumbered
         if (healthPercent < 0.3 && enemies.length > allies.length) {
             return true;
         }
-        
+
         // Random factor based on risk tolerance
-        const riskTolerance = 1 - this.controller.getAIParameter('riskTolerance');
+        const riskTolerance = 1 - (this.controller.getAIParameter?.('riskTolerance') || 0.5);
         return Math.random() < riskTolerance;
     }
-    
+
     calculateKillPotential(enemies) {
-        const hero = this.controller.hero;
+        const hero = this.controller?.hero;
+        if (!hero) return 0;
+
         let potentialKills = 0;
-        
+
         for (const enemy of enemies) {
             if (enemy.type === 'hero') {
                 const damageOutput = this.calculateTotalDamageOutput(enemy);
-                const enemyHealth = enemy.health;
-                
+                const enemyHealth = enemy.health || 0;
+
                 // Can kill if we can output 120% of their health
                 if (damageOutput > enemyHealth * 1.2) {
                     potentialKills++;
                 }
             }
         }
-        
+
         return potentialKills;
     }
-    
+
     calculateTotalDamageOutput(target) {
-        const hero = this.controller.hero;
+        const hero = this.controller?.hero;
+        if (!hero || !hero.heroData) return 0;
+
         let totalDamage = 0;
-        
+
         // Auto attacks (3 hits)
-        totalDamage += hero.stats.attackDamage * 3;
-        
+        totalDamage += (hero.stats?.attackDamage || 0) * 3;
+
         // Abilities
-        for (const key of ['q', 'e', 'r', 't']) {
-            if (hero.abilityLevels[key] > 0 && hero.abilityCooldowns[key] <= 0) {
-                const ability = hero.heroData.abilities[key];
-                const level = hero.abilityLevels[key];
-                
-                let damage = ability.baseDamage[level - 1] || 0;
-                damage += (ability.adRatio || 0) * hero.stats.attackDamage;
-                damage += (ability.apRatio || 0) * hero.stats.abilityPower;
-                
-                totalDamage += damage;
+        if (hero.heroData.abilities && hero.abilityLevels && hero.abilityCooldowns) {
+            for (const key of ['q', 'e', 'r', 't']) {
+                const level = hero.abilityLevels[key] || 0;
+                const cooldown = hero.abilityCooldowns[key] || 0;
+
+                if (level > 0 && cooldown <= 0) {
+                    const ability = hero.heroData.abilities[key];
+                    if (ability) {
+                        let damage = ability.baseDamage?.[level - 1] || 0;
+                        damage += (ability.adRatio || 0) * (hero.stats?.attackDamage || 0);
+                        damage += (ability.apRatio || 0) * (hero.stats?.abilityPower || 0);
+
+                        totalDamage += damage;
+                    }
+                }
             }
         }
-        
+
         return totalDamage;
     }
     
@@ -271,19 +312,20 @@ class CombatAnalyzer {
     
     shouldFocusTarget(target) {
         if (!target || target.type !== 'hero') return false;
-        
+        if (!target.stats || target.stats.maxHealth === 0) return false;
+
         // Focus low health targets
         const healthPercent = target.health / target.stats.maxHealth;
         if (healthPercent < 0.3) return true;
-        
+
         // Focus high threat targets
         const threat = this.calculateEnemyThreat(target);
         if (threat > 150) return true;
-        
+
         // Focus targets we can kill
         const damageOutput = this.calculateTotalDamageOutput(target);
         if (damageOutput > target.health * 1.2) return true;
-        
+
         return false;
     }
 }

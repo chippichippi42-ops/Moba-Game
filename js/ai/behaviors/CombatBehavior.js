@@ -43,18 +43,23 @@ class CombatBehavior {
     tryCombo(target) {
         const now = Date.now();
         if (now - this.lastComboTime < this.comboCooldown) return;
-        
+
         const hero = this.controller.hero;
-        const comboExecutor = this.controller.systems.comboExecutor;
-        
+        if (!hero) return;
+
+        const comboExecutor = this.controller.systems?.comboExecutor;
+        if (!comboExecutor) return;
+
         // Let combo executor handle the combo
         comboExecutor.executeBestCombo(hero, target, 'all_in');
-        
+
         this.lastComboTime = now;
     }
     
     positionForCombat(target, currentDistance) {
         const hero = this.controller.hero;
+        if (!hero || !hero.stats) return;
+
         const idealRange = hero.stats.attackRange * this.controller.getTargetingSetting('preferredRangePercentage');
         
         if (currentDistance < idealRange - 50) {
@@ -64,27 +69,27 @@ class CombatBehavior {
                 x: hero.x + Math.cos(angle) * 100,
                 y: hero.y + Math.sin(angle) * 100
             };
-            this.controller.systems.movementOptimizer.setMovementTarget(retreatPos, 'kiting');
+            this.controller.systems?.movementOptimizer?.setMovementTarget(retreatPos, 'kiting');
         } else if (currentDistance > idealRange + 50) {
             // Too far, move closer
             const approachPos = {
                 x: target.x + (Math.random() - 0.5) * 50,
                 y: target.y + (Math.random() - 0.5) * 50
             };
-            this.controller.systems.movementOptimizer.setMovementTarget(approachPos, 'chasing');
+            this.controller.systems?.movementOptimizer?.setMovementTarget(approachPos, 'chasing');
         } else {
             // At ideal range, stop moving or strafe
             if (Math.random() < 0.3) {
                 // Random strafing
-                const strafeAngle = Utils.angleBetweenPoints(hero.x, hero.y, target.x, target.y) + 
+                const strafeAngle = Utils.angleBetweenPoints(hero.x, hero.y, target.x, target.y) +
                                     (Math.random() > 0.5 ? Math.PI/2 : -Math.PI/2);
                 const strafePos = {
                     x: hero.x + Math.cos(strafeAngle) * 50,
                     y: hero.y + Math.sin(strafeAngle) * 50
                 };
-                this.controller.systems.movementOptimizer.setMovementTarget(strafePos, 'strafing');
+                this.controller.systems?.movementOptimizer?.setMovementTarget(strafePos, 'strafing');
             } else {
-                this.controller.systems.movementOptimizer.clearMovementTarget();
+                this.controller.systems?.movementOptimizer?.clearMovementTarget();
             }
         }
     }
@@ -92,37 +97,40 @@ class CombatBehavior {
     // Use defensive abilities if needed
     useDefensiveAbilities() {
         const hero = this.controller.hero;
+        if (!hero || !hero.stats || !hero.heroData) return false;
+
         const healthPercent = hero.health / hero.stats.maxHealth;
-        
+
         if (healthPercent < 0.3) {
             // Look for healing or shield abilities
             for (const key of ['e', 'r', 'q']) {
-                const ability = hero.heroData.abilities[key];
+                const ability = hero.heroData?.abilities?.[key];
                 if (!ability) continue;
-                
+
                 if ((ability.effects && ability.effects.includes('heal')) ||
                     (ability.effects && ability.effects.includes('shield'))) {
-                    if (hero.abilityCooldowns[key] <= 0 && hero.abilityLevels[key] > 0) {
+                    if ((hero.abilityCooldowns?.[key] || 0) <= 0 && (hero.abilityLevels?.[key] || 0) > 0) {
                         hero.useAbility(key, hero.x, hero.y, hero);
                         return true;
                     }
                 }
             }
         }
-        
+
         return false;
     }
-    
+
     // Use offensive abilities
     useOffensiveAbilities(target) {
         const hero = this.controller.hero;
-        
+        if (!hero || !hero.heroData) return false;
+
         for (const key of ['q', 'e', 'r', 't']) {
-            const ability = hero.heroData.abilities[key];
+            const ability = hero.heroData?.abilities?.[key];
             if (!ability) continue;
-            
+
             if (ability.type === 'damage' || ability.type === 'skillshot') {
-                if (hero.abilityCooldowns[key] <= 0 && hero.abilityLevels[key] > 0) {
+                if ((hero.abilityCooldowns?.[key] || 0) <= 0 && (hero.abilityLevels?.[key] || 0) > 0) {
                     if (Math.random() < this.controller.getDifficultySetting('skillUsage')) {
                         hero.useAbility(key, target.x, target.y, target);
                         return true;
@@ -130,7 +138,7 @@ class CombatBehavior {
                 }
             }
         }
-        
+
         return false;
     }
 }

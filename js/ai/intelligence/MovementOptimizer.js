@@ -122,14 +122,18 @@ class MovementOptimizer {
     }
     
     tryEscapeDash() {
-        const hero = this.controller.hero;
-        
+        const hero = this.controller?.hero;
+        if (!hero || !hero.heroData) return false;
+
         for (const key of ['e', 'r', 'q']) {
-            const ability = hero.heroData.abilities[key];
+            const ability = hero.heroData?.abilities?.[key];
             if (!ability) continue;
-            
+
             if (ability.type === 'dash' || ability.type === 'blink') {
-                if (hero.abilityCooldowns[key] <= 0 && hero.abilityLevels[key] > 0) {
+                const cooldown = hero.abilityCooldowns?.[key] || 0;
+                const level = hero.abilityLevels?.[key] || 0;
+
+                if (cooldown <= 0 && level > 0) {
                     // Dash towards a safe direction
                     const safeAngle = this.findSafeDirection();
                     if (safeAngle !== null) {
@@ -141,7 +145,7 @@ class MovementOptimizer {
                 }
             }
         }
-        
+
         return false;
     }
     

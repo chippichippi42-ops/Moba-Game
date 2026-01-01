@@ -52,28 +52,29 @@ class ComboExecutor {
     canExecuteCombo(hero, combo) {
         // Check mana requirements
         let totalMana = 0;
-        
+
         for (const action of combo.sequence) {
             if (['q', 'e', 'r', 't'].includes(action)) {
-                const ability = hero.heroData.abilities[action];
-                if (ability && hero.abilityLevels[action] > 0) {
-                    const manaCost = ability.manaCost[hero.abilityLevels[action] - 1] || 0;
+                const ability = hero.heroData?.abilities?.[action];
+                const level = hero.abilityLevels?.[action] || 0;
+                if (ability && level > 0) {
+                    const manaCost = ability.manaCost?.[level - 1] || 0;
                     totalMana += manaCost;
                 }
             }
         }
-        
+
         if (hero.mana < totalMana) return false;
-        
+
         // Check cooldowns
         for (const action of combo.sequence) {
             if (['q', 'e', 'r', 't'].includes(action)) {
-                if (hero.abilityCooldowns[action] > 0) {
+                if ((hero.abilityCooldowns?.[action] || 0) > 0) {
                     return false;
                 }
             }
         }
-        
+
         return true;
     }
     
@@ -82,9 +83,9 @@ class ComboExecutor {
             this.currentCombo = null;
             return false;
         }
-        
+
         const action = this.currentCombo.sequence[this.comboStep];
-        
+
         switch (action) {
             case 'auto':
                 hero.basicAttack(target);
@@ -93,7 +94,9 @@ class ComboExecutor {
             case 'e':
             case 'r':
             case 't':
-                if (hero.abilityCooldowns[action] <= 0 && hero.abilityLevels[action] > 0) {
+                const cooldown = hero.abilityCooldowns?.[action] || 0;
+                const level = hero.abilityLevels?.[action] || 0;
+                if (cooldown <= 0 && level > 0) {
                     hero.useAbility(action, target.x, target.y, target);
                 }
                 break;

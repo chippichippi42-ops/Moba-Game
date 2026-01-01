@@ -61,27 +61,28 @@ class AIController {
     }
     
     update(deltaTime, entities) {
+        if (!this.hero) return;
         if (!this.hero.isAlive || this.hero.isDead) return;
-        
+
         // Update state machine
-        this.stateMachine.update(deltaTime, entities);
-        
+        this.stateMachine?.update?.(deltaTime, entities);
+
         // Update intelligence systems
-        this.strategicAnalyzer.update(deltaTime, entities);
-        this.combatAnalyzer.update(deltaTime, entities);
-        this.movementOptimizer.update(deltaTime);
-        this.llmDecisionEngine.update(deltaTime, entities);
-        
+        this.strategicAnalyzer?.update?.(deltaTime, entities);
+        this.combatAnalyzer?.update?.(deltaTime, entities);
+        this.movementOptimizer?.update?.(deltaTime);
+        this.llmDecisionEngine?.update?.(deltaTime, entities);
+
         // Advanced 10-Layer Smart Evaluation
-        const heroState = this.hero.getState();
+        const heroState = this.hero.getState?.() || this.createDefaultHeroState();
         const gameState = this.getGameState();
         const teamState = this.getTeamState();
 
-        const evaluation = this.advancedEvaluator.analyze(
+        const evaluation = this.advancedEvaluator?.analyze?.(
             heroState,
             gameState,
             teamState
-        );
+        ) || { mode: 'LOCAL', score: 50 };
 
         let decision;
         switch (evaluation.mode) {
@@ -89,42 +90,42 @@ class AIController {
                 // Local decision only
                 decision = this.decisionMaker.makeDecision(deltaTime, entities, 'aggressive');
                 break;
-            
+
             case 'URGENT':
                 // Try cache, else fallback + async
-                const cached = this.smartDecisionCache.getCached(this.hero.id);
-                if (cached && this.smartDecisionCache.canUseCached(evaluation, cached)) {
+                const cached = this.smartDecisionCache?.getCached?.(this.hero.id);
+                if (cached && this.smartDecisionCache?.canUseCached?.(evaluation, cached)) {
                     decision = cached.decision;
                 } else {
                     // Queue async + fallback
-                    this.ollamaIntegrator.queryOllama(
-                        this.promptBuilder.buildDecisionPrompt(heroState, gameState, teamState, evaluation)
+                    this.ollamaIntegrator?.queryOllama?.(
+                        this.promptBuilder?.buildDecisionPrompt?.(heroState, gameState, teamState, evaluation)
                     ).then(response => {
                         const localDec = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
-                        const fused = this.responseFusion.merge(
+                        const fused = this.responseFusion?.merge?.(
                             response,
                             localDec,
                             evaluation
                         );
-                        this.smartDecisionCache.updateCache(this.hero.id, fused, evaluation);
+                        this.smartDecisionCache?.updateCache?.(this.hero.id, fused, evaluation);
                     });
                     decision = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
                 }
                 break;
-            
+
             case 'PLANNING':
                 // Queue async, use local
-                this.ollamaIntegrator.queryOllama(
-                    this.promptBuilder.buildStrategyPrompt(heroState, gameState, evaluation)
+                this.ollamaIntegrator?.queryOllama?.(
+                    this.promptBuilder?.buildStrategyPrompt?.(heroState, gameState, evaluation)
                 ).then(response => {
                     // Cache for next time (simple integration)
                     const localDec = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
-                    const fused = this.responseFusion.merge(response, localDec, evaluation);
-                    this.smartDecisionCache.updateCache(this.hero.id, fused, evaluation);
+                    const fused = this.responseFusion?.merge?.(response, localDec, evaluation);
+                    this.smartDecisionCache?.updateCache?.(this.hero.id, fused, evaluation);
                 });
                 decision = this.decisionMaker.makeDecision(deltaTime, entities, 'balanced');
                 break;
-            
+
             case 'LOCAL':
             default:
                 // Local only
@@ -132,12 +133,49 @@ class AIController {
         }
 
         this.executeDecision(decision);
-        
+
         // Execute current behavior based on state
         this.executeCurrentBehavior(deltaTime, entities);
-        
+
         // Update movement
         this.updateMovement(deltaTime);
+    }
+
+    /**
+     * Create a default hero state as fallback
+     */
+    createDefaultHeroState() {
+        return {
+            id: this.hero?.id || 'unknown',
+            name: this.hero?.name || 'Unknown',
+            team: this.hero?.team || 0,
+            isAlive: this.hero?.isAlive || true,
+            isDead: this.hero?.isDead || false,
+            health: this.hero?.health || 100,
+            maxHealth: 100,
+            healthPercent: 1.0,
+            mana: this.hero?.mana || 100,
+            maxMana: 100,
+            manaPercent: 1.0,
+            level: this.hero?.level || 1,
+            x: this.hero?.x || 0,
+            y: this.hero?.y || 0,
+            stats: this.hero?.stats || {},
+            abilities: {},
+            abilityLevels: { q: 0, e: 0, r: 0, t: 0 },
+            abilityCooldowns: { q: 0, e: 0, r: 0, t: 0 },
+            hasEscapeRoute: true,
+            isCCVulnerable: false,
+            importantItemsOnCooldown: false,
+            inCombat: false,
+            hasBuff: false,
+            hasManaForCombo: true,
+            skillsReadySoon: false,
+            timeSinceBase: 0,
+            killStreak: 0,
+            deathStreak: 0,
+            deathProbability: 0,
+        };
     }
     
     executeCurrentBehavior(deltaTime, entities) {
@@ -201,9 +239,13 @@ class AIController {
 
     getGameState() {
         const hero = this.hero;
-        const nearbyEnemies = Combat.getEnemiesInRange(hero, 1000);
-        const nearbyAllies = Combat.getAlliesInRange(hero, 1000);
-        
+        if (!hero) {
+            return this.createDefaultGameState();
+        }
+
+        const nearbyEnemies = Combat?.getEnemiesInRange?.(hero, 1000) || [];
+        const nearbyAllies = Combat?.getAlliesInRange?.(hero, 1000) || [];
+
         return {
             nearbyEnemies: nearbyEnemies.map(e => ({
                 id: e.id,
@@ -214,7 +256,9 @@ class AIController {
             })),
             nearbyAllies: nearbyAllies.map(a => ({
                 id: a.id,
-                healthPercent: (a.health / a.stats.maxHealth) * 100
+                healthPercent: a.stats?.maxHealth > 0
+                    ? (a.health / a.stats.maxHealth) * 100
+                    : 100
             })),
             blueScore: typeof GameManager !== 'undefined' ? GameManager.blueScore : 0,
             redScore: typeof GameManager !== 'undefined' ? GameManager.redScore : 0,
@@ -224,7 +268,7 @@ class AIController {
             waveFrozen: false, // Simplified
             inUnvardedArea: false, // Simplified
             teamFightActive: nearbyEnemies.length >= 3 && nearbyAllies.length >= 2,
-            teammateCritical: nearbyAllies.some(a => a.health / a.stats.maxHealth < 0.25),
+            teammateCritical: nearbyAllies.some(a => a.stats?.maxHealth > 0 && a.health / a.stats.maxHealth < 0.25),
             enemyMissingDuration: 0, // Simplified
             goodRotationWindow: true, // Simplified
             wavePushing: false, // Simplified
@@ -239,14 +283,48 @@ class AIController {
         };
     }
 
+    /**
+     * Create a default game state as fallback
+     */
+    createDefaultGameState() {
+        return {
+            nearbyEnemies: [],
+            nearbyAllies: [],
+            blueScore: 0,
+            redScore: 0,
+            towerUnderAttackNearby: false,
+            objectiveThreat: false,
+            minionWavePushedIn: false,
+            waveFrozen: false,
+            inUnvardedArea: false,
+            teamFightActive: false,
+            teammateCritical: false,
+            enemyMissingDuration: 0,
+            goodRotationWindow: true,
+            wavePushing: false,
+            teamMomentum: 0,
+            goldDifferential: 0,
+            incomingCCChain: false,
+            predictedEnemyGank: false,
+            objectiveContestedSoon: false,
+            deathProbability: 0,
+            killOpportunity: false,
+            nearObjective: false,
+        };
+    }
+
     getTeamState() {
+        if (!this.hero) {
+            return { averageHP: 0 };
+        }
+
         const team = this.hero.team;
         let totalHP = 0;
         let count = 0;
 
         if (typeof HeroManager !== 'undefined' && HeroManager.heroes) {
             for (const h of HeroManager.heroes) {
-                if (h.team === team && h.isAlive) {
+                if (h.team === team && h.isAlive && h.stats?.maxHealth > 0) {
                     totalHP += (h.health / h.stats.maxHealth) * 100;
                     count++;
                 }

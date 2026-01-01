@@ -34,38 +34,40 @@ class RetreatBehavior {
     tryEscapeAbilities() {
         const now = Date.now();
         if (now - this.lastEscapeAttempt < this.escapeCooldown) return;
-        
+
         const hero = this.controller.hero;
+        if (!hero || !hero.heroData) return false;
+
         const basePoint = GameMap.getSpawnPoint(hero.team);
-        
+
         // Try to use dash/blink abilities
         for (const key of ['r', 'e', 'q']) {
-            const ability = hero.heroData.abilities[key];
+            const ability = hero.heroData?.abilities?.[key];
             if (!ability) continue;
-            
+
             if (ability.type === 'dash' || ability.type === 'blink') {
-                if (hero.abilityCooldowns[key] <= 0 && hero.abilityLevels[key] > 0) {
+                if ((hero.abilityCooldowns?.[key] || 0) <= 0 && (hero.abilityLevels?.[key] || 0) > 0) {
                     // Dash towards base
                     const escapeAngle = Utils.angleBetweenPoints(hero.x, hero.y, basePoint.x, basePoint.y);
                     const escapeX = hero.x + Math.cos(escapeAngle) * 400;
                     const escapeY = hero.y + Math.sin(escapeAngle) * 400;
-                    
+
                     hero.useAbility(key, escapeX, escapeY);
                     this.lastEscapeAttempt = now;
                     return true;
                 }
             }
         }
-        
+
         // Try to use healing abilities
-        if (hero.spell === 'heal' && hero.spellCooldown <= 0) {
+        if (hero.spell === 'heal' && (hero.spellCooldown || 0) <= 0) {
             hero.useSpell(hero.x, hero.y);
             this.lastEscapeAttempt = now;
             return true;
         }
-        
+
         // Try to use flash
-        if (hero.spell === 'flash' && hero.spellCooldown <= 0) {
+        if (hero.spell === 'flash' && (hero.spellCooldown || 0) <= 0) {
             const enemies = Combat.getEnemiesInRange(hero, 500);
             if (enemies.length > 0) {
                 const escapeAngle = Utils.angleBetweenPoints(hero.x, hero.y, basePoint.x, basePoint.y);
@@ -77,22 +79,24 @@ class RetreatBehavior {
                 return true;
             }
         }
-        
+
         return false;
     }
     
     moveToSafety() {
         const hero = this.controller.hero;
+        if (!hero) return;
+
         const basePoint = GameMap.getSpawnPoint(hero.team);
-        
+
         // Find the safest path to base
         const safePosition = this.findSafePosition();
-        
+
         if (safePosition) {
-            this.controller.systems.movementOptimizer.setMovementTarget(safePosition, 'retreating');
+            this.controller.systems?.movementOptimizer?.setMovementTarget(safePosition, 'retreating');
         } else {
             // Fallback to direct path to base
-            this.controller.systems.movementOptimizer.setMovementTarget(basePoint, 'retreating');
+            this.controller.systems?.movementOptimizer?.setMovementTarget(basePoint, 'retreating');
         }
     }
     

@@ -280,14 +280,24 @@ class AdvancedSmartEvaluator {
     skillComboReadinessLayer(heroState, gameState) {
         let score = 0;
 
+        // Safely access abilities with null checks
+        const abilities = heroState.abilities || {};
+        const abilityLevels = heroState.abilityLevels || { q: 0, e: 0, r: 0, t: 0 };
+        const abilityCooldowns = heroState.abilityCooldowns || { q: 0, e: 0, r: 0, t: 0 };
+
+        // Check if abilities are ready (must be leveled and cooldown <= 0)
+        const qReady = abilityLevels.q > 0 && abilityCooldowns.q <= 0;
+        const eReady = abilityLevels.e > 0 && abilityCooldowns.e <= 0;
+        const rReady = abilityLevels.r > 0 && abilityCooldowns.r <= 0;
+
         // All combo skills ready check
-        const allReady = heroState.abilities.q.ready && heroState.abilities.e.ready && heroState.abilities.r.ready;
+        const allReady = qReady && eReady && rReady;
         if (allReady && (gameState.nearbyEnemies || []).length > 0) {
             score -= 20; // Ready to GO!
         }
 
         // Ultimate impact assessment
-        if (!heroState.abilities.r.ready && (gameState.nearbyEnemies || []).length >= 3) {
+        if (!rReady && (gameState.nearbyEnemies || []).length >= 3) {
             score += 15;
         }
 
@@ -295,7 +305,7 @@ class AdvancedSmartEvaluator {
         if (!heroState.hasManaForCombo) score += 12;
 
         // Cooldown urgency calculation
-        if (!heroState.abilities.e.ready && (gameState.nearbyEnemies || []).length > 0) {
+        if (!eReady && (gameState.nearbyEnemies || []).length > 0) {
             score += 20; // No escape skill
         }
 
@@ -393,7 +403,9 @@ class AdvancedSmartEvaluator {
 
     calculateDynamicWeights(scores, heroState, gameState) {
         let weights = { ...this.baseWeights };
-        const difficulty = this.controller.difficulty || 'normal';
+
+        // Safely get difficulty from controller
+        const difficulty = this.controller?.difficulty || 'normal';
 
         // Difficulty multipliers
         if (difficulty === 'nightmare') {

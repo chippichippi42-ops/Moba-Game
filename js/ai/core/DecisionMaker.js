@@ -17,11 +17,13 @@ class DecisionMaker {
     
     makeDecision(deltaTime, entities, aggressiveness = 'balanced') {
         const now = Date.now();
-        const decisionInterval = this.controller.getDifficultySetting('decisionInterval');
-        
+
+        // Safely get decision interval
+        const decisionInterval = this.controller?.getDifficultySetting?.('decisionInterval') || 1000;
+
         if (now - this.lastDecisionTime >= decisionInterval || typeof deltaTime === 'string') {
             const situation = this.analyzeSituation(entities);
-            
+
             // Apply aggressiveness to situation if needed
             if (aggressiveness === 'aggressive') {
                 situation.hasAdvantage = true;
@@ -35,7 +37,7 @@ class DecisionMaker {
             this.updateTarget(situation);
             this.lastDecisionTime = now;
         }
-        
+
         return {
             action: this.currentStrategy,
             target: this.currentTarget
@@ -43,41 +45,71 @@ class DecisionMaker {
     }
     
     analyzeSituation(entities) {
-        const myTeam = this.controller.hero.team;
+        const hero = this.controller?.hero;
+        if (!hero) {
+            // Return a default situation if hero is not available
+            return {
+                healthPercent: 1.0,
+                manaPercent: 1.0,
+                nearbyEnemies: [],
+                nearbyAllies: [],
+                enemyHeroes: [],
+                lowHpEnemies: [],
+                nearbyEnemyTower: null,
+                nearbyAllyTower: null,
+                myMinions: [],
+                enemyMinions: [],
+                distFromBase: 0,
+                incomingProjectiles: [],
+                nearbyJungleCamps: [],
+                inDanger: false,
+                canKill: false,
+                shouldRetreat: true,
+                hasAdvantage: false,
+            };
+        }
+
+        const myTeam = hero.team;
         const enemyTeam = myTeam === CONFIG.teams.BLUE ? CONFIG.teams.RED : CONFIG.teams.BLUE;
-        
-        const nearbyEnemies = Combat.getEnemiesInRange(this.controller.hero, 1000);
-        const nearbyAllies = Combat.getAlliesInRange(this.controller.hero, 1000);
-        const nearbyMinions = MinionManager.getMinionsInRange(this.controller.hero.x, this.controller.hero.y, 600);
-        
-        const healthPercent = this.controller.hero.health / this.controller.hero.stats.maxHealth;
-        const manaPercent = this.controller.hero.mana / this.controller.hero.stats.maxMana;
-        
+
+        const nearbyEnemies = Combat.getEnemiesInRange(hero, 1000);
+        const nearbyAllies = Combat.getAlliesInRange(hero, 1000);
+        const nearbyMinions = MinionManager?.getMinionsInRange?.(hero.x, hero.y, 600) || [];
+
+        const healthPercent = hero.stats?.maxHealth > 0
+            ? hero.health / hero.stats.maxHealth
+            : 1.0;
+        const manaPercent = hero.stats?.maxMana > 0
+            ? hero.mana / hero.stats.maxMana
+            : 1.0;
+
         const enemyHeroes = nearbyEnemies.filter(e => e.type === 'hero');
-        const lowHpEnemies = enemyHeroes.filter(e => e.health / e.stats.maxHealth < 0.3);
-        
-        const nearbyEnemyTower = TowerManager.towers.find(t => 
-            t.team !== myTeam && t.isAlive && 
-            Utils.distance(this.controller.hero.x, this.controller.hero.y, t.x, t.y) < 800
+        const lowHpEnemies = enemyHeroes.filter(e => {
+            return e.stats?.maxHealth > 0 && (e.health || 0) / e.stats.maxHealth < 0.3;
+        });
+
+        const nearbyEnemyTower = TowerManager?.towers?.find(t =>
+            t.team !== myTeam && t.isAlive &&
+            Utils.distance(hero.x, hero.y, t.x, t.y) < 800
         );
-        
-        const nearbyAllyTower = TowerManager.towers.find(t => 
-            t.team === myTeam && t.isAlive && 
-            Utils.distance(this.controller.hero.x, this.controller.hero.y, t.x, t.y) < 800
+
+        const nearbyAllyTower = TowerManager?.towers?.find(t =>
+            t.team === myTeam && t.isAlive &&
+            Utils.distance(hero.x, hero.y, t.x, t.y) < 800
         );
-        
+
         const myMinions = nearbyMinions.filter(m => m.team === myTeam);
         const enemyMinions = nearbyMinions.filter(m => m.team !== myTeam);
-        
+
         const basePoint = GameMap.getSpawnPoint(myTeam);
-        const distFromBase = Utils.distance(this.controller.hero.x, this.controller.hero.y, basePoint.x, basePoint.y);
-        
+        const distFromBase = Utils.distance(hero.x, hero.y, basePoint.x, basePoint.y);
+
         // Check for incoming projectiles
         const incomingProjectiles = this.detectIncomingProjectiles();
-        
+
         // Check for nearby jungle camps
         const nearbyJungleCamps = this.detectNearbyJungleCamps();
-        
+
         return {
             healthPercent,
             manaPercent,
@@ -94,7 +126,7 @@ class DecisionMaker {
             nearbyJungleCamps,
             inDanger: nearbyEnemyTower && enemyHeroes.length > 0,
             canKill: lowHpEnemies.length > 0,
-            shouldRetreat: healthPercent < this.controller.getAIParameter('healthThresholdRetreat') || 
+            shouldRetreat: healthPercent < (this.controller.getAIParameter?.('healthThresholdRetreat') || 0.3) ||
                           (healthPercent < 0.4 && enemyHeroes.length > nearbyAllies.length),
             hasAdvantage: nearbyAllies.length >= enemyHeroes.length && healthPercent > 0.5,
         };
@@ -225,24 +257,32 @@ class DecisionMaker {
     
     calculateKillPotential(target) {
         if (!target || !target.isAlive) return false;
-        
+
+        const hero = this.controller?.hero;
+        if (!hero || !hero.heroData) return false;
+
         let totalDamage = 0;
-        totalDamage += this.controller.hero.stats.attackDamage * 3;
-        
-        for (const key of ['q', 'e', 'r', 't']) {
-            if (this.controller.hero.abilityLevels[key] > 0 && this.controller.hero.abilityCooldowns[key] <= 0) {
-                const ability = this.controller.hero.heroData.abilities[key];
-                const level = this.controller.hero.abilityLevels[key];
-                
-                let damage = ability.baseDamage[level - 1] || 0;
-                damage += (ability.adRatio || 0) * this.controller.hero.stats.attackDamage;
-                damage += (ability.apRatio || 0) * this.controller.hero.stats.abilityPower;
-                
-                totalDamage += damage;
+        totalDamage += (hero.stats?.attackDamage || 0) * 3;
+
+        if (hero.heroData.abilities && hero.abilityLevels && hero.abilityCooldowns) {
+            for (const key of ['q', 'e', 'r', 't']) {
+                const level = hero.abilityLevels[key] || 0;
+                const cooldown = hero.abilityCooldowns[key] || 0;
+
+                if (level > 0 && cooldown <= 0) {
+                    const ability = hero.heroData.abilities[key];
+                    if (ability) {
+                        let damage = ability.baseDamage?.[level - 1] || 0;
+                        damage += (ability.adRatio || 0) * (hero.stats?.attackDamage || 0);
+                        damage += (ability.apRatio || 0) * (hero.stats?.abilityPower || 0);
+
+                        totalDamage += damage;
+                    }
+                }
             }
         }
-        
-        return totalDamage > target.health * 1.2;
+
+        return totalDamage > (target.health || 0) * 1.2;
     }
     
     updateTarget(situation) {

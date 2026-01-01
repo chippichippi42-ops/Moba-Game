@@ -1451,11 +1451,79 @@ class Hero {
         ctx.fillStyle = this.color;
         ctx.textAlign = 'center';
         ctx.fillText(this.playerName, this.x, this.y - this.radius - 35);
-        
+
         // Level
         ctx.font = '10px Arial';
         ctx.fillStyle = '#fbbf24';
         ctx.fillText(`Lv.${this.level}`, this.x, this.y - this.radius - 48);
+    }
+
+    /**
+     * Get hero state for AI analysis
+     * Returns a complete state object with all necessary information
+     */
+    getState() {
+        const healthPercent = this.stats && this.stats.maxHealth > 0
+            ? (this.health / this.stats.maxHealth) * 100
+            : 0;
+        const manaPercent = this.stats && this.stats.maxMana > 0
+            ? (this.mana / this.stats.maxMana) * 100
+            : 0;
+
+        return {
+            id: this.id,
+            name: this.name,
+            team: this.team,
+            isAlive: this.isAlive,
+            isDead: this.isDead,
+            health: this.health,
+            maxHealth: this.stats?.maxHealth || 0,
+            healthPercent: healthPercent,
+            mana: this.mana,
+            maxMana: this.stats?.maxMana || 0,
+            manaPercent: manaPercent,
+            level: this.level,
+            x: this.x,
+            y: this.y,
+            radius: this.radius,
+            vx: this.vx,
+            vy: this.vy,
+            facingAngle: this.facingAngle,
+            role: this.role,
+            kills: this.kills || 0,
+            deaths: this.deaths || 0,
+            assists: this.assists || 0,
+            gold: this.gold || 0,
+            exp: this.exp || 0,
+
+            // Stats (with null safety)
+            stats: this.stats || {},
+
+            // Abilities
+            abilities: this.heroData?.abilities || {},
+            abilityLevels: this.abilityLevels || { q: 0, e: 0, r: 0, t: 0 },
+            abilityCooldowns: this.abilityCooldowns || { q: 0, e: 0, r: 0, t: 0 },
+            abilityPoints: this.abilityPoints || 0,
+
+            // Spell
+            spell: this.spell,
+            spellCooldown: this.spellCooldown || 0,
+
+            // State flags
+            hasEscapeRoute: true, // Simplified - should be calculated
+            isCCVulnerable: false, // Simplified
+            importantItemsOnCooldown: false, // Simplified
+            inCombat: this.attackCooldown > 0, // Simplified
+            hasBuff: Array.isArray(this.buffs) && this.buffs.length > 0,
+            hasManaForCombo: manaPercent > 30, // Simplified
+            skillsReadySoon: false, // Simplified
+            timeSinceBase: 0, // Simplified
+            killStreak: this.killStreak || 0,
+            deathStreak: this.deathStreak || 0,
+
+            // Predictive data
+            deathProbability: 0, // Should be calculated by AI
+        };
     }
 }
 

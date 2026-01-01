@@ -125,18 +125,22 @@ class StrategicAnalyzer {
     
     calculateTeamFightStrength(heroes) {
         let strength = 0;
-        
+
         for (const hero of heroes) {
             // Simple strength calculation based on level and health
-            strength += hero.level * 100;
-            strength += (hero.health / hero.stats.maxHealth) * 50;
-            
+            strength += (hero.level || 1) * 100;
+
+            // Safely calculate health percentage
+            if (hero.stats?.maxHealth > 0) {
+                strength += (hero.health / hero.stats.maxHealth) * 50;
+            }
+
             // Bonus for certain roles
             if (hero.role === 'tank') strength += 150;
             if (hero.role === 'mage') strength += 120;
             if (hero.role === 'marksman') strength += 100;
         }
-        
+
         return strength;
     }
     
