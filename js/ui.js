@@ -488,50 +488,185 @@ const UI = {
         for (const skill of skillElements) {
             if (!skill.element) continue;
             
-            const upgradeBtn = document.createElement('div');
-            upgradeBtn.className = 'skill-upgrade-btn hidden';
-            upgradeBtn.innerHTML = '+';
-            upgradeBtn.dataset.skill = skill.key;
-            
-            upgradeBtn.style.cssText = `
-                position: absolute;
-                top: -15px;
-                right: -5px;
-                width: 22px;
-                height: 22px;
-                background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-                border: 2px solid #fcd34d;
-                border-radius: 50%;
-                color: #000;
-                font-size: 16px;
-                font-weight: bold;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                z-index: 10;
-                box-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
-                animation: pulse-glow 1s ease-in-out infinite;
-                transition: transform 0.2s;
-            `;
-            
-            upgradeBtn.addEventListener('mouseenter', () => {
-                upgradeBtn.style.transform = 'scale(1.2)';
-            });
-            upgradeBtn.addEventListener('mouseleave', () => {
-                upgradeBtn.style.transform = 'scale(1)';
-            });
-            
-            upgradeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.onSkillUpgradeClick(skill.key);
-            });
-            
-            skill.element.appendChild(upgradeBtn);
-            skill.element.style.position = 'relative';
+            this.createSkillIconForElement(skill.element, skill.key);
         }
         
         this.addUpgradeButtonStyles();
+    },
+
+    /**
+     * Create skill icon for a specific element
+     */
+    createSkillIconForElement(element, key) {
+        // Clear existing content except cooldown overlay
+        const existingOverlay = element.querySelector('.cooldown-overlay');
+        element.innerHTML = '';
+        
+        if (existingOverlay) {
+            element.appendChild(existingOverlay);
+        }
+        
+        // Create key indicator
+        const keyIndicator = document.createElement('div');
+        keyIndicator.className = 'skill-key-indicator';
+        keyIndicator.textContent = key.toUpperCase();
+        keyIndicator.style.cssText = `
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 18px;
+            height: 18px;
+            background: rgba(51, 51, 51, 0.95);
+            border: 1px solid #555;
+            border-radius: 3px;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            text-transform: uppercase;
+        `;
+        element.appendChild(keyIndicator);
+        
+        // Create skill icon container
+        const iconContainer = document.createElement('div');
+        iconContainer.className = 'skill-icon-container';
+        iconContainer.style.cssText = `
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        `;
+        
+        // Create skill icon element
+        const skillIcon = document.createElement('div');
+        skillIcon.className = 'skill-icon';
+        skillIcon.style.cssText = `
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            position: relative;
+        `;
+        
+        // Try to load custom icon
+        const player = HeroManager.player;
+        let hasCustomIcon = false;
+        
+        if (player && player.heroData && player.heroData.abilities[key]) {
+            const ability = player.heroData.abilities[key];
+            if (ability.icon) {
+                const img = document.createElement('img');
+                img.src = ability.icon;
+                img.alt = key.toUpperCase();
+                img.style.cssText = `
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
+                `;
+                
+                img.onerror = () => {
+                    img.style.display = 'none';
+                    showFallbackIcon();
+                };
+                
+                img.onload = () => {
+                    hasCustomIcon = true;
+                };
+                
+                skillIcon.appendChild(img);
+            } else {
+                showFallbackIcon();
+            }
+        } else {
+            showFallbackIcon();
+        }
+        
+        function showFallbackIcon() {
+            skillIcon.textContent = key.toUpperCase();
+            skillIcon.style.cssText = `
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 32px;
+                font-weight: bold;
+                color: white;
+                background: #333;
+                position: relative;
+            `;
+        }
+        
+        iconContainer.appendChild(skillIcon);
+        element.appendChild(iconContainer);
+        
+        // Create upgrade button
+        const upgradeBtn = document.createElement('div');
+        upgradeBtn.className = 'skill-upgrade-btn hidden';
+        upgradeBtn.innerHTML = '+';
+        upgradeBtn.dataset.skill = key;
+        
+        upgradeBtn.style.cssText = `
+            position: absolute;
+            top: -15px;
+            right: -5px;
+            width: 22px;
+            height: 22px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border: 2px solid #fcd34d;
+            border-radius: 50%;
+            color: #000;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
+            animation: pulse-glow 1s ease-in-out infinite;
+            transition: transform 0.2s;
+        `;
+        
+        upgradeBtn.addEventListener('mouseenter', () => {
+            upgradeBtn.style.transform = 'scale(1.2)';
+        });
+        upgradeBtn.addEventListener('mouseleave', () => {
+            upgradeBtn.style.transform = 'scale(1)';
+        });
+        
+        upgradeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.onSkillUpgradeClick(key);
+        });
+        
+        element.appendChild(upgradeBtn);
+        element.style.position = 'relative';
+    },
+
+    /**
+     * Refresh skill icons (call after player is created)
+     */
+    refreshSkillIcons() {
+        const skillKeys = ['q', 'e', 'r', 't'];
+        const skillElements = [this.elements.skill1, this.elements.skill2, this.elements.skill3, this.elements.skill4];
+        
+        for (let i = 0; i < skillKeys.length; i++) {
+            const key = skillKeys[i];
+            const element = skillElements[i];
+            if (element) {
+                this.createSkillIconForElement(element, key);
+            }
+        }
     },
     
     /**
@@ -1311,6 +1446,8 @@ const UI = {
     
     showIngameUI() {
         if (this.elements.ingameUI) this.elements.ingameUI.classList.remove('hidden');
+        // Refresh skill icons when showing UI (after player is created)
+        this.refreshSkillIcons();
     },
     
     hideIngameUI() {

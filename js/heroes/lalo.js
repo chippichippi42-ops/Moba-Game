@@ -63,7 +63,7 @@ const HeroLaLo = {
         q: {
             name: 'Cầu Lửa',
             description: 'Phóng một cầu lửa về phía trước, nổ khi chạm mục tiêu đầu tiên hoặc đạt tầm tối đa.',
-            icon: '🔥',
+            icon: 'assets/icons/lalo_q.png',
             type: 'skillshot',
             damageType: 'magical',
             baseDamage: [90, 140, 190, 240, 290],
@@ -114,7 +114,7 @@ const HeroLaLo = {
         e: {
             name: 'Vòng Băng',
             description: 'Tạo một vòng băng tại vị trí chỉ định, đóng băng kẻ địch bên trong sau 1 giây.',
-            icon: '❄️',
+            icon: 'assets/icons/lalo_e.png',
             type: 'area',
             damageType: 'magical',
             baseDamage: [70, 110, 150, 190, 230],
@@ -164,7 +164,7 @@ const HeroLaLo = {
         r: {
             name: 'Dịch Chuyển',
             description: 'Dịch chuyển tức thời đến vị trí chỉ định trong tầm.',
-            icon: '🌀',
+            icon: 'assets/icons/lalo_r.png',
             type: 'blink',
             damageType: 'none',
             baseDamage: [0],
@@ -201,7 +201,7 @@ const HeroLaLo = {
         t: {
             name: 'Thiên Thạch',
             description: 'Triệu hồi một thiên thạch khổng lồ rơi xuống sau 1.5 giây, gây sát thương cực lớn và làm choáng kẻ địch trong vùng.',
-            icon: '☄️',
+            icon: 'assets/icons/lalo_t.png',
             type: 'area',
             damageType: 'magical',
             baseDamage: [300, 450, 600],

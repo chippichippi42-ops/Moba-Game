@@ -64,7 +64,7 @@ const HeroNemo = {
         q: {
             name: 'Húc Mạnh',
             description: 'Lao về phía trước và húc kẻ địch đầu tiên, gây sát thương và làm choáng.',
-            icon: '🦬',
+            icon: 'assets/icons/nemo_q.png',
             type: 'dash',
             damageType: 'physical',
             baseDamage: [60, 100, 140, 180, 220],
@@ -114,7 +114,7 @@ const HeroNemo = {
         e: {
             name: 'Khiên Bảo Hộ',
             description: 'Tạo khiên cho bản thân hoặc đồng đội trong tầm, hấp thụ sát thương.',
-            icon: '🔰',
+            icon: 'assets/icons/nemo_e.png',
             type: 'shield',
             damageType: 'none',
             baseShield: [80, 130, 180, 230, 280],
@@ -160,7 +160,7 @@ const HeroNemo = {
         r: {
             name: 'Khiêu Khích',
             description: 'Khiêu khích tất cả kẻ địch xung quanh, buộc họ tấn công bạn trong 2 giây.',
-            icon: '😤',
+            icon: 'assets/icons/nemo_r.png',
             type: 'area',
             damageType: 'none',
             manaCost: [50, 55, 60, 65, 70],
@@ -202,7 +202,7 @@ const HeroNemo = {
         t: {
             name: 'Pháo Đài Bất Diệt',
             description: 'Tạo một vùng pháo đài trong 5 giây. Đồng đội trong vùng nhận giảm 30% sát thương và hồi máu mỗi giây.',
-            icon: '🏰',
+            icon: 'assets/icons/nemo_t.png',
             type: 'zone',
             damageType: 'none',
             baseHeal: [20, 35, 50],

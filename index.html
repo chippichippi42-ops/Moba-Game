@@ -26,6 +26,7 @@
                 
                 <div class="menu-buttons">
                     <button id="btnPlay" class="btn btn-primary">CHƠI NGAY</button>
+                    <button id="btnHowToPlay" class="btn btn-secondary">HƯỚNG DẪN</button>
                     <button id="btnSettings" class="btn btn-secondary">CÀI ĐẶT</button>
                     <button id="btnQuit" class="btn btn-secondary">THOÁT</button>
                 </div>
@@ -245,7 +246,18 @@
             <div id="fpsCounter" class="hidden">FPS: 60</div>
         </div>
     </div>
-    
+
+    <!-- How To Play Modal -->
+    <div id="howToPlayModal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="btnCloseHowToPlay" class="modal-close">&times;</button>
+            <h2 class="modal-title">How To Play</h2>
+            <div id="howToPlayContent" class="modal-body">
+                <p>Loading instructions...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Mobile Controls -->
     <div id="mobileControls" class="hidden">
         <div id="joystick" class="joystick">

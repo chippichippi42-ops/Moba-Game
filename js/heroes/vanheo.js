@@ -63,7 +63,7 @@ const HeroVanheo = {
         q: {
             name: 'Mũi Tên Xuyên',
             description: 'Bắn một mũi tên xuyên qua kẻ địch, gây sát thương cho tất cả mục tiêu trên đường đi.',
-            icon: '➡️',
+            icon: 'assets/icons/vanheo_q.png',
             type: 'skillshot',
             damageType: 'physical',
             baseDamage: [80, 120, 160, 200, 240],
@@ -112,7 +112,7 @@ const HeroVanheo = {
         e: {
             name: 'Mưa Tên',
             description: 'Bắn một loạt tên lên trời, tên rơi xuống vùng chỉ định sau 0.5 giây, gây sát thương và làm chậm.',
-            icon: '🌧️',
+            icon: 'assets/icons/vanheo_e.png',
             type: 'area',
             damageType: 'physical',
             baseDamage: [100, 150, 200, 250, 300],
@@ -163,7 +163,7 @@ const HeroVanheo = {
         r: {
             name: 'Lùi Bước',
             description: 'Nhảy lùi về phía sau và bắn một phát đạn gây sát thương. Nếu trúng tướng địch, giảm 2 giây hồi chiêu cho tất cả kỹ năng.',
-            icon: '↩️',
+            icon: 'assets/icons/vanheo_r.png',
             type: 'dash',
             damageType: 'physical',
             baseDamage: [60, 90, 120, 150, 180],
@@ -217,7 +217,7 @@ const HeroVanheo = {
         t: {
             name: 'Tên Trời Phạt',
             description: 'Sau 1 giây tích lũy, bắn một mũi tên khổng lồ xuyên toàn bản đồ, gây sát thương cực lớn cho mục tiêu đầu tiên và giảm dần cho các mục tiêu sau.',
-            icon: '💥',
+            icon: 'assets/icons/vanheo_t.png',
             type: 'global_skillshot',
             damageType: 'physical',
             baseDamage: [350, 500, 650],
