@@ -498,6 +498,49 @@ const Combat = {
     },
     
     /**
+     * Handle entity death event
+     * Called when minion, creature, or other entity dies
+     */
+    onEntityDeath(entity) {
+        if (!entity) return;
+        
+        // Handle different entity types
+        switch(entity.type) {
+            case 'minion':
+                this.handleMinionDeath(entity);
+                break;
+            case 'creature':
+                this.handleCreatureDeath(entity);
+                break;
+            case 'hero':
+                this.handleHeroDeath(entity);
+                break;
+        }
+    },
+    
+    /**
+     * Handle minion death
+     */
+    handleMinionDeath(minion) {
+        // Minion death handled by MinionManager
+        // This hook is for future combat event processing
+    },
+    
+    /**
+     * Handle creature death
+     */
+    handleCreatureDeath(creature) {
+        // Creature death handled by CreatureManager
+    },
+    
+    /**
+     * Handle hero death
+     */
+    handleHeroDeath(hero) {
+        // Hero death already handled elsewhere
+    },
+    
+    /**
      * Clear combat data
      */
     clear() {
