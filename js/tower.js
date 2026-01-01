@@ -697,26 +697,13 @@ class Tower {
             Game.onMainTowerDestroyed(this.team);
         }
 
-        // Announcement (avoid spurious kill feed during initialization)
+        // Only add kill feed if game has started properly (after 3 seconds)
         if (typeof Game !== 'undefined' && Game.gameTime > 3000) {
             const teamName = this.team === CONFIG.teams.BLUE ? 'BLUE' : 'RED';
-            const laneName = this.lane ? this.lane.toUpperCase() : null;
-            const towerTypeMap = {
-                outer: 'Outer Tower',
-                inner: 'Inner Tower',
-                inhibitor: 'Inhibitor',
-                main: 'Main Tower',
-            };
-            const towerTypeName = towerTypeMap[this.towerType] || this.name;
-            const formattedName = [teamName, laneName, towerTypeName].filter(Boolean).join(' ');
+            const laneName = this.lane ? this.lane.toUpperCase() : '';
+            const towerDisplayName = `${teamName} ${laneName} ${this.name}`.trim();
 
-            UI.addKillFeed(null, {
-                type: 'tower',
-                team: this.team,
-                lane: this.lane,
-                towerType: this.towerType,
-                name: formattedName,
-            }, 'tower');
+            UI.addKillFeed(null, towerDisplayName, 'tower');
         }
     }
 
