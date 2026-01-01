@@ -65,8 +65,12 @@ class TargetSelector {
     calculateTargetScore(target, hero, weights) {
         let score = 0;
         
+        // Safe helper to get max health
+        const getMaxHealth = (entity) => entity.stats?.maxHealth || entity.health || 100;
+        
         // Low HP factor
-        const healthPercent = target.health / target.stats.maxHealth;
+        const targetMaxHealth = getMaxHealth(target);
+        const healthPercent = (target.health || 0) / targetMaxHealth;
         score += (1 - healthPercent) * weights.lowHP * 100;
         
         // Threat factor
@@ -75,7 +79,8 @@ class TargetSelector {
         
         // Distance factor (prefer closer targets)
         const distance = Utils.distance(hero.x, hero.y, target.x, target.y);
-        const maxRange = hero.stats.attackRange * 2;
+        const heroAttackRange = hero.stats?.attackRange || 500;
+        const maxRange = heroAttackRange * 2;
         const distanceScore = 1 - Math.min(distance / maxRange, 1);
         score += distanceScore * weights.distance * 100;
         
@@ -94,15 +99,19 @@ class TargetSelector {
         const threatFactors = CONFIG.aiTargeting.threatFactors;
         let threat = 0;
         
-        // Damage output
-        const damageOutput = target.stats.attackDamage + target.stats.abilityPower * 0.5;
+        // Damage output with safe access
+        const targetAD = target.stats?.attackDamage || 50;
+        const targetAP = target.stats?.abilityPower || 0;
+        const damageOutput = targetAD + targetAP * 0.5;
         threat += damageOutput * threatFactors.damageOutput;
         
         // Cooldowns (simplified - check if abilities are ready)
         let cooldownScore = 0;
-        for (const key of ['q', 'e', 'r', 't']) {
-            if (target.abilityCooldowns[key] <= 0 && target.abilityLevels[key] > 0) {
-                cooldownScore += 1;
+        if (target.abilityCooldowns && target.abilityLevels) {
+            for (const key of ['q', 'e', 'r', 't']) {
+                if (target.abilityCooldowns[key] <= 0 && target.abilityLevels[key] > 0) {
+                    cooldownScore += 1;
+                }
             }
         }
         threat += cooldownScore * threatFactors.cooldowns * 10;
@@ -115,7 +124,7 @@ class TargetSelector {
         threat += positionScore * threatFactors.position * 100;
         
         // Itemization (simplified - just use level for now)
-        const itemizationScore = target.level / 15;
+        const itemizationScore = (target.level || 1) / 15;
         threat += itemizationScore * threatFactors.itemization * 100;
         
         return threat;
@@ -125,19 +134,23 @@ class TargetSelector {
         // Check if our abilities work well against this target
         let synergy = 0;
         
+        // Safe helper to get max health
+        const targetMaxHealth = target.stats?.maxHealth || target.health || 100;
+        
         // Check if target is low health and we have execute abilities
-        const healthPercent = target.health / target.stats.maxHealth;
-        if (healthPercent < 0.3) {
+        const healthPercent = (target.health || 0) / targetMaxHealth;
+        if (healthPercent < 0.3 && hero.heroData && hero.heroData.abilities) {
             for (const key of ['q', 'e', 'r', 't']) {
                 const ability = hero.heroData.abilities[key];
-                if (ability && ability.type === 'execute' && hero.abilityLevels[key] > 0) {
+                if (ability && ability.type === 'execute' && hero.abilityLevels && hero.abilityLevels[key] > 0) {
                     synergy += 0.5;
                 }
             }
         }
         
         // Check if target has high armor and we have armor penetration
-        if (target.stats.armor > 50) {
+        const targetArmor = target.stats?.armor || 0;
+        if (targetArmor > 50 && hero.heroData && hero.heroData.abilities) {
             for (const key of ['q', 'e', 'r', 't']) {
                 const ability = hero.heroData.abilities[key];
                 if (ability && ability.effects && ability.effects.includes('armor_penetration')) {
@@ -147,7 +160,8 @@ class TargetSelector {
         }
         
         // Check if target is magic resistant and we have magic penetration
-        if (target.stats.magicResist > 50) {
+        const targetMR = target.stats?.magicResist || 0;
+        if (targetMR > 50 && hero.heroData && hero.heroData.abilities) {
             for (const key of ['q', 'e', 'r', 't']) {
                 const ability = hero.heroData.abilities[key];
                 if (ability && ability.effects && ability.effects.includes('magic_penetration')) {
@@ -160,25 +174,29 @@ class TargetSelector {
     }
     
     canKillTarget(target, hero) {
-        // Calculate total damage output
-        let totalDamage = hero.stats.attackDamage * 3; // 3 auto attacks
+        // Calculate total damage output with safe access
+        const heroAD = hero.stats?.attackDamage || 50;
+        let totalDamage = heroAD * 3; // 3 auto attacks
         
         // Add ability damage
-        for (const key of ['q', 'e', 'r', 't']) {
-            if (hero.abilityCooldowns[key] <= 0 && hero.abilityLevels[key] > 0) {
-                const ability = hero.heroData.abilities[key];
-                if (ability) {
-                    const level = hero.abilityLevels[key];
-                    let damage = ability.baseDamage[level - 1] || 0;
-                    damage += (ability.adRatio || 0) * hero.stats.attackDamage;
-                    damage += (ability.apRatio || 0) * hero.stats.abilityPower;
-                    totalDamage += damage;
+        if (hero.abilityCooldowns && hero.abilityLevels && hero.heroData && hero.heroData.abilities) {
+            for (const key of ['q', 'e', 'r', 't']) {
+                if (hero.abilityCooldowns[key] <= 0 && hero.abilityLevels[key] > 0) {
+                    const ability = hero.heroData.abilities[key];
+                    if (ability) {
+                        const level = hero.abilityLevels[key];
+                        let damage = (ability.baseDamage && ability.baseDamage[level - 1]) || 0;
+                        damage += (ability.adRatio || 0) * heroAD;
+                        damage += (ability.apRatio || 0) * (hero.stats?.abilityPower || 0);
+                        totalDamage += damage;
+                    }
                 }
             }
         }
         
         // Check if we can kill (with 20% buffer)
-        return totalDamage > target.health * 1.2;
+        const targetHealth = target.health || 100;
+        return totalDamage > targetHealth * 1.2;
     }
     
     // Get current target

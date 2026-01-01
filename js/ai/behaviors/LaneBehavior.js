@@ -66,11 +66,14 @@ class LaneBehavior {
         if (now - this.lastFarmTime < this.farmCooldown) return;
         
         const hero = this.controller.hero;
-        const nearbyMinions = MinionManager.getMinionsInRange(hero.x, hero.y, hero.stats.attackRange + 100)
+        const heroAttackRange = hero.stats?.attackRange || 500;
+        const heroAttackDamage = hero.stats?.attackDamage || 50;
+        
+        const nearbyMinions = MinionManager.getMinionsInRange(hero.x, hero.y, heroAttackRange + 100)
             .filter(m => m.team !== hero.team);
         
         const lastHitTarget = nearbyMinions.find(m => 
-            m.health <= hero.stats.attackDamage * 1.2
+            m.health <= heroAttackDamage * 1.2
         );
         
         if (lastHitTarget) {
@@ -80,7 +83,7 @@ class LaneBehavior {
             
             if (shouldLastHit) {
                 const dist = Utils.distance(hero.x, hero.y, lastHitTarget.x, lastHitTarget.y);
-                if (dist <= hero.stats.attackRange + lastHitTarget.radius) {
+                if (dist <= heroAttackRange + (lastHitTarget.radius || 20)) {
                     hero.basicAttack(lastHitTarget);
                     this.lastFarmTime = now;
                     return true;
@@ -93,7 +96,9 @@ class LaneBehavior {
     
     farmMinions() {
         const hero = this.controller.hero;
-        const nearbyMinions = MinionManager.getMinionsInRange(hero.x, hero.y, hero.stats.attackRange + 100)
+        const heroAttackRange = hero.stats?.attackRange || 500;
+        
+        const nearbyMinions = MinionManager.getMinionsInRange(hero.x, hero.y, heroAttackRange + 100)
             .filter(m => m.team !== hero.team);
         
         if (nearbyMinions.length === 0) return;
@@ -117,7 +122,8 @@ class LaneBehavior {
             }
             
             // Bonus for low health minions
-            const healthPercent = minion.health / (minion.type === 'siege' ? 800 : minion.type === 'ranged' ? 280 : 450);
+            const minionMaxHealth = minion.type === 'siege' ? 800 : minion.type === 'ranged' ? 280 : 450;
+            const healthPercent = (minion.health || 0) / minionMaxHealth;
             priority += (1 - healthPercent) * 0.2;
             
             if (priority > bestPriority) {
@@ -128,7 +134,7 @@ class LaneBehavior {
         
         if (bestMinion) {
             const dist = Utils.distance(hero.x, hero.y, bestMinion.x, bestMinion.y);
-            if (dist <= hero.stats.attackRange + bestMinion.radius) {
+            if (dist <= heroAttackRange + (bestMinion.radius || 20)) {
                 hero.basicAttack(bestMinion);
             } else {
                 // Move towards the minion
@@ -146,7 +152,8 @@ class LaneBehavior {
         const jungleRate = this.controller.getDifficultySetting('jungleRate');
         
         // Don't jungle if low health
-        const healthPercent = hero.health / hero.stats.maxHealth;
+        const maxHealth = hero.stats?.maxHealth || hero.health || 100;
+        const healthPercent = (hero.health || 0) / maxHealth;
         if (healthPercent < 0.5) return false;
         
         // Check if there are enemy minions nearby

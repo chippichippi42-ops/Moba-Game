@@ -128,8 +128,12 @@ class StrategicAnalyzer {
         
         for (const hero of heroes) {
             // Simple strength calculation based on level and health
-            strength += hero.level * 100;
-            strength += (hero.health / hero.stats.maxHealth) * 50;
+            const heroLevel = hero.level || 1;
+            const maxHealth = hero.stats?.maxHealth || hero.health || 100;
+            const healthPercent = (hero.health || 0) / maxHealth;
+            
+            strength += heroLevel * 100;
+            strength += healthPercent * 50;
             
             // Bonus for certain roles
             if (hero.role === 'tank') strength += 150;

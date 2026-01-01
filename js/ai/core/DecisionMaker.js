@@ -50,11 +50,17 @@ class DecisionMaker {
         const nearbyAllies = Combat.getAlliesInRange(this.controller.hero, 1000);
         const nearbyMinions = MinionManager.getMinionsInRange(this.controller.hero.x, this.controller.hero.y, 600);
         
-        const healthPercent = this.controller.hero.health / this.controller.hero.stats.maxHealth;
-        const manaPercent = this.controller.hero.mana / this.controller.hero.stats.maxMana;
+        const hero = this.controller.hero;
+        const maxHealth = hero.stats?.maxHealth || hero.health || 100;
+        const maxMana = hero.stats?.maxMana || hero.mana || 100;
+        const healthPercent = (hero.health || 0) / maxHealth;
+        const manaPercent = (hero.mana || 0) / maxMana;
         
         const enemyHeroes = nearbyEnemies.filter(e => e.type === 'hero');
-        const lowHpEnemies = enemyHeroes.filter(e => e.health / e.stats.maxHealth < 0.3);
+        const lowHpEnemies = enemyHeroes.filter(e => {
+            const enemyMaxHealth = e.stats?.maxHealth || e.health || 100;
+            return (e.health || 0) / enemyMaxHealth < 0.3;
+        });
         
         const nearbyEnemyTower = TowerManager.towers.find(t => 
             t.team !== myTeam && t.isAlive && 
@@ -226,23 +232,31 @@ class DecisionMaker {
     calculateKillPotential(target) {
         if (!target || !target.isAlive) return false;
         
-        let totalDamage = 0;
-        totalDamage += this.controller.hero.stats.attackDamage * 3;
+        const hero = this.controller.hero;
+        const heroAD = hero.stats?.attackDamage || 50;
+        const heroAP = hero.stats?.abilityPower || 0;
         
-        for (const key of ['q', 'e', 'r', 't']) {
-            if (this.controller.hero.abilityLevels[key] > 0 && this.controller.hero.abilityCooldowns[key] <= 0) {
-                const ability = this.controller.hero.heroData.abilities[key];
-                const level = this.controller.hero.abilityLevels[key];
-                
-                let damage = ability.baseDamage[level - 1] || 0;
-                damage += (ability.adRatio || 0) * this.controller.hero.stats.attackDamage;
-                damage += (ability.apRatio || 0) * this.controller.hero.stats.abilityPower;
-                
-                totalDamage += damage;
+        let totalDamage = 0;
+        totalDamage += heroAD * 3;
+        
+        if (hero.abilityLevels && hero.abilityCooldowns && hero.heroData && hero.heroData.abilities) {
+            for (const key of ['q', 'e', 'r', 't']) {
+                if (hero.abilityLevels[key] > 0 && hero.abilityCooldowns[key] <= 0) {
+                    const ability = hero.heroData.abilities[key];
+                    if (!ability) continue;
+                    
+                    const level = hero.abilityLevels[key];
+                    
+                    let damage = (ability.baseDamage && ability.baseDamage[level - 1]) || 0;
+                    damage += (ability.adRatio || 0) * heroAD;
+                    damage += (ability.apRatio || 0) * heroAP;
+                    
+                    totalDamage += damage;
+                }
             }
         }
         
-        return totalDamage > target.health * 1.2;
+        return totalDamage > (target.health || 0) * 1.2;
     }
     
     updateTarget(situation) {
