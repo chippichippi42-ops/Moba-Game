@@ -253,40 +253,45 @@ const GameMap = {
         const w = this.width;
         const h = this.height;
 
-        // Increased tower spacing by 17.5% (1.175x multiplier)
-        // Original: 1500, 2800, 4200 -> New: 1760, 3290, 4940
+        // Get lane distances from config
+        const topDist = CONFIG.tower.towerLaneDistances.top;
+        const midDist = CONFIG.tower.towerLaneDistances.mid;
+        const botDist = CONFIG.tower.towerLaneDistances.bot;
+
+        // Blue team towers (bottom-left corner)
         this.towerPositions.blue.main = { x: 600, y: h - 600 };
         this.towerPositions.blue.top = [
-            { x: 400, y: h - 1760 },
-            { x: 400, y: h - 3290 },
-            { x: 400, y: h - 4940 },
+            { x: 400, y: h - (600 + topDist) },
+            { x: 400, y: h - (600 + topDist * 2) },
+            { x: 400, y: h - (600 + topDist * 3) },
         ];
         this.towerPositions.blue.mid = [
-            { x: 1760, y: h - 1760 },
-            { x: 2820, y: h - 2820 },
-            { x: 3875, y: h - 3875 },
+            { x: 600 + midDist, y: h - (600 + midDist) },
+            { x: 600 + midDist * 2, y: h - (600 + midDist * 2) },
+            { x: 600 + midDist * 3, y: h - (600 + midDist * 3) },
         ];
         this.towerPositions.blue.bot = [
-            { x: 1760, y: h - 400 },
-            { x: 3290, y: h - 400 },
-            { x: 4940, y: h - 400 },
+            { x: 600 + botDist, y: h - 400 },
+            { x: 600 + botDist * 2, y: h - 400 },
+            { x: 600 + botDist * 3, y: h - 400 },
         ];
 
+        // Red team towers (top-right corner)
         this.towerPositions.red.main = { x: w - 600, y: 600 };
         this.towerPositions.red.top = [
-            { x: w - 1760, y: 400 },
-            { x: w - 3290, y: 400 },
-            { x: w - 4940, y: 400 },
+            { x: w - (600 + topDist), y: 400 },
+            { x: w - (600 + topDist * 2), y: 400 },
+            { x: w - (600 + topDist * 3), y: 400 },
         ];
         this.towerPositions.red.mid = [
-            { x: w - 1760, y: 1760 },
-            { x: w - 2820, y: 2820 },
-            { x: w - 3875, y: 3875 },
+            { x: w - (600 + midDist), y: 600 + midDist },
+            { x: w - (600 + midDist * 2), y: 600 + midDist * 2 },
+            { x: w - (600 + midDist * 3), y: 600 + midDist * 3 },
         ];
         this.towerPositions.red.bot = [
-            { x: w - 400, y: 1760 },
-            { x: w - 400, y: 3290 },
-            { x: w - 400, y: 4940 },
+            { x: w - 400, y: 600 + botDist },
+            { x: w - 400, y: 600 + botDist * 2 },
+            { x: w - 400, y: 600 + botDist * 3 },
         ];
     },
     

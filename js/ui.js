@@ -562,35 +562,44 @@ const UI = {
         if (player && player.heroData && player.heroData.abilities[key]) {
             const ability = player.heroData.abilities[key];
             if (ability.icon) {
-                const img = new Image();
-                
-                // Add error handler BEFORE setting src
-                img.addEventListener('error', () => {
-                    // Silently fallback to text mode
-                    if (!iconLoaded) {
+                // Check if file exists BEFORE attempting to load
+                fetch(ability.icon, { method: 'HEAD' })
+                    .then(response => {
+                        if (response.ok) {
+                            // File exists, load it
+                            const img = new Image();
+                            
+                            img.addEventListener('load', () => {
+                                iconLoaded = true;
+                                skillIcon.innerHTML = '';
+                                skillIcon.appendChild(img);
+                                skillIcon.style.background = 'transparent';
+                            }, { once: true });
+                            
+                            img.addEventListener('error', () => {
+                                // Fallback if load fails
+                                if (!iconLoaded) {
+                                    skillIcon.textContent = key.toUpperCase();
+                                }
+                            }, { once: true });
+                            
+                            img.style.cssText = `
+                                width: 100%;
+                                height: 100%;
+                                object-fit: cover;
+                                display: block;
+                            `;
+                            img.src = ability.icon;
+                            img.alt = key.toUpperCase();
+                        } else {
+                            // File doesn't exist, use text fallback immediately
+                            skillIcon.textContent = key.toUpperCase();
+                        }
+                    })
+                    .catch(() => {
+                        // File check failed, use text fallback immediately
                         skillIcon.textContent = key.toUpperCase();
-                    }
-                }, { once: true });
-                
-                // Add load handler
-                img.addEventListener('load', () => {
-                    iconLoaded = true;
-                    skillIcon.innerHTML = '';
-                    skillIcon.appendChild(img);
-                    skillIcon.style.background = 'transparent';
-                }, { once: true });
-                
-                // Set image styling
-                img.style.cssText = `
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    display: block;
-                `;
-                
-                // Set src AFTER all handlers attached
-                img.src = ability.icon;
-                img.alt = key.toUpperCase();
+                    });
             } else {
                 skillIcon.textContent = key.toUpperCase();
             }
@@ -1314,11 +1323,11 @@ const UI = {
         }
     },
     
-    addKillFeed(killer, victim, type) {
+    addKillFeed(killer, victim, type, team = null) {
         let killerName = 'Unknown';
         let killerTeam = null;
         let killerType = 'unknown';
-        
+
         // Check killer type to get proper name
         if (!killer) {
             killerName = 'Unknown';
@@ -1346,13 +1355,18 @@ const UI = {
             killerName = killer.playerName || killer.name || 'Unknown';
             killerTeam = killer.team;
         }
-        
+
         let victimName = typeof victim === 'string' ? victim : (victim?.playerName || victim?.name || 'Unknown');
         let victimTeam = typeof victim === 'string' ? null : victim?.team;
         let victimType = typeof victim === 'string' ? 'unknown' : (victim?.type || 'unknown');
-        
-        const entry = { 
-            killer: killerName, 
+
+        // For tower deaths with team parameter, override victimTeam
+        if (type === 'tower' && team !== null) {
+            victimTeam = team;
+        }
+
+        const entry = {
+            killer: killerName,
             killerTeam: killerTeam,
             killerType: killerType,
             killerIsPlayer: killer?.isPlayer || false,
@@ -1360,8 +1374,8 @@ const UI = {
             victimTeam: victimTeam,
             victimType: victimType,
             victimIsPlayer: victim?.isPlayer || false,
-            type, 
-            timestamp: Date.now() 
+            type,
+            timestamp: Date.now()
         };
         this.killFeed.unshift(entry);
         if (this.killFeed.length > this.maxKillFeedEntries) this.killFeed.pop();
@@ -1399,13 +1413,23 @@ const UI = {
                 <span class="victim kill-victim-strikethrough" style="color: ${victimColor};">${entry.victim}</span>
             `;
         } else if (entry.type === 'tower') {
-            const teamColor = entry.victimTeam === CONFIG.teams.BLUE
-                ? '#4488FF'
-                : (entry.victimTeam === CONFIG.teams.RED ? '#FF4444' : victimColor);
-            const victimName = entry.victim;
-            
+            // Determine team color
+            let teamColor = '#FFFFFF';
+            if (entry.victimTeam === CONFIG.teams.BLUE) {
+                teamColor = '#4488FF'; // Blue color
+            } else if (entry.victimTeam === CONFIG.teams.RED) {
+                teamColor = '#FF4444'; // Red color
+            }
+
+            // Extract team name and remaining tower info
+            const parts = entry.victim.split(' ');
+            const teamName = parts[0]; // "RED" or "BLUE"
+            const remainingName = parts.slice(1).join(' '); // "MID Inhibitor"
+
+            // Display with colored team name
             div.innerHTML = `
-                <span class="victim kill-victim-strikethrough" style="color: ${teamColor};">${victimName}</span>
+                <span class="victim" style="color: ${teamColor}; font-weight: bold;">${teamName}</span>
+                <span class="victim kill-victim-strikethrough" style="color: #CCCCCC; margin: 0 4px;">${remainingName}</span>
                 <span class="action">was destroyed</span>
             `;
         }

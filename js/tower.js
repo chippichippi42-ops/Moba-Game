@@ -8,6 +8,7 @@
 const TowerManager = {
     towers: [],
     bases: [],
+    isInitialized: false,  // Add initialization flag
     
     /**
      * Khởi tạo
@@ -16,6 +17,7 @@ const TowerManager = {
         this.towers = [];
         this.bases = [];
         this.createTowers();
+        this.isInitialized = true;  // Set to true after setup complete
         this.createBases();
     },
     
@@ -697,13 +699,18 @@ class Tower {
             Game.onMainTowerDestroyed(this.team);
         }
 
-        // Only add kill feed if game has started properly (after 3 seconds)
-        if (typeof Game !== 'undefined' && Game.gameTime > 3000) {
+        // ONLY add kill feed if initialization complete AND game running > 1 second
+        if (TowerManager.isInitialized && Game && Game.gameTime && Game.gameTime > 1000) {
             const teamName = this.team === CONFIG.teams.BLUE ? 'BLUE' : 'RED';
             const laneName = this.lane ? this.lane.toUpperCase() : '';
-            const towerDisplayName = `${teamName} ${laneName} ${this.name}`.trim();
 
-            UI.addKillFeed(null, towerDisplayName, 'tower');
+            // Check if tower name already contains lane name to avoid duplicates
+            const nameAlreadyHasLane = this.name.toUpperCase().includes(laneName);
+            const towerDisplayName = nameAlreadyHasLane
+                ? `${teamName} ${this.name}`
+                : (laneName ? `${teamName} ${laneName} ${this.name}` : `${teamName} ${this.name}`);
+
+            UI.addKillFeed(null, towerDisplayName, 'tower', this.team);
         }
     }
 
