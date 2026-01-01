@@ -724,11 +724,13 @@ const UI = {
             });
         }
         
-        if (this.elements.showCoordinates) {
-            this.elements.showCoordinates.addEventListener('change', (e) => {
+        const showCoordsCheckbox = document.getElementById('showCoordinates');
+        if (showCoordsCheckbox) {
+            showCoordsCheckbox.addEventListener('change', (e) => {
                 this.settings.showCoordinates = e.target.checked;
-                this.elements.coordinatesDisplay?.classList.toggle('hidden', !e.target.checked);
                 this.saveSettings();
+                // Gọi updateCoordinates ngay để refresh UI
+                this.updateCoordinates();
             });
         }
     },
@@ -785,9 +787,9 @@ const UI = {
             if (display) display.textContent = this.settings.cameraSensitivity;
         }
         
-        if (this.elements.showCoordinates) {
-            this.elements.showCoordinates.checked = this.settings.showCoordinates || false;
-            this.elements.coordinatesDisplay?.classList.toggle('hidden', !this.settings.showCoordinates);
+        const showCoordsCheckbox = document.getElementById('showCoordinates');
+        if (showCoordsCheckbox) {
+            showCoordsCheckbox.checked = this.settings.showCoordinates || false;
         }
     },
     
@@ -807,12 +809,27 @@ const UI = {
     },
     
     updateCoordinates() {
-        if (!this.settings.showCoordinates) return;
+        // Luôn cập nhật element từ DOM, không dùng cache
+        const coordsDisplay = document.getElementById('coordinatesDisplay');
+        const playerCoords = document.getElementById('playerCoords');
+        
+        if (!coordsDisplay) return;
         
         const player = HeroManager.player;
-        if (!player || !this.elements.playerCoords) return;
+        if (!player) return;
         
-        this.elements.playerCoords.textContent = `X: ${Math.round(player.x)} Y: ${Math.round(player.y)}`;
+        // Cập nhật text tọa độ
+        if (playerCoords) {
+            playerCoords.textContent = `X: ${Math.round(player.x)} Y: ${Math.round(player.y)}`;
+        }
+        
+        // Kiểm tra checkbox trực tiếp từ DOM
+        const checkbox = document.getElementById('showCoordinates');
+        if (checkbox && checkbox.checked) {
+            coordsDisplay.classList.remove('hidden');
+        } else {
+            coordsDisplay.classList.add('hidden');
+        }
     },
     
     updateKDA() {

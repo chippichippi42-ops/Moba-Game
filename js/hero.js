@@ -1000,35 +1000,56 @@ class Hero {
      * Die
      */
     die(killer) {
-            this.isAlive = false;
-            this.isDead = true;
-            this.deaths++;
-            
-            // Calculate respawn time
-            const gameMinutes = Game.gameTime / 60000;
-            this.respawnTimer = CONFIG.game.respawnBaseTime + gameMinutes * CONFIG.game.respawnTimePerMinute;
-            
-            // Calculate exp reward for hero kill
-            const heroKillExp = 100 + this.level * 20;
-            
-            // Distribute experience using new system
-            Combat.distributeExperience(this, killer, heroKillExp);
-            
-            // Give kill credit
-            if (killer && killer.type === 'hero') {
-                killer.kills++;
-            }
-            
-            // Get and credit assists
-            Combat.getAssists(this, killer);
-            
-            // Death effect
-            EffectManager.createExplosion(this.x, this.y, 50, this.color);
-            Camera.shake(10, 300);
-            
-            // Announcement
-            UI.addKillFeed(killer, this, 'kill');
+        this.isAlive = false;
+        this.isDead = true;
+        this.deaths++;
+        
+        // Calculate respawn time
+        const gameMinutes = Game.gameTime / 60000;
+        this.respawnTimer = CONFIG.game.respawnBaseTime + gameMinutes * CONFIG.game.respawnTimePerMinute;
+        
+        // Calculate exp reward for hero kill
+        const heroKillExp = 100 + this.level * 20;
+        
+        // Distribute experience using new system
+        Combat.distributeExperience(this, killer, heroKillExp);
+        
+        // === NEW KILL CREDIT LOGIC ===
+        // Bước 1: Lấy tất cả tướng tham gia trong 5s cuối
+        const participantsData = Combat.getHeroesInLastFiveSecondsWithDamage(this, killer);
+        
+        // Bước 2: Xác định tướng nhận kill credit
+        let creditHero = null;
+        
+        if (killer && killer.type === 'hero') {
+            // Nếu killer là tướng → killer nhận kill
+            creditHero = killer;
+        } else if (participantsData.length > 0) {
+            // Nếu killer là non-hero (trụ/lính/quái) nhưng có tướng tham gia
+            // → tướng gây sát thương GẦN NHẤT (timestamp gần nhất) nhận kill
+            creditHero = Combat.getMostRecentDamageHero(participantsData);
         }
+        
+        // Bước 3: Cộng kill cho tướng nhận credit
+        if (creditHero) {
+            creditHero.kills++;
+        }
+        
+        // Bước 4: Cộng assists cho những tướng khác
+        const heroes = participantsData.map(p => p.hero);
+        for (const hero of heroes) {
+            if (hero !== creditHero) {
+                hero.assists++;
+            }
+        }
+        
+        // Death effect
+        EffectManager.createExplosion(this.x, this.y, 50, this.color);
+        Camera.shake(10, 300);
+        
+        // Announcement - pass tướng nhận credit thực sự
+        UI.addKillFeed(creditHero, this, 'kill');
+    }
     
     /**
      * Respawn
