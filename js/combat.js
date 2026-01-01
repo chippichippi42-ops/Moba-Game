@@ -150,9 +150,6 @@ const Combat = {
             }
         }
         
-        // Clear log sau khi dùng xong
-        this.damageLog.delete(key);
-        
         return participantsData;
     },
     

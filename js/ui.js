@@ -1132,18 +1132,24 @@ const UI = {
     addKillFeed(killer, victim, type) {
         let killerName = 'Unknown';
         
-        if (killer) {
-            if (killer.playerName) {
-                killerName = killer.playerName;
-            } else if (killer.name) {
-                killerName = killer.name;
-            } else if (killer.type === 'creature') {
-                killerName = killer.name || 'Monster';
-            } else if (killer.type === 'tower') {
-                killerName = 'Tower';
-            } else if (killer.type === 'minion') {
-                killerName = 'Minion';
-            }
+        // Check killer type to get proper name
+        if (!killer) {
+            killerName = 'Unknown';
+        } else if (killer.type === 'hero') {
+            // Hero: use playerName or name
+            killerName = killer.playerName || killer.name || 'Unknown';
+        } else if (killer.type === 'tower') {
+            // Tower: use name or "Tower"
+            killerName = killer.name || 'Tower';
+        } else if (killer.type === 'minion') {
+            // Minion: use name or "Minion"
+            killerName = killer.name || 'Minion';
+        } else if (killer.type === 'creature') {
+            // Creature: use name or "Monster"
+            killerName = killer.name || 'Monster';
+        } else {
+            // Fallback: try to get name or playerName
+            killerName = killer.playerName || killer.name || 'Unknown';
         }
         
         let victimName = typeof victim === 'string' ? victim : (victim?.playerName || victim?.name || 'Unknown');
