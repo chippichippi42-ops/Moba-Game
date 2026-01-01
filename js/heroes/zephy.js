@@ -75,6 +75,16 @@ const HeroZephy = {
             radius: 280,
             maxLevel: 5,
 
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Burst',
+            priority: 3,
+            minDamage: 110,
+            isEscape: false,
+            isCC: false,
+            canChain: true,
+            isSustain: false,
+            isEngage: false,
+
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] + (hero.stats.attackDamage * this.adRatio);
                 
@@ -107,6 +117,16 @@ const HeroZephy = {
             dashDistance: 450,
             knockupDuration: 500,
             maxLevel: 5,
+
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'CC',
+            priority: 2,
+            minDamage: 90,
+            isEscape: false,
+            isCC: true,
+            canChain: true,
+            isSustain: false,
+            isEngage: true,
 
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] + (hero.stats.attackDamage * this.adRatio);
@@ -147,6 +167,16 @@ const HeroZephy = {
             lifeSteal: 0.25, // 25% of damage dealt
             maxLevel: 5,
 
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Burst',
+            priority: 2,
+            minDamage: 50,
+            isEscape: false,
+            isCC: false,
+            canChain: true,
+            isSustain: true,
+            isEngage: false,
+
             execute(hero, targetX, targetY, level) {
                 const damagePerTick = this.baseDamage[level - 1] + (hero.stats.attackDamage * this.adRatio);
                 
@@ -184,6 +214,16 @@ const HeroZephy = {
             slowPercent: 50,
             slowDuration: 2000,
             maxLevel: 3,
+
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Engage',
+            priority: 1,
+            minDamage: 250,
+            isEscape: false,
+            isCC: true,
+            canChain: true,
+            isSustain: false,
+            isEngage: true,
 
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] + (hero.stats.attackDamage * this.adRatio);

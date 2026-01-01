@@ -78,6 +78,16 @@ const HeroBalametany = {
             markBonusDamage: 0.2, // 20% bonus damage
             maxLevel: 5,
 
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Burst',
+            priority: 3,
+            minDamage: 80,
+            isEscape: false,
+            isCC: false,
+            canChain: true,
+            isSustain: false,
+            isEngage: false,
+
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] + (hero.stats.attackDamage * this.adRatio);
                 const angle = Utils.angleBetweenPoints(hero.x, hero.y, targetX, targetY);
@@ -124,6 +134,16 @@ const HeroBalametany = {
             dashDistance: 450,
             maxLevel: 5,
 
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Mobility',
+            priority: 2,
+            minDamage: 70,
+            isEscape: true,
+            isCC: false,
+            canChain: true,
+            isSustain: false,
+            isEngage: true,
+
             execute(hero, targetX, targetY, level) {
                 const damage = this.baseDamage[level - 1] + (hero.stats.attackDamage * this.adRatio);
                 const angle = Utils.angleBetweenPoints(hero.x, hero.y, targetX, targetY);
@@ -154,6 +174,16 @@ const HeroBalametany = {
             duration: 3000,
             speedBoost: 0.3, // 30%
             maxLevel: 5,
+
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Escape',
+            priority: 4,
+            minDamage: 0,
+            isEscape: true,
+            isCC: false,
+            canChain: true,
+            isSustain: false,
+            isEngage: true,
 
             execute(hero, targetX, targetY, level) {
                 return {
@@ -186,6 +216,16 @@ const HeroBalametany = {
             guaranteedCrit: true,
             resetWindow: 5000,
             maxLevel: 3,
+
+            // NEW FIELDS FOR AI SYSTEM
+            abilityType: 'Burst',
+            priority: 1,
+            minDamage: 250,
+            isEscape: false,
+            isCC: false,
+            canChain: true,
+            isSustain: false,
+            isEngage: true,
 
             execute(hero, target, level) {
                 if (!target || target.type !== 'hero' || target.team === hero.team) {
