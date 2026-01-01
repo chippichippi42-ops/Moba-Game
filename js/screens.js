@@ -25,6 +25,7 @@ const Screens = {
         this.populateHeroGrid();
         this.populateSpellGrid();
         this.loadPlayerName();
+        this.loadHowToPlayContent();
     },
     
     /**
@@ -83,150 +84,173 @@ const Screens = {
         return Utils.randomItem(available);
     },
     
-	/**
-	 * Setup event listeners - UPDATED
-	 */
-	setupEventListeners() {
-		// Start screen
-		document.getElementById('btnPlay')?.addEventListener('click', () => {
-			const nameInput = document.getElementById('playerNameInput');
-			if (nameInput) {
-				this.savePlayerName(nameInput.value.trim());
-			}
-			this.showScreen('pregame');
-			
-			if (typeof AudioManager !== 'undefined') {
-				AudioManager.resume();
-			}
-		});
-		
-		document.getElementById('btnSettings')?.addEventListener('click', () => {
-			this.previousScreen = this.currentScreen;
-			this.showScreen('settings');
-		});
-		
-		document.getElementById('btnQuit')?.addEventListener('click', () => {
-			alert('Cảm ơn bạn đã chơi MOBA Arena!');
-		});
-		
-		document.getElementById('playerNameInput')?.addEventListener('change', (e) => {
-			this.savePlayerName(e.target.value.trim());
-		});
-		
-		// Pre-game screen
-		document.getElementById('btnStartGame')?.addEventListener('click', () => {
-			this.startGame();
-		});
-		
-		document.getElementById('btnBackToMenu')?.addEventListener('click', () => {
-			this.showScreen('start');
-		});
-		
-		document.getElementById('allyDifficulty')?.addEventListener('change', (e) => {
-			this.allyDifficulty = e.target.value;
-		});
-		
-		document.getElementById('enemyDifficulty')?.addEventListener('change', (e) => {
-			this.enemyDifficulty = e.target.value;
-		});
-		
-		// Settings screen - UPDATED
-		document.getElementById('btnCloseSettings')?.addEventListener('click', () => {
-			this.closeSettings();
-		});
-		
-		// Pause screen
-		document.getElementById('btnResume')?.addEventListener('click', () => {
-			this.resumeFromPause();
-		});
-		
-		// Pause settings - UPDATED
-		document.getElementById('btnPauseSettings')?.addEventListener('click', () => {
-			this.previousScreen = 'pause';
-			this.showScreen('settings');
-		});
-		
-		document.getElementById('btnExitGame')?.addEventListener('click', () => {
-			Game.stop();
-			this.hideScreen('pause');
-			this.showScreen('start');
-			UI.hideIngameUI();
-			
-			if (typeof AudioManager !== 'undefined') {
-				AudioManager.stopMusic();
-			}
-		});
-		
-		// Game over screen
-		document.getElementById('btnPlayAgain')?.addEventListener('click', () => {
-			this.hideScreen('gameover');
-			this.showScreen('pregame');
-		});
-		
-		document.getElementById('btnBackToMenuEnd')?.addEventListener('click', () => {
-			this.hideScreen('gameover');
-			this.showScreen('start');
-		});
-		
-		// === NEW: ESC key handler ===
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape') {
-				this.handleEscapeKey();
-			}
-		});
-	},
-	
-	/**
-	 * Handle ESC key press - NEW
-	 */
-	handleEscapeKey() {
-		// Nếu đang ở settings
-		if (this.currentScreen === 'settings') {
-			this.closeSettings();
-			return;
-		}
-		
-		// Nếu đang ở pause
-		if (this.currentScreen === 'pause') {
-			this.resumeFromPause();
-			return;
-		}
-		
-		// Nếu game đang chạy và không pause
-		if (Game.isRunning && !Game.isPaused && !Game.isGameOver) {
-			Game.pause();
-		}
-	},
-	
-	/**
-	 * Close settings - FIXED
-	 */
-	closeSettings() {
-		this.hideScreen('settings');
-		
-		if (this.previousScreen === 'pause') {
-			this.showScreen('pause');
-			// KHÔNG hiện UI vì vẫn đang pause
-		} else if (Game.isRunning && !Game.isPaused) {
-			UI.showIngameUI();
-			MinionManager.showCountdownForResume();
-		} else if (!Game.isRunning) {
-			this.showScreen('start');
-		}
-		this.previousScreen = null;
-	},
+    /**
+     * Setup event listeners - UPDATED
+     */
+    setupEventListeners() {
+        // Start screen
+        document.getElementById('btnPlay')?.addEventListener('click', () => {
+            const nameInput = document.getElementById('playerNameInput');
+            if (nameInput) {
+                this.savePlayerName(nameInput.value.trim());
+            }
+            this.showScreen('pregame');
+            
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.resume();
+            }
+        });
+        
+        document.getElementById('btnSettings')?.addEventListener('click', () => {
+            this.previousScreen = this.currentScreen;
+            this.showScreen('settings');
+        });
+        
+        document.getElementById('btnQuit')?.addEventListener('click', () => {
+            alert('Cảm ơn bạn đã chơi MOBA Arena!');
+        });
+        
+        document.getElementById('playerNameInput')?.addEventListener('change', (e) => {
+            this.savePlayerName(e.target.value.trim());
+        });
+        
+        // How To Play modal
+        document.getElementById('btnHowToPlay')?.addEventListener('click', () => {
+            this.showHowToPlayModal();
+        });
+        
+        document.getElementById('btnCloseHowToPlay')?.addEventListener('click', () => {
+            this.closeHowToPlayModal();
+        });
+        
+        document.getElementById('howToPlayModal')?.querySelector('.modal-overlay')?.addEventListener('click', () => {
+            this.closeHowToPlayModal();
+        });
+        
+        // ESC key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('howToPlayModal');
+                if (modal && modal.classList.contains('active')) {
+                    this.closeHowToPlayModal();
+                }
+            }
+        });
+        
+        // Pre-game screen
+        document.getElementById('btnStartGame')?.addEventListener('click', () => {
+            this.startGame();
+        });
+        
+        document.getElementById('btnBackToMenu')?.addEventListener('click', () => {
+            this.showScreen('start');
+        });
+        
+        document.getElementById('allyDifficulty')?.addEventListener('change', (e) => {
+            this.allyDifficulty = e.target.value;
+        });
+        
+        document.getElementById('enemyDifficulty')?.addEventListener('change', (e) => {
+            this.enemyDifficulty = e.target.value;
+        });
+        
+        // Settings screen - UPDATED
+        document.getElementById('btnCloseSettings')?.addEventListener('click', () => {
+            this.closeSettings();
+        });
+        
+        // Pause screen
+        document.getElementById('btnResume')?.addEventListener('click', () => {
+            this.resumeFromPause();
+        });
+        
+        // Pause settings - UPDATED
+        document.getElementById('btnPauseSettings')?.addEventListener('click', () => {
+            this.previousScreen = 'pause';
+            this.showScreen('settings');
+        });
+        
+        document.getElementById('btnExitGame')?.addEventListener('click', () => {
+            Game.stop();
+            this.hideScreen('pause');
+            this.showScreen('start');
+            UI.hideIngameUI();
+            
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.stopMusic();
+            }
+        });
+        
+        // Game over screen
+        document.getElementById('btnPlayAgain')?.addEventListener('click', () => {
+            this.hideScreen('gameover');
+            this.showScreen('pregame');
+        });
+        
+        document.getElementById('btnBackToMenuEnd')?.addEventListener('click', () => {
+            this.hideScreen('gameover');
+            this.showScreen('start');
+        });
+        
+        // === NEW: ESC key handler ===
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.handleEscapeKey();
+            }
+        });
+    },
+    
+    /**
+     * Handle ESC key press - NEW
+     */
+    handleEscapeKey() {
+        // Nếu đang ở settings
+        if (this.currentScreen === 'settings') {
+            this.closeSettings();
+            return;
+        }
+        
+        // Nếu đang ở pause
+        if (this.currentScreen === 'pause') {
+            this.resumeFromPause();
+            return;
+        }
+        
+        // Nếu game đang chạy và không pause
+        if (Game.isRunning && !Game.isPaused && !Game.isGameOver) {
+            Game.pause();
+        }
+    },
+    
+    /**
+     * Close settings - FIXED
+     */
+    closeSettings() {
+        this.hideScreen('settings');
+        
+        if (this.previousScreen === 'pause') {
+            this.showScreen('pause');
+            // KHÔNG hiện UI vì vẫn đang pause
+        } else if (Game.isRunning && !Game.isPaused) {
+            UI.showIngameUI();
+            MinionManager.showCountdownForResume();
+        } else if (!Game.isRunning) {
+            this.showScreen('start');
+        }
+        this.previousScreen = null;
+    },
 
-	/**
-	 * Resume from pause - UPDATED
-	 */
-	resumeFromPause() {
-		Game.resume();
-		this.hideScreen('pause');
-		UI.showIngameUI();
-		MinionManager.showCountdownForResume(); // Hiện lại countdown nếu cần
-	},
+    /**
+     * Resume from pause - UPDATED
+     */
+    resumeFromPause() {
+        Game.resume();
+        this.hideScreen('pause');
+        UI.showIngameUI();
+        MinionManager.showCountdownForResume(); // Hiện lại countdown nếu cần
+    },
 
-		
+        
     /**
      * Populate hero selection grid
      */
@@ -389,14 +413,14 @@ const Screens = {
         this.currentScreen = null;
     },
     
-	/**
-	 * Show pause screen - UPDATED
-	 */
-	showPause() {
-		UI.hideIngameUI();
-		MinionManager.hideCountdownForPause(); // Ẩn countdown lính
-		this.showScreen('pause');
-	},
+    /**
+     * Show pause screen - UPDATED
+     */
+    showPause() {
+        UI.hideIngameUI();
+        MinionManager.hideCountdownForPause(); // Ẩn countdown lính
+        this.showScreen('pause');
+    },
     
     /**
      * Show game over screen
@@ -493,6 +517,77 @@ const Screens = {
         });
         
         this.showScreen('start');
+    },
+    
+    /**
+     * Load How To Play content from instruction.md
+     */
+    async loadHowToPlayContent() {
+        try {
+            const response = await fetch('instruction.md');
+            if (!response.ok) throw new Error('Failed to load instructions');
+            
+            const markdown = await response.text();
+            const contentDiv = document.getElementById('howToPlayContent');
+            if (contentDiv) {
+                contentDiv.innerHTML = this.parseMarkdownToHTML(markdown);
+            }
+        } catch (error) {
+            console.error('Error loading How To Play content:', error);
+            const contentDiv = document.getElementById('howToPlayContent');
+            if (contentDiv) {
+                contentDiv.innerHTML = '<p>Failed to load instructions. Please try again later.</p>';
+            }
+        }
+    },
+    
+    /**
+     * Simple markdown to HTML parser
+     */
+    parseMarkdownToHTML(markdown) {
+        let html = markdown;
+        
+        // Headers
+        html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+        html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+        html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+        
+        // Bold
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        // Lists
+        html = html.replace(/^\- (.*$)/gim, '<li>$1</li>');
+        html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+        
+        // Paragraphs
+        html = html.split('\n\n').map(para => {
+            if (para.startsWith('<h') || para.startsWith('<ul') || para.startsWith('<li')) {
+                return para;
+            }
+            return para.trim() ? `<p>${para}</p>` : '';
+        }).join('\n');
+        
+        return html;
+    },
+    
+    /**
+     * Show How To Play modal
+     */
+    showHowToPlayModal() {
+        const modal = document.getElementById('howToPlayModal');
+        if (modal) {
+            modal.classList.add('active');
+        }
+    },
+    
+    /**
+     * Close How To Play modal
+     */
+    closeHowToPlayModal() {
+        const modal = document.getElementById('howToPlayModal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
     },
 };
 
