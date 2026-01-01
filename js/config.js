@@ -607,56 +607,374 @@ const CONFIG = {
         },
     },
 
-    // === AI DIFFICULTY SETTINGS ===
+    // === AI COMPREHENSIVE CONFIGURATION ===
     aiDifficulty: {
         easy: {
-            reactionTime: 600,
-            accuracy: 0.45,
-            skillUsage: 0.25,
-            decisionInterval: 2500,
-            dodgeChance: 0.08,
-            comboExecution: 0.15,
-            jungleRate: 0.2,
+            // === DECISION MAKING ===
+            decisionInterval: 2500,        // Thời gian giữa các quyết định (ms)
+            reactionTime: 600,             // Phản ứng chậm
+            
+            // === ACCURACY & SKILL USAGE ===
+            accuracy: 0.45,                // Hit rate 45%
+            skillUsage: 0.25,              // Sử dụng kỹ năng 25%
+            comboHitRate: 0.20,            // Skillshot hit 20%
+            comboExecution: 0.15,          // Combo success 15%
+            
+            // === DODGE & AVOIDANCE ===
+            dodgeChance: 0.08,             // Dodge general 8%
+            dodgeProjectile: 0.10,         // Dodge projectile 10%
+            dodgeObstacle: 0.15,           // Dodge obstacle 15%
+            dodgeAbilityCC: 0.05,          // Dodge CC ability 5%
+            
+            // === TARGETING ===
+            targetSelectionLogic: 'random',
+            targetingAccuracy: 0.20,       // 20% accurate targeting
+            
+            // === MOVEMENT ===
+            movementSpeed: 0.80,           // -20% speed
+            pathfindingQuality: 'poor',    // Poor pathfinding
+            movementSmoothing: 0.3,        // Low smoothing
+            unstuckThreshold: 2000,        // Get unstuck after 2s
+            
+            // === FARMING & ROAMING ===
+            farmEfficiency: 0.50,          // 50% CS
+            lastHitAccuracy: 0.40,         // 40% last hit accuracy
+            jungleRate: 0.2,               // Jungle 20%
+            roamingFrequency: 0.1,         // Roam rarely
+            
+            // === AWARENESS ===
+            visionAwareness: 0.10,         // 10% map knowledge
+            threatAssessment: 0.15,        // Poor threat eval
+            
+            // === FEATURES ===
+            hasLLM: false,
+            predictEnemies: false,
+            hasComboSystem: true,          // But execute poorly
+            hasSmartPathing: true,         // But quality is poor
         },
+        
         normal: {
-            reactionTime: 350,
-            accuracy: 0.65,
-            skillUsage: 0.45,
-            decisionInterval: 1800,
-            dodgeChance: 0.25,
+            decisionInterval: 2000,
+            reactionTime: 400,
+            
+            accuracy: 0.57,
+            skillUsage: 0.38,
+            comboHitRate: 0.60,
             comboExecution: 0.35,
+            
+            dodgeChance: 0.18,
+            dodgeProjectile: 0.25,
+            dodgeObstacle: 0.35,
+            dodgeAbilityCC: 0.15,
+            
+            targetSelectionLogic: 'basic_threat',
+            targetingAccuracy: 0.50,
+            
+            movementSpeed: 0.90,
+            pathfindingQuality: 'basic',
+            movementSmoothing: 0.6,
+            unstuckThreshold: 1500,
+            
+            farmEfficiency: 0.70,
+            lastHitAccuracy: 0.65,
             jungleRate: 0.4,
+            roamingFrequency: 0.25,
+            
+            visionAwareness: 0.30,
+            threatAssessment: 0.40,
+            
+            hasLLM: false,
+            predictEnemies: false,
+            hasComboSystem: true,
+            hasSmartPathing: true,
         },
+        
         hard: {
-            reactionTime: 180,
-            accuracy: 0.82,
-            skillUsage: 0.7,
-            decisionInterval: 1200,
-            dodgeChance: 0.45,
-            comboExecution: 0.65,
+            decisionInterval: 1400,
+            reactionTime: 240,
+            
+            accuracy: 0.72,
+            skillUsage: 0.58,
+            comboHitRate: 0.75,
+            comboExecution: 0.62,
+            
+            dodgeChance: 0.38,
+            dodgeProjectile: 0.50,
+            dodgeObstacle: 0.60,
+            dodgeAbilityCC: 0.45,
+            
+            targetSelectionLogic: 'threat_analysis',
+            targetingAccuracy: 0.75,
+            
+            movementSpeed: 1.0,
+            pathfindingQuality: 'good',
+            movementSmoothing: 0.85,
+            unstuckThreshold: 1000,
+            
+            farmEfficiency: 0.90,
+            lastHitAccuracy: 0.85,
             jungleRate: 0.6,
+            roamingFrequency: 0.50,
+            
+            visionAwareness: 0.55,
+            threatAssessment: 0.65,
+            
+            // ✨ BASIC LLM/PREDICTION
+            hasLLM: true,
+            llmQuality: 0.30,
+            llmAccuracy: 0.50,
+            llmUsageFrequency: 0.50,
+            
+            predictEnemies: true,
+            predictionRange: 1.0,
+            predictionAccuracy: 0.40,
+            
+            hasComboSystem: true,
+            hasSmartPathing: true,
         },
+        
         veryhard: {
-            reactionTime: 100,
-            accuracy: 0.92,
-            skillUsage: 0.88,
-            decisionInterval: 600,
-            dodgeChance: 0.7,
-            comboExecution: 0.85,
+            decisionInterval: 800,
+            reactionTime: 140,
+            
+            accuracy: 0.85,
+            skillUsage: 0.78,
+            comboHitRate: 0.93,
+            comboExecution: 0.82,
+            
+            dodgeChance: 0.58,
+            dodgeProjectile: 0.75,
+            dodgeObstacle: 0.80,
+            dodgeAbilityCC: 0.75,
+            
+            targetSelectionLogic: 'optimal_selection',
+            targetingAccuracy: 0.90,
+            
+            movementSpeed: 1.0,
+            pathfindingQuality: 'excellent',
+            movementSmoothing: 0.95,
+            unstuckThreshold: 500,
+            
+            farmEfficiency: 0.98,
+            lastHitAccuracy: 0.95,
             jungleRate: 0.8,
+            roamingFrequency: 0.80,
+            
+            visionAwareness: 0.85,
+            threatAssessment: 0.90,
+            
+            // ✨ GOOD LLM/PREDICTION
+            hasLLM: true,
+            llmQuality: 0.65,
+            llmAccuracy: 0.75,
+            llmUsageFrequency: 0.85,
+            
+            predictEnemies: true,
+            predictionRange: 2.0,
+            predictionAccuracy: 0.70,
+            
+            hasComboSystem: true,
+            hasSmartPathing: true,
         },
+        
         nightmare: {
-            reactionTime: 40,
+            decisionInterval: 150,
+            reactionTime: 50,
+            
             accuracy: 0.98,
             skillUsage: 0.98,
-            decisionInterval: 150,
-            dodgeChance: 0.92,
+            comboHitRate: 1.0,
             comboExecution: 0.98,
+            
+            dodgeChance: 0.92,
+            dodgeProjectile: 0.95,
+            dodgeObstacle: 0.95,
+            dodgeAbilityCC: 0.95,
+            
+            targetSelectionLogic: 'llm_optimal',
+            targetingAccuracy: 1.0,
+            
+            movementSpeed: 1.0,
+            pathfindingQuality: 'perfect',
+            movementSmoothing: 1.0,
+            unstuckThreshold: 200,
+            
+            farmEfficiency: 1.0,
+            lastHitAccuracy: 1.0,
             jungleRate: 0.95,
+            roamingFrequency: 1.0,
+            
+            visionAwareness: 1.0,
+            threatAssessment: 1.0,
+            
+            // ✨ PERFECT LLM/PREDICTION
+            hasLLM: true,
+            llmQuality: 1.0,
+            llmAccuracy: 1.0,
+            llmUsageFrequency: 1.0,
+            
+            predictEnemies: true,
+            predictionRange: 3.0,
+            predictionAccuracy: 0.95,
+            
+            adaptiveAccuracy: true,
+            optimalDecisions: true,
             perfectLastHit: true,
             perfectDodge: true,
             globalAwareness: true,
-            optimalDecisions: true,
+            
+            hasComboSystem: true,
+            hasSmartPathing: true,
+        },
+    },
+
+    // === MOVEMENT BEHAVIOR CONFIG ===
+    aiMovement: {
+        // Waypoint system
+        waypointMode: 'dynamic',           // dynamic, static, hybrid
+        waypointDistance: 150,             // Distance to waypoint before next
+        waypointSmoothing: 0.7,            // 0-1: smoothness of movement
+        
+        // Stuck detection & recovery
+        stuckDetectionInterval: 500,       // Check stuck every 500ms
+        stuckDistanceThreshold: 30,        // Less than 30 pixel moved = stuck
+        stuckRecoverySteps: 3,             // Try 3 recovery steps before pathfinding
+        
+        // Deadlock prevention
+        deadlockDetectionTime: 3000,       // Detect deadlock after 3s
+        deadlockRecoveryMode: 'jump',      // jump, retreat, dodge
+        
+        // Pathing
+        pathUpdateInterval: 1000,          // Recalculate path every 1s
+        pathSmoothness: 0.8,               // Path smoothing
+        pathVisualization: false,          // Debug: show paths
+    },
+
+    // === DODGE SYSTEM CONFIG ===
+    aiDodge: {
+        // Projectile dodge
+        projectilePredictionMs: 500,       // Predict 500ms ahead
+        dodgeReactionTime: 150,            // React in 150ms
+        dodgeSideMargin: 100,              // Dodge distance
+        
+        // Obstacle dodge (walls, towers, pillars)
+        obstacleScanRange: 300,            // Scan obstacles 300px away
+        obstacleMargin: 80,                // Keep 80px away from obstacles
+        
+        // CC ability dodge
+        ccAbilityTypes: ['stun', 'root', 'knockup', 'pull', 'silence'],
+        ccDodgeAccuracy: { easy: 0.05, normal: 0.15, hard: 0.45, veryhard: 0.75, nightmare: 0.95 },
+        
+        // Positioning
+        idealRangeMargin: 0.9,             // Stay at 90% of max range
+    },
+
+    // === COMBO SYSTEM CONFIG ===
+    aiCombo: {
+        // Combo execution
+        comboSequenceDelay: 100,           // Delay between abilities in combo
+        comboDamageCalculation: true,      // Calculate damage before combo
+        comboManaCheck: true,              // Check mana before casting
+        
+        // Ability priority
+        ultimatePriority: 0.8,             // 80% chance to use ultimate if available
+        skillPriority: { q: 0.6, e: 0.7, r: 0.9, t: 0.85 }, // Per ability priority
+        
+        // Conditions
+        executeComboOnLowHP: true,
+        executeComboOnKillable: true,
+        executeComboOnKite: true,
+    },
+
+    // === TARGET SELECTION CONFIG ===
+    aiTargeting: {
+        // Priority factors
+        priorityWeights: {
+            lowHP: 0.30,                   // 30% weight on low HP
+            threat: 0.25,                  // 25% weight on threat level
+            distance: 0.20,                // 20% weight on distance
+            comboSynergy: 0.15,            // 15% weight on combo synergy
+            lastHit: 0.10,                 // 10% weight on last hit opportunity
+        },
+        
+        // Threat calculation
+        threatFactors: {
+            damageOutput: 0.4,
+            cooldowns: 0.3,
+            position: 0.2,
+            itemization: 0.1,
+        },
+        
+        // Range preferences
+        preferredRangePercentage: 0.85,    // Stay at 85% of max range
+        minRangeToTarget: 100,             // Minimum distance to target
+    },
+
+    // === VISION & AWARENESS CONFIG ===
+    aiVision: {
+        // Map knowledge
+        mapAwarenessRefreshRate: 500,      // Update map awareness every 500ms
+        lastSeenTimeout: 5000,             // Forget enemy after 5s not seen
+        
+        // Ward knowledge
+        wardPlacementImportance: {
+            defensive: 0.7,
+            offensive: 0.5,
+            river: 0.8,
+        },
+        
+        // Brush awareness
+        brushScanRange: 800,
+        brushPriority: 0.6,
+    },
+
+    // === FARMING CONFIG ===
+    aiFarming: {
+        // Last hit mechanics
+        lastHitWindow: 200,                // 200ms window to last hit
+        lastHitPrediction: true,
+        lastHitMinDamage: 1.1,             // Need 110% damage to last hit
+        
+        // Minion priority
+        minionPriority: {
+            cannon: 0.9,                   // High priority
+            melee: 0.5,
+            ranged: 0.7,
+            super: 0.95,
+        },
+        
+        // Safety
+        farmUnderTower: { easy: false, normal: false, hard: true, veryhard: true, nightmare: true },
+        farmWithEnemyNear: { easy: false, normal: true, hard: true, veryhard: true, nightmare: true },
+    },
+
+    // === ROAMING CONFIG ===
+    aiRoaming: {
+        // Roaming triggers
+        minAgeForRoam: 120000,             // Start roaming after 2min
+        roamTravelTime: 5000,              // Travel to roam location in 5s
+        roamObjPriority: { gank: 0.7, ward: 0.3, objective: 0.9 },
+        
+        // Roam locations
+        preferredRoamLanes: { top: 0.3, mid: 0.7, bot: 0.5 },
+    },
+
+    // === PARAMETER SCALING ===
+    aiParameters: {
+        healthThresholdRetreat: {
+            easy: 0.35, normal: 0.30, hard: 0.25, veryhard: 0.20, nightmare: 0.15,
+        },
+        aggressionLevel: {
+            easy: 0.25, normal: 0.45, hard: 0.60, veryhard: 0.78, nightmare: 0.90,
+        },
+        riskTolerance: {
+            easy: 0.10, normal: 0.25, hard: 0.45, veryhard: 0.70, nightmare: 0.95,
+        },
+        roamingMultiplier: {
+            easy: 0.3, normal: 0.6, hard: 0.9, veryhard: 1.2, nightmare: 1.5,
+        },
+        mapKnowledge: {
+            easy: 0.2, normal: 0.4, hard: 0.65, veryhard: 0.9, nightmare: 1.0,
         },
     },
 
@@ -713,338 +1031,338 @@ const CONFIG = {
     
     // === AI NAMES ===
     aiNames:
-		[
-		  // --- EDGY & CLASSIC GAMER STYLE (English/Global) ---
-		  'xX_Shadow_Hunter_Xx',
-		  'Noob_Slayer_v2.0',
-		  'Captain.Price.141',
-		  'Sniper_Elite_99',
-		  'Dont_Kill_Me_Pls',
-		  'Lag_Is_Real_!!!',
-		  'Tactical_Feeder',
-		  'Just_A_Glitch',
-		  'Get.Rekt.Son.=_=',
-		  'Cyber_Punk_2077',
-		  'Dr4g0n_W4rri0r',
-		  'Silent.Assassin.',
-		  'Pro_Gamer_1337',
-		  'Coffee_Addict_xD',
-		  'Keyboard_Warrior',
-		  'Error_404_Found',
-		  'Toxic_Player_007',
-		  'Ping_999_ms',
-		  'Loading_..._99%',
-		  'Rush_B_Dont_Stop',
-		  'One_Shot_One_Kill',
-		  'Ghost_In_The_Shell',
-		  'Zero_Cool_Hacker',
-		  'KilleR_InstincT',
-		  'Deadly-Viper-X',
-		  'The.Last.Jedi',
-		  'Iron_Man_Fanboy',
-		  'Batman_No_Parents',
-		  'Walter_White_Meth',
-		  'Squid_Game_001',
-		  'Winter_Is_Coming_',
-		  'Rick_And_Morty_C137',
-		  'God_Mode_Enabled',
-		  'Aim_Bot_Activated',
-		  'Wall_Hack_User?',
-		  'Report_Me_Plz',
-		  'Sweaty_Tryhard',
-		  'Casual_Gamer_Dad',
-		  'Mom_Get_The_Camera',
-		  'Xx_Sephiroth_xX',
-		  'Cloud_Strife_FF7',
-		  'Link_Zelda_Hyrule',
-		  'Mario_Luigi_Bros',
-		  'Sonic.The.Hedgehog',
-		  'Master_Chief_117',
-		  'Kratos_God_Of_War',
-		  'Doom_Slayer_BFG',
-		  'Geralt_Of_Rivia',
-		  'Yennefer_Vengerberg',
-		  'Tracer_Overwatch',
-		  'Jinx_Arcane_LoL',
-		  'Teemo_Mushroom',
-		  'Yasuo_0_10_Power',
-		  'Faker_Senpai_KR',
-		  'Shroud_Aim_God',
-		  'Ninja_Fortnite_OG',
-		  'PewDiePie_BroFist',
-		  'MrBeast_Giveaway',
+        [
+          // --- EDGY & CLASSIC GAMER STYLE (English/Global) ---
+          'xX_Shadow_Hunter_Xx',
+          'Noob_Slayer_v2.0',
+          'Captain.Price.141',
+          'Sniper_Elite_99',
+          'Dont_Kill_Me_Pls',
+          'Lag_Is_Real_!!!',
+          'Tactical_Feeder',
+          'Just_A_Glitch',
+          'Get.Rekt.Son.=_=',
+          'Cyber_Punk_2077',
+          'Dr4g0n_W4rri0r',
+          'Silent.Assassin.',
+          'Pro_Gamer_1337',
+          'Coffee_Addict_xD',
+          'Keyboard_Warrior',
+          'Error_404_Found',
+          'Toxic_Player_007',
+          'Ping_999_ms',
+          'Loading_..._99%',
+          'Rush_B_Dont_Stop',
+          'One_Shot_One_Kill',
+          'Ghost_In_The_Shell',
+          'Zero_Cool_Hacker',
+          'KilleR_InstincT',
+          'Deadly-Viper-X',
+          'The.Last.Jedi',
+          'Iron_Man_Fanboy',
+          'Batman_No_Parents',
+          'Walter_White_Meth',
+          'Squid_Game_001',
+          'Winter_Is_Coming_',
+          'Rick_And_Morty_C137',
+          'God_Mode_Enabled',
+          'Aim_Bot_Activated',
+          'Wall_Hack_User?',
+          'Report_Me_Plz',
+          'Sweaty_Tryhard',
+          'Casual_Gamer_Dad',
+          'Mom_Get_The_Camera',
+          'Xx_Sephiroth_xX',
+          'Cloud_Strife_FF7',
+          'Link_Zelda_Hyrule',
+          'Mario_Luigi_Bros',
+          'Sonic.The.Hedgehog',
+          'Master_Chief_117',
+          'Kratos_God_Of_War',
+          'Doom_Slayer_BFG',
+          'Geralt_Of_Rivia',
+          'Yennefer_Vengerberg',
+          'Tracer_Overwatch',
+          'Jinx_Arcane_LoL',
+          'Teemo_Mushroom',
+          'Yasuo_0_10_Power',
+          'Faker_Senpai_KR',
+          'Shroud_Aim_God',
+          'Ninja_Fortnite_OG',
+          'PewDiePie_BroFist',
+          'MrBeast_Giveaway',
 
-		  // --- VIETNAMESE (Real User Style) ---
-		  'Huy_Dep_Trai_9x',
-		  'Thich_An_Pho_Bo',
-		  'Gamer_Viet_Nam_Vo_Dich',
-		  'Chua_Te_Bong_Dem',
-		  'Sat_Thu_Tinh_Truong',
-		  'Co_Be_Ban_Diêm',
-		  'Chi_Pheo_Thoi_4.0',
-		  'Lao_Hac_Nuoi_Cho',
-		  'Ha_Noi_Mua_Thu',
-		  'Sai_Gon_Cafe_Sua',
-		  'Banh_Mi_Pate_Trung',
-		  'Tra_Da_Via_He_VN',
-		  'Dung_Hoi_Em_La_Ai',
-		  'Yeu_Em_Tron_Doi',
-		  'Mai_Mai_Mot_Tinh_Yeu',
-		  'Doi_Thay_Huyen_Thoai',
-		  'Top_1_Sever_Viet',
-		  'Anh_Hung_Ban_Phim',
-		  'Tre_Trau_Chua_Dat_Ten',
-		  'Huyen_Thoai_Rong_Vang',
-		  'Sieu_Nhan_Gao_Do',
+          // --- VIETNAMESE (Real User Style) ---
+          'Huy_Dep_Trai_9x',
+          'Thich_An_Pho_Bo',
+          'Gamer_Viet_Nam_Vo_Dich',
+          'Chua_Te_Bong_Dem',
+          'Sat_Thu_Tinh_Truong',
+          'Co_Be_Ban_Diêm',
+          'Chi_Pheo_Thoi_4.0',
+          'Lao_Hac_Nuoi_Cho',
+          'Ha_Noi_Mua_Thu',
+          'Sai_Gon_Cafe_Sua',
+          'Banh_Mi_Pate_Trung',
+          'Tra_Da_Via_He_VN',
+          'Dung_Hoi_Em_La_Ai',
+          'Yeu_Em_Tron_Doi',
+          'Mai_Mai_Mot_Tinh_Yeu',
+          'Doi_Thay_Huyen_Thoai',
+          'Top_1_Sever_Viet',
+          'Anh_Hung_Ban_Phim',
+          'Tre_Trau_Chua_Dat_Ten',
+          'Huyen_Thoai_Rong_Vang',
+          'Sieu_Nhan_Gao_Do',
 
-		  // --- CHINESE / JAPANESE (Romanized & Characters) ---
-		  'W0_Bu_Zhi_Dao_???', // "I don't know"
-		  'Tian_Xia_Di_Yi_CN', // "Number 1 under heaven"
-		  'Ni_Hao_Ma_Friend',
-		  'Lao_Gan_Ma_Lover',
-		  'Genshin_Impact_Whale',
-		  'Anime_Waifu_Lover',
-		  'Otaku_For_Life_UwU',
-		  'Neko_Chan_Kawaii',
-		  'Yamete_Kudasai_>.<',
-		  'Omae_Wa_Mou_Shindeiru',
-		  'Nani_the_Fck_xD',
-		  'Kage_Bunshin_No_Jutsu',
-		  'Bankai_Ichigo_K',
-		  'Luffy_Pirate_King',
-		  'Naruto_Hokage_7th',
-		  'Goku_Super_Saiyan',
-		  'Vegeta_Prince_SSJ',
-		  'Saitama_One_Punch',
-		  'Attack_On_Titan_Levi',
-		  'Tokyo_Ghoul_Kaneki',
-		  'Demon_Slayer_Tanjiro',
-		  'Nezuko_In_Box',
-		  'Zenitsu_Thunder',
-		  'Inosuke_Boar_Head',
-		  'Rengoku_Donut_:)',
-		  'Go_Jo_Sa_To_Ru',
-		  'Sukuna_Finger_Yummy',
-		  'Anya_Forger_Peanut',
-		  'Yor_Briar_Assassin',
-		  'Loid_Forger_Spy',
-		  'Makima_Woof_Woof',
-		  'Denji_Chainsaw_Man',
-		  'Power_Blood_Fiend',
-		  'Aki_Hayakawa_Gun',
-		  'Kobeni_Car_Owner',
-		  'Reze_Bomb_Girl',
-		  'Quanxi_Crossbow',
-		  'Kishibe_Alcoholic',
-		  'Himeno_Ghost_Eye',
-		  'Pochita_Best_Boy',
-		  'Katana_Man_Samurai',
-		  'Sawatar_Snake_Girl',
-		  'Beam_Shark_Fiend',
-		  'Violenc_Fiend_Galgal',
-		  'Ange_Devil_Lazy',
-		  'Prinz_Spider_Devil',
-		  'Zomb_Devil_Trash',
-		  'Bat_Devil_Blood',
-		  'Typhoo_Devil_Rain',
-		  'Leec_Devil_Dream',
-		  'Fox_Devil_Kon_!!',
-		  'Ghos_Devil_Hand',
-		  'Curs_Devil_Nail',
-		  'Snake_Devil_Tail',
-		  'Futu_Devil_Dance',
-		  'Darknes_Devil_Void',
-		  'Doll_Devil_Santa',
-		  'Hel_Devil_Portal',
-		  'G_u_n_Devil_Bullet',
-		  'Contro_Devil_Nayuta',
-		  'Wa_Devil_Yoru',
-		  'Famin_Devil_Fami',
-		  'Deat_Devil_End',
-		  'Nuclear_Weapon_War',
-		  'Blood_Devil_Powy',
-		  'Falling_Devil_Chef',
-		  'Justice_Devil_Class',
-		  'Eternity_Devil_8F',
-		  'Cosmo_Halloween',
-		  'Long_Sword_Hybrid',
-		  'Flamethrower_Hybrid',
-		  'Spear_Hybrid_Miar',
-		  'Whip_Hybrid_Sado',
-		  'Barem_Bridge_Fire',
-		  'Miri_Sugo_Sword',
-		  'Haruka_Iseumi_Fan',
-		  'Seigi_Akoku_Fight',
-		  'Higashiyama_Family',
-		  'Kusakal_Bodyguard',
-		  'Tendo_Subaru_Kyoto',
-		  'Kurose_Kyoto_Pupil',
-		  'Nomo_Doctor_Hand',
-		  'Arai_Hirokazu_Pal',
-		  'Fushi_Devil_Hunter',
-		  'Madoka_Survivor',
-		  'Okonogi_Partner',
-		  'Tolka_Master_Doll',
-		  'Santa_Claus_Old',
-		  'Pingtsi_Fiend_Int',
-		  'Long_Fiend_Dragon',
-		  'Tsugihagi_Stitch',
-		  'Kusabe_Stone_Dev',
-		  'Tamaoki_Shadow_Dev',
-		  'Nakamura_Fox_Dev',
-		  'Kato_Mold_Devil',
-		  'Tanaka_Spine_Swrd',
-		  'Sato_Skin_Devil',
-		  'Suzuki_Ear_Devil',
-		  'Takahashi_Eye_Dev',
-		  'Watanabe_Nose_Dev',
-		  'Ito_Mouth_Devil',
-		  'Yamamoto_Teeth_Dev',
-		  'Nakamura_Hair_Dev',
-		  'Kobayashi_Bone_Dev',
-		  'Kato_Blood_Devil',
-		  'Yoshida_Octopus',
-		  'Fumiko_Mifune_Sec',
-		  'Asa_Mitaka_War_V2',
-		  'Yuko_Justice_Dev',
-		  'Crambon_Cat_Sad',
-		  'Meowy_Cat_Happy',
-		  'Nutella_Devil_Sweet',
-		  'Coffee_Devil_Bitter',
-		  'Pizza_Devil_Cheesy',
-		  'Burger_Devil_Juicy',
-		  'Fries_Devil_Salty',
-		  'Soda_Devil_Fizzy',
-		  'IceCream_Devil_Cold',
-		  'Cake_Devil_Soft',
-		  'Cookie_Devil_Crumby',
-		  'Donut_Devil_Holey',
-		  'Bagel_Devil_Round',
-		  'Toast_Devil_Burnt',
-		  'Pancake_Devil_Flat',
-		  'Waffle_Devil_Grid',
-		  'Bacon_Devil_Crispy',
-		  'Egg_Devil_Yolky',
-		  'Cheese_Devil_Melt',
-		  'Butter_Devil_Slip',
-		  'Bread_Devil_Loaf',
-		  'Rice_Devil_Grain',
-		  'Noodle_Devil_Long',
-		  'Pasta_Devil_Saucy',
-		  'Sushi_Devil_Raw',
-		  'Sashimi_Devil_Fish',
-		  'Tempura_Devil_Fry',
-		  'Ramen_Devil_Soup',
-		  'Udon_Devil_Thick',
-		  'Soba_Devil_Thin',
-		  'Miso_Devil_Paste',
-		  'Tofu_Devil_Soft',
-		  'Curry_Devil_Spice',
-		  'Stew_Devil_Hot',
-		  'Salad_Devil_Green',
-		  'Fruit_Devil_Sweet',
-		  'Veggie_Devil_Health',
-		  'Meat_Devil_Flesh',
-		  'Fish_Devil_Swim',
-		  'Bird_Devil_Fly',
-		  'Cow_Devil_Moo',
-		  'Pig_Devil_Oink',
-		  'Sheep_Devil_Baa',
-		  'Goat_Devil_Bleat',
-		  'Horse_Devil_Neigh',
-		  'Dog_Devil_Bark',
-		  'Cat_Devil_Meow',
-		  'Mouse_Devil_Squeak',
-		  'Rat_Devil_Gnaw',
-		  'Rabbit_Devil_Hop',
-		  'Fox_Devil_Sly',
-		  'Bear_Devil_Roar',
-		  'Wolf_Devil_Howl',
-		  'Tiger_Devil_Stripe',
-		  'Lion_Devil_Mane',
-		  'Elephant_Devil_Trunk',
-		  'Giraffe_Devil_Neck',
-		  'Zebra_Devil_B&W',
-		  'Monkey_Devil_Tree',
-		  'Ape_Devil_Strong',
-		  'Gorilla_Devil_Big',
-		  'Chimp_Devil_Smart',
-		  'Snake_Devil_Hiss',
-		  'Lizard_Devil_Scale',
-		  'Turtle_Devil_Shell',
-		  'Frog_Devil_Croak',
-		  'Toad_Devil_Wart',
-		  'Fish_Devil_Gill',
-		  'Shark_Devil_Fin',
-		  'Whale_Devil_Blow',
-		  'Dolphin_Devil_Click',
-		  'Seal_Devil_Clap',
-		  'Penguin_Devil_Slide',
-		  'Bird_Devil_Wing',
-		  'Eagle_Devil_Soar',
-		  'Hawk_Devil_Dive',
-		  'Owl_Devil_Hoot',
-		  'Crow_Devil_Caw',
-		  'Raven_Devil_Black',
-		  'Parrot_Devil_Talk',
-		  'Pigeon_Devil_Coo',
-		  'Duck_Devil_Quack',
-		  'Goose_Devil_Honk',
-		  'Swan_Devil_Grace',
-		  'Chicken_Devil_Egg',
-		  'Rooster_Devil_Wake',
-		  'Turkey_Devil_Gobble',
-		  'Bee_Devil_Sting',
-		  'Wasp_Devil_Pain',
-		  'Ant_Devil_March',
-		  'Bug_Devil_Crawl',
-		  'Fly_Devil_Buzz',
-		  'Moth_Devil_Lamp',
-		  'Spider_Devil_Web',
-		  'Scorpion_Devil_Tail',
-		  'Crab_Devil_Pinch',
-		  'Lobster_Devil_Red',
-		  'Shrimp_Devil_Small',
-		  'Clam_Devil_Shut',
-		  'Snail_Devil_Slow',
-		  'Slug_Devil_Slime',
-		  'Worm_Devil_Dig',
+          // --- CHINESE / JAPANESE (Romanized & Characters) ---
+          'W0_Bu_Zhi_Dao_???', // "I don't know"
+          'Tian_Xia_Di_Yi_CN', // "Number 1 under heaven"
+          'Ni_Hao_Ma_Friend',
+          'Lao_Gan_Ma_Lover',
+          'Genshin_Impact_Whale',
+          'Anime_Waifu_Lover',
+          'Otaku_For_Life_UwU',
+          'Neko_Chan_Kawaii',
+          'Yamete_Kudasai_>.<',
+          'Omae_Wa_Mou_Shindeiru',
+          'Nani_the_Fck_xD',
+          'Kage_Bunshin_No_Jutsu',
+          'Bankai_Ichigo_K',
+          'Luffy_Pirate_King',
+          'Naruto_Hokage_7th',
+          'Goku_Super_Saiyan',
+          'Vegeta_Prince_SSJ',
+          'Saitama_One_Punch',
+          'Attack_On_Titan_Levi',
+          'Tokyo_Ghoul_Kaneki',
+          'Demon_Slayer_Tanjiro',
+          'Nezuko_In_Box',
+          'Zenitsu_Thunder',
+          'Inosuke_Boar_Head',
+          'Rengoku_Donut_:)',
+          'Go_Jo_Sa_To_Ru',
+          'Sukuna_Finger_Yummy',
+          'Anya_Forger_Peanut',
+          'Yor_Briar_Assassin',
+          'Loid_Forger_Spy',
+          'Makima_Woof_Woof',
+          'Denji_Chainsaw_Man',
+          'Power_Blood_Fiend',
+          'Aki_Hayakawa_Gun',
+          'Kobeni_Car_Owner',
+          'Reze_Bomb_Girl',
+          'Quanxi_Crossbow',
+          'Kishibe_Alcoholic',
+          'Himeno_Ghost_Eye',
+          'Pochita_Best_Boy',
+          'Katana_Man_Samurai',
+          'Sawatar_Snake_Girl',
+          'Beam_Shark_Fiend',
+          'Violenc_Fiend_Galgal',
+          'Ange_Devil_Lazy',
+          'Prinz_Spider_Devil',
+          'Zomb_Devil_Trash',
+          'Bat_Devil_Blood',
+          'Typhoo_Devil_Rain',
+          'Leec_Devil_Dream',
+          'Fox_Devil_Kon_!!',
+          'Ghos_Devil_Hand',
+          'Curs_Devil_Nail',
+          'Snake_Devil_Tail',
+          'Futu_Devil_Dance',
+          'Darknes_Devil_Void',
+          'Doll_Devil_Santa',
+          'Hel_Devil_Portal',
+          'G_u_n_Devil_Bullet',
+          'Contro_Devil_Nayuta',
+          'Wa_Devil_Yoru',
+          'Famin_Devil_Fami',
+          'Deat_Devil_End',
+          'Nuclear_Weapon_War',
+          'Blood_Devil_Powy',
+          'Falling_Devil_Chef',
+          'Justice_Devil_Class',
+          'Eternity_Devil_8F',
+          'Cosmo_Halloween',
+          'Long_Sword_Hybrid',
+          'Flamethrower_Hybrid',
+          'Spear_Hybrid_Miar',
+          'Whip_Hybrid_Sado',
+          'Barem_Bridge_Fire',
+          'Miri_Sugo_Sword',
+          'Haruka_Iseumi_Fan',
+          'Seigi_Akoku_Fight',
+          'Higashiyama_Family',
+          'Kusakal_Bodyguard',
+          'Tendo_Subaru_Kyoto',
+          'Kurose_Kyoto_Pupil',
+          'Nomo_Doctor_Hand',
+          'Arai_Hirokazu_Pal',
+          'Fushi_Devil_Hunter',
+          'Madoka_Survivor',
+          'Okonogi_Partner',
+          'Tolka_Master_Doll',
+          'Santa_Claus_Old',
+          'Pingtsi_Fiend_Int',
+          'Long_Fiend_Dragon',
+          'Tsugihagi_Stitch',
+          'Kusabe_Stone_Dev',
+          'Tamaoki_Shadow_Dev',
+          'Nakamura_Fox_Dev',
+          'Kato_Mold_Devil',
+          'Tanaka_Spine_Swrd',
+          'Sato_Skin_Devil',
+          'Suzuki_Ear_Devil',
+          'Takahashi_Eye_Dev',
+          'Watanabe_Nose_Dev',
+          'Ito_Mouth_Devil',
+          'Yamamoto_Teeth_Dev',
+          'Nakamura_Hair_Dev',
+          'Kobayashi_Bone_Dev',
+          'Kato_Blood_Devil',
+          'Yoshida_Octopus',
+          'Fumiko_Mifune_Sec',
+          'Asa_Mitaka_War_V2',
+          'Yuko_Justice_Dev',
+          'Crambon_Cat_Sad',
+          'Meowy_Cat_Happy',
+          'Nutella_Devil_Sweet',
+          'Coffee_Devil_Bitter',
+          'Pizza_Devil_Cheesy',
+          'Burger_Devil_Juicy',
+          'Fries_Devil_Salty',
+          'Soda_Devil_Fizzy',
+          'IceCream_Devil_Cold',
+          'Cake_Devil_Soft',
+          'Cookie_Devil_Crumby',
+          'Donut_Devil_Holey',
+          'Bagel_Devil_Round',
+          'Toast_Devil_Burnt',
+          'Pancake_Devil_Flat',
+          'Waffle_Devil_Grid',
+          'Bacon_Devil_Crispy',
+          'Egg_Devil_Yolky',
+          'Cheese_Devil_Melt',
+          'Butter_Devil_Slip',
+          'Bread_Devil_Loaf',
+          'Rice_Devil_Grain',
+          'Noodle_Devil_Long',
+          'Pasta_Devil_Saucy',
+          'Sushi_Devil_Raw',
+          'Sashimi_Devil_Fish',
+          'Tempura_Devil_Fry',
+          'Ramen_Devil_Soup',
+          'Udon_Devil_Thick',
+          'Soba_Devil_Thin',
+          'Miso_Devil_Paste',
+          'Tofu_Devil_Soft',
+          'Curry_Devil_Spice',
+          'Stew_Devil_Hot',
+          'Salad_Devil_Green',
+          'Fruit_Devil_Sweet',
+          'Veggie_Devil_Health',
+          'Meat_Devil_Flesh',
+          'Fish_Devil_Swim',
+          'Bird_Devil_Fly',
+          'Cow_Devil_Moo',
+          'Pig_Devil_Oink',
+          'Sheep_Devil_Baa',
+          'Goat_Devil_Bleat',
+          'Horse_Devil_Neigh',
+          'Dog_Devil_Bark',
+          'Cat_Devil_Meow',
+          'Mouse_Devil_Squeak',
+          'Rat_Devil_Gnaw',
+          'Rabbit_Devil_Hop',
+          'Fox_Devil_Sly',
+          'Bear_Devil_Roar',
+          'Wolf_Devil_Howl',
+          'Tiger_Devil_Stripe',
+          'Lion_Devil_Mane',
+          'Elephant_Devil_Trunk',
+          'Giraffe_Devil_Neck',
+          'Zebra_Devil_B&W',
+          'Monkey_Devil_Tree',
+          'Ape_Devil_Strong',
+          'Gorilla_Devil_Big',
+          'Chimp_Devil_Smart',
+          'Snake_Devil_Hiss',
+          'Lizard_Devil_Scale',
+          'Turtle_Devil_Shell',
+          'Frog_Devil_Croak',
+          'Toad_Devil_Wart',
+          'Fish_Devil_Gill',
+          'Shark_Devil_Fin',
+          'Whale_Devil_Blow',
+          'Dolphin_Devil_Click',
+          'Seal_Devil_Clap',
+          'Penguin_Devil_Slide',
+          'Bird_Devil_Wing',
+          'Eagle_Devil_Soar',
+          'Hawk_Devil_Dive',
+          'Owl_Devil_Hoot',
+          'Crow_Devil_Caw',
+          'Raven_Devil_Black',
+          'Parrot_Devil_Talk',
+          'Pigeon_Devil_Coo',
+          'Duck_Devil_Quack',
+          'Goose_Devil_Honk',
+          'Swan_Devil_Grace',
+          'Chicken_Devil_Egg',
+          'Rooster_Devil_Wake',
+          'Turkey_Devil_Gobble',
+          'Bee_Devil_Sting',
+          'Wasp_Devil_Pain',
+          'Ant_Devil_March',
+          'Bug_Devil_Crawl',
+          'Fly_Devil_Buzz',
+          'Moth_Devil_Lamp',
+          'Spider_Devil_Web',
+          'Scorpion_Devil_Tail',
+          'Crab_Devil_Pinch',
+          'Lobster_Devil_Red',
+          'Shrimp_Devil_Small',
+          'Clam_Devil_Shut',
+          'Snail_Devil_Slow',
+          'Slug_Devil_Slime',
+          'Worm_Devil_Dig',
 
-		  // --- UNICODE & SYMBOLS (Decorated) ---
-		  '★_Super_Star_★',
-		  '>>>Speed_Demon<<<',
-		  '꧁༺LeGeNd༻꧂',
-		  '¯\_(ツ)_/¯_Shrug',
-		  '[AFK]_But_Winning',
-		  '=+=_Medic_=+=',
-		  'x_X_Sniper_X_x',
-		  '-->_Insert_Coin_<--',
-		  '$$$_Rich_Kid_$$$',
-		  '♥_Love_Is_War_♥',
-		  '⚠_Danger_Zone_⚠',
-		  '†_The_Undertaker_†',
-		  '♪_Music_Lover_♪',
-		  '∞_Infinity_Loop_∞',
-		  '✪_Official_Bot_✪',
-		  'Alpha_&_Omega_Ω',
-		  'Pie_Is_3.14159...',
+          // --- UNICODE & SYMBOLS (Decorated) ---
+          '★_Super_Star_★',
+          '>>>Speed_Demon<<<',
+          '꧁༺LeGeNd༻꧂',
+          '¯\_(ツ)_/¯_Shrug',
+          '[AFK]_But_Winning',
+          '=+=_Medic_=+=',
+          'x_X_Sniper_X_x',
+          '-->_Insert_Coin_<--',
+          '$$$_Rich_Kid_$$$',
+          '♥_Love_Is_War_♥',
+          '⚠_Danger_Zone_⚠',
+          '†_The_Undertaker_†',
+          '♪_Music_Lover_♪',
+          '∞_Infinity_Loop_∞',
+          '✪_Official_Bot_✪',
+          'Alpha_&_Omega_Ω',
+          'Pie_Is_3.14159...',
 
-		  // --- NONSENSE / KEYBOARD MASH (Very Real) ---
-		  'asdfghjkl_123',
-		  'qwerty_uiop_xD',
-		  'zxcvbnm_!!!',
-		  'User_192837465',
-		  'Player_No_Name',
-		  'Guest_9999999',
-		  '1234567890_Pass',
-		  'Admin_Root_Sys',
-		  'Test_Account_01',
-		  'Bot_Or_Not???',
-		  'Why_So_Serious?',
-		  'Hello_World_js',
-		  'System.Out.Print',
-		  'Sudo_Rm_Rf_Root',
-		  'Cmd_Ctrl_Alt_Del'
+          // --- NONSENSE / KEYBOARD MASH (Very Real) ---
+          'asdfghjkl_123',
+          'qwerty_uiop_xD',
+          'zxcvbnm_!!!',
+          'User_192837465',
+          'Player_No_Name',
+          'Guest_9999999',
+          '1234567890_Pass',
+          'Admin_Root_Sys',
+          'Test_Account_01',
+          'Bot_Or_Not???',
+          'Why_So_Serious?',
+          'Hello_World_js',
+          'System.Out.Print',
+          'Sudo_Rm_Rf_Root',
+          'Cmd_Ctrl_Alt_Del'
 
     ],
     
