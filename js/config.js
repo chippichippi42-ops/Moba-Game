@@ -100,6 +100,9 @@ const CONFIG = {
 
     // === TOWER SETTINGS - Full customizable ===
     tower: {
+        // Tower range indicator distance
+        rangeIndicatorDistance: 150,
+
         // === TOWER DISTANCES BY LANE ===
         // Independent spacing for each lane to allow balance tweaking
         towerLaneDistances: {
