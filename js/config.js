@@ -651,6 +651,18 @@ const CONFIG = {
     },
 
     // === AI COMPREHENSIVE CONFIGURATION ===
+
+    // AI update throttling frequency by difficulty (Hz)
+    AI_UPDATE_FREQUENCY: {
+        easy: 10,
+        medium: 20,    // Alias for "normal" (kept for compatibility with older naming)
+        normal: 20,
+        hard: 30,
+        veryHard: 40,  // Alias for "veryhard" (kept for compatibility with older naming)
+        veryhard: 40,
+        nightmare: 50,
+    },
+
     aiDifficulty: {
         easy: {
             // === DECISION MAKING ===
