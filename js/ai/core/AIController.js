@@ -49,7 +49,11 @@ class AIController {
 
         // Performance optimization: AI update throttling
         this.lastAIUpdateTime = 0;
-        this.aiUpdateInterval = 100; // Update AI every 100ms (10 times/second instead of 60)
+
+        const freqConfig = CONFIG?.AI_UPDATE_FREQUENCY || {};
+        const configuredHz = freqConfig[difficulty] ?? freqConfig.normal ?? freqConfig.medium ?? 10;
+        const frequencyHz = Number.isFinite(configuredHz) && configuredHz > 0 ? configuredHz : 10;
+        this.aiUpdateInterval = 1000 / frequencyHz;
 
         // Initialize
         this.initialize();
