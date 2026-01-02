@@ -74,6 +74,8 @@ http://localhost:8000
 | **Cực Khó** | Cho người chơi rất giỏi - AI với LLM nâng cao, dự đoán đối thủ, combo phức tạp và targeting thông minh |
 | **Ác Mộng** | Gần như không thể đánh bại - AI hoàn hảo với LLM tiên tiến, né tất cả kỹ năng, combo hoàn hảo và nhận thức toàn cầu |
 
+> **Lưu ý:** Độ khó "Cực Khó" (Very Hard) đã được thêm vào hệ thống, với AI có khả năng dự đoán đối thủ và sử dụng LLM chất lượng cao.
+
 ### Cài Đặt Độ Khó AI - Chi Tiết
 
 Game có 4 mức độ khó với các tham số tùy chỉnh:
@@ -421,6 +423,42 @@ Hệ thống AI mới được tối ưu hóa để chạy mượt mà:
 
 - Developed with ❤️ using vanilla JavaScript
 - No external libraries required
+
+## 📋 Recent Changes
+
+### Version Update - Asset Structure & CORS Fix
+
+#### 1. Fixed CORS Errors (Issue with file:// protocol)
+- **Removed fetch() with HEAD method** that caused CORS errors when loading skill icons
+- **Implemented direct image loading** with proper error handling
+- Now works seamlessly with both `file://` and `http://` protocols
+
+#### 2. Updated Asset Path Structure
+All hero ability icons have been updated to follow the new structure:
+- **Old:** `assets/icons/{heroName}_{ability}.png`
+- **New:** `assets/heroes/{heroName}/{ability}.png`
+
+**Updated paths for all heroes:**
+- Vanheo: `assets/heroes/vanheo/q.png`, `assets/heroes/vanheo/e.png`, etc.
+- Zephy: `assets/heroes/zephy/q.png`, `assets/heroes/zephy/e.png`, etc.
+- Balametany: `assets/heroes/balametany/q.png`, `assets/heroes/balametany/e.png`, etc.
+- Nemo: `assets/heroes/nemo/q.png`, `assets/heroes/nemo/e.png`, etc.
+- LaLo: `assets/heroes/lalo/q.png`, `assets/heroes/lalo/e.png`, etc.
+
+#### 3. Smart Icon Display System
+- **Key indicator** (small Q/E/R/T badge in bottom-right corner) now:
+  - **Shows** when icon loads successfully
+  - **Hides** when icon asset is missing or fails to load
+- **Text fallback** (large Q/E/R/T in center) displays when no icon is available
+- Provides cleaner UI when assets are not present
+
+#### 4. Very Hard AI Difficulty Available
+- **"Cực Khó" (Very Hard)** difficulty is now fully functional
+- Features advanced LLM integration (65% quality, 75% accuracy)
+- Enhanced prediction capabilities with 2.0x range
+- 98% farm efficiency and 95% last-hit accuracy
+- Optimal targeting with 90% accuracy
+- Excellent pathfinding and 0.8 second decision intervals
 
 ---
 

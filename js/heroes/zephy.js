@@ -64,7 +64,7 @@ const HeroZephy = {
         q: {
             name: 'Chém Xoáy',
             description: 'Chém một vòng xung quanh, gây sát thương cho tất cả kẻ địch trong tầm.',
-            icon: 'assets/icons/zephy_q.png',
+            icon: 'assets/heroes/zephy/q.png',
             type: 'area',
             damageType: 'physical',
             baseDamage: [70, 110, 150, 190, 230],
@@ -106,7 +106,7 @@ const HeroZephy = {
         e: {
             name: 'Lao Đột',
             description: 'Lao về phía trước một đoạn ngắn, mục tiêu đầu tiên chạm phải sẽ bị đánh bật lên và chịu sát thương.',
-            icon: 'assets/icons/zephy_e.png',
+            icon: 'assets/heroes/zephy/e.png',
             type: 'dash',
             damageType: 'physical',
             baseDamage: [60, 95, 130, 165, 200],
@@ -153,7 +153,7 @@ const HeroZephy = {
         r: {
             name: 'Bão Kiếm',
             description: 'Tạo ra một cơn bão kiếm xung quanh trong 3 giây, gây sát thương liên tục và hút máu.',
-            icon: 'assets/icons/zephy_r.png',
+            icon: 'assets/heroes/zephy/r.png',
             type: 'channel',
             damageType: 'physical',
             baseDamage: [40, 60, 80, 100, 120], // per tick
@@ -201,7 +201,7 @@ const HeroZephy = {
         t: {
             name: 'Tử Thần Giáng Thế',
             description: 'Nhảy lên không trung và đập xuống vị trí chỉ định, gây sát thương lớn và làm chậm kẻ địch.',
-            icon: 'assets/icons/zephy_t.png',
+            icon: 'assets/heroes/zephy/t.png',
             type: 'leap',
             damageType: 'physical',
             baseDamage: [200, 350, 500],
