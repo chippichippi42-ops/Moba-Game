@@ -281,7 +281,6 @@ class Minion {
         this.secondaryColor = this.team === CONFIG.teams.BLUE ? '#0097e6' : '#e84118';
         this.accentColor = this.team === CONFIG.teams.BLUE ? '#74b9ff' : '#ff6b81';
 
-        this.radius = this.minionType === 'melee' ? 22 : 18;
 
         // Stats
         if (this.minionType === 'melee') {
@@ -295,6 +294,7 @@ class Minion {
 			this.speed = CONFIG.minion.melee.speed;
 			this.visionRange = CONFIG.minion.melee.visionRange;
 			this.exp = CONFIG.minion.melee.exp;
+			this.radius = CONFIG.minion.melee.radius;
         } else {
             this.baseMaxHealth = CONFIG.minion.ranged.health;
             this.baseDamage = CONFIG.minion.ranged.damage;
@@ -306,6 +306,7 @@ class Minion {
 			this.speed = CONFIG.minion.ranged.speed;
 			this.visionRange = CONFIG.minion.ranged.visionRange;
 			this.exp = CONFIG.minion.ranged.exp;
+			this.radius = CONFIG.minion.melee.radius;
         }
 
 
@@ -508,18 +509,69 @@ class Minion {
     }
 
     attack(target) {
-        const damage = this.damage;
-        Combat.dealDamage(this, target, damage);
+        if (this.minionType === 'ranged') {
+            ProjectileManager.create({
+                x: this.x,
+                y: this.y,
+                target: target,
+                speed: 900,
+                damage: this.damage,
+                damageType: 'physical',
+                owner: this,
+                color: this.primaryColor,
+                width: 12,
+                range: this.attackRange + 50,
+            });
+        } else {
+            Combat.dealDamage(this, target, this.damage, 'physical');
+        }
+        
         this.attackCooldown = 1000 / this.attackSpeed;
+        
+        if (typeof AudioManager !== 'undefined') {
+            AudioManager.play('hit', 0.2);
+        }
     }
 
-    takeDamage(amount) {
-        this.health -= amount;
-
-        if (this.health <= 0) {
-            this.isAlive = false;
-            Combat.onEntityDeath(this);
+    takeDamage(amount, attacker, damageType) {
+        if (!this.isAlive) return 0;
+        
+        let actualDamage = amount;
+        if (damageType === 'physical') {
+            const reduction = this.armor / (this.armor + 100);
+            actualDamage = amount * (1 - reduction);
         }
+        
+        actualDamage = Math.min(this.health, actualDamage);
+        this.health -= actualDamage;
+        
+        EffectManager.createDamageNumber(this.x, this.y, actualDamage, damageType);
+        
+        if (this.health <= 0) {
+            this.die(attacker);
+        }
+        
+        return actualDamage;
+    }
+	
+	 /**
+     * Minion dies - CẬP NHẬT: sử dụng hệ thống exp mới
+     */
+    die(killer) {
+        this.isAlive = false;
+        this.health = 0;
+        
+        // Distribute experience using new system
+        Combat.distributeExperience(this, killer, this.exp);
+        
+        // Play sound for last-hit
+        if (killer && killer.type === 'hero') {
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.play('gold', 0.3);
+            }
+        }
+        
+        EffectManager.createExplosion(this.x, this.y, 25, this.primaryColor);
     }
 
     /**
