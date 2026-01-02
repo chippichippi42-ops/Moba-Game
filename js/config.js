@@ -45,7 +45,7 @@ const CONFIG = {
         minionSpawnInterval: 25000,
         respawnBaseTime: 5000,
         respawnTimePerMinute: 3000,
-        defaultPlayerName: 'HDPE',
+        defaultPlayerName: 'HDPE_la_ngon_luon',
     },
 
     // === MAP SETTINGS ===
@@ -53,7 +53,7 @@ const CONFIG = {
         width: 8000,
         height: 8000,
         tileSize: 100,
-        baseExtension: 500,
+        baseExtension: 600,
         riverWidth: 300,
         laneWidth: 350,
         wallThickness: 80,
@@ -101,7 +101,7 @@ const CONFIG = {
     // === TOWER SETTINGS - Full customizable ===
     tower: {
         // Tower range indicator distance
-        rangeIndicatorDistance: 150,
+        rangeIndicatorDistance: 250,
 
         // === TOWER DISTANCES BY LANE ===
         // Independent spacing for each lane to allow balance tweaking
@@ -113,64 +113,52 @@ const CONFIG = {
         // Main tower (Nexus)
         main: {
             health: 12000,
-            damage: 1500,
+            damage: 250,
             armor: 50,
             magicResist: 50,
-            attackRange: 550,
+            attackRange: 750,
             attackSpeed: 1.0,
             expReward: 500,
         },
         // Outer towers (T1)
         outer: {
             health: 5000,
-            damage: 400,
+            damage: 200,
             armor: 30,
             magicResist: 30,
-            attackRange: 500,
+            attackRange: 650,
             attackSpeed: 1.0,
             expReward: 150,
         },
         // Inner towers (T2)
         inner: {
             health: 6500,
-            damage: 550,
+            damage: 150,
             armor: 40,
             magicResist: 40,
-            attackRange: 500,
+            attackRange: 650,
             attackSpeed: 1.0,
             expReward: 200,
         },
         // Inhibitor towers (T3)
         inhibitor: {
-            health: 8000,
-            damage: 700,
+            health: 4000,
+            damage: 150,
             armor: 50,
             magicResist: 50,
-            attackRange: 500,
+            attackRange: 650,
             attackSpeed: 1.0,
             expReward: 250,
         },
         // Base fountain
         base: {
-            damage: 8000,
-            attackRange: 250,
+            damage: 1000,
+            attackRange: 400,
             attackSpeed: 2.0,
         },
         // Damage stacking
         damageStackPercent: 0.5,
         maxDamageStacks: 4,
-        // Legacy (for backward compatibility)
-        mainHealth: 12000,
-        outerHealth: 5000,
-        innerHealth: 6500,
-        inhibitorHealth: 8000,
-        mainDamage: 1500,
-        outerDamage: 400,
-        innerDamage: 550,
-        inhibitorDamage: 700,
-        baseDamage: 8000,
-        attackRange: 800,
-        attackSpeed: 1,
     },
 
     // === MINION SETTINGS - Full customizable ===
@@ -178,7 +166,7 @@ const CONFIG = {
         // Melee minion
         melee: {
             health: 450,
-            damage: 22,
+            damage: 11,
             armor: 18,
             magicResist: 0,
             attackRange: 100,
@@ -191,7 +179,7 @@ const CONFIG = {
         // Ranged minion (caster)
         ranged: {
             health: 280,
-            damage: 35,
+            damage: 8,
             armor: 0,
             magicResist: 0,
             attackRange: 450,
@@ -203,8 +191,8 @@ const CONFIG = {
         },
         // Siege minion (cannon)
         siege: {
-            health: 800,
-            damage: 55,
+            health: 600,
+            damage: 14,
             armor: 30,
             magicResist: 30,
             attackRange: 500,
@@ -216,8 +204,8 @@ const CONFIG = {
         },
         // Super minion
         superMinion: {
-            health: 1500,
-            damage: 80,
+            health: 1200,
+            damage: 30,
             armor: 50,
             magicResist: 50,
             attackRange: 150,
@@ -231,20 +219,9 @@ const CONFIG = {
         spawn: {
             meleeCount: 3,
             rangedCount: 2,
-            siegeEveryNWaves: 3,
-            spacing: 80, // Khoảng cách giữa các lính
+            siegeEveryNWaves: 4,
+            spacing: 120, // Khoảng cách giữa các lính
         },
-        // Legacy (backward compatibility)
-        meleeHealth: 450,
-        rangedHealth: 280,
-        meleeDamage: 22,
-        rangedDamage: 35,
-        meleeArmor: 18,
-        rangedArmor: 0,
-        attackRange: { melee: 100, ranged: 450 },
-        speed: 300,
-        exp: 28,
-        visionRange: 700,
     },
 
 
@@ -652,17 +629,6 @@ const CONFIG = {
 
     // === AI COMPREHENSIVE CONFIGURATION ===
 
-    // AI update throttling frequency by difficulty (Hz)
-    AI_UPDATE_FREQUENCY: {
-        easy: 10,
-        medium: 20,    // Alias for "normal" (kept for compatibility with older naming)
-        normal: 20,
-        hard: 30,
-        veryHard: 40,  // Alias for "veryhard" (kept for compatibility with older naming)
-        veryhard: 40,
-        nightmare: 50,
-    },
-
     aiDifficulty: {
         easy: {
             // === DECISION MAKING ===
@@ -909,8 +875,16 @@ const CONFIG = {
             decisionDelay: 150,
             abilityReuseCooldown: 1000,
         },
+		veryhard: {
+            escapeHPThreshold: 0.35,
+            useCCFrequency: 0.8,
+            burstThreshold: 0.55,
+            sustainThreshold: 0.65,
+            decisionDelay: 100,
+            abilityReuseCooldown: 750,
+        },
         nightmare: {
-            escapeHPThreshold: 0.40,
+            escapeHPThreshold: 0.35,
             useCCFrequency: 0.90,
             burstThreshold: 0.60,
             sustainThreshold: 0.70,

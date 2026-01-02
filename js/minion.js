@@ -128,12 +128,12 @@ const MinionManager = {
         }
     },
 
-    /**
+	 /**
      * Cập nhật UI đếm ngược wave đầu
      */
     updateFirstWaveCountdown() {
         let countdownEl = document.getElementById('firstWaveCountdown');
-
+        
         if (!countdownEl) {
             countdownEl = document.createElement('div');
             countdownEl.id = 'firstWaveCountdown';
@@ -150,12 +150,16 @@ const MinionManager = {
                 font-weight: bold;
                 z-index: 1000;
                 border: 2px solid #fbbf24;
+                text-align: center;
             `;
             document.body.appendChild(countdownEl);
         }
-
+        
         const seconds = Math.ceil(this.firstWaveCountdown / 1000);
-        countdownEl.textContent = `Minions spawning in: ${seconds}s`;
+        countdownEl.innerHTML = `
+            <div style="font-size: 14px; color: #94a3b8; margin-bottom: 5px;">LÍNH SẮP XUẤT HIỆN</div>
+            <div style="font-size: 28px;">${seconds}s</div>
+        `;
     },
 
     /**
@@ -281,26 +285,30 @@ class Minion {
 
         // Stats
         if (this.minionType === 'melee') {
-            this.baseMaxHealth = CONFIG.minion.meleeHealth;
-            this.baseDamage = CONFIG.minion.meleeDamage;
-            this.maxHealth = CONFIG.minion.meleeHealth;
-            this.health = CONFIG.minion.meleeHealth;
-            this.damage = CONFIG.minion.meleeDamage;
-            this.armor = CONFIG.minion.meleeArmor;
-            this.attackRange = CONFIG.minion.attackRange.melee;
+            this.baseMaxHealth = CONFIG.minion.melee.health;
+            this.baseDamage = CONFIG.minion.melee.damage;
+            this.maxHealth = CONFIG.minion.melee.health;
+            this.health = CONFIG.minion.melee.health;
+            this.damage = CONFIG.minion.melee.damage;
+            this.armor = CONFIG.minion.melee.armor;
+            this.attackRange = CONFIG.minion.melee.attackRange;
+			this.speed = CONFIG.minion.melee.speed;
+			this.visionRange = CONFIG.minion.melee.visionRange;
+			this.exp = CONFIG.minion.melee.exp;
         } else {
-            this.baseMaxHealth = CONFIG.minion.rangedHealth;
-            this.baseDamage = CONFIG.minion.rangedDamage;
-            this.maxHealth = CONFIG.minion.rangedHealth;
-            this.health = CONFIG.minion.rangedHealth;
-            this.damage = CONFIG.minion.rangedDamage;
-            this.armor = CONFIG.minion.rangedArmor;
-            this.attackRange = CONFIG.minion.attackRange.ranged;
+            this.baseMaxHealth = CONFIG.minion.ranged.health;
+            this.baseDamage = CONFIG.minion.ranged.damage;
+            this.maxHealth = CONFIG.minion.ranged.health;
+            this.health = CONFIG.minion.ranged.health;
+            this.damage = CONFIG.minion.ranged.damage;
+            this.armor = CONFIG.minion.ranged.armor;
+            this.attackRange = CONFIG.minion.ranged.attackRange;
+			this.speed = CONFIG.minion.ranged.speed;
+			this.visionRange = CONFIG.minion.ranged.visionRange;
+			this.exp = CONFIG.minion.ranged.exp;
         }
 
-        this.speed = CONFIG.minion.speed;
-        this.visionRange = CONFIG.minion.visionRange;
-        this.exp = CONFIG.minion.exp;
+
 
         // State
         this.isAlive = true;

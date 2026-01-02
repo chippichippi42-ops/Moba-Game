@@ -140,54 +140,6 @@ class CombatBehavior {
         
         return false;
     }
-
-    // Predictive movement interception
-    interceptMovingTarget(target, hero) {
-        // Predict target position after 0.8s
-        const predictedPos = this.predictTargetPosition(target, 0.8);
-
-        const distance = Utils.distance(hero.x, hero.y, predictedPos.x, predictedPos.y);
-        const heroAttackRange = hero.stats?.attackRange || 500;
-
-        // If target running into us, dash intercept
-        if (distance < 200 && this.canDashIntercept()) {
-            this.controller.movementOptimizer.useDashToChase(target);
-            return;
-        }
-
-        // Move to intercept point
-        this.moveToInterceptPoint(predictedPos, target);
-    }
-
-    predictTargetPosition(target, timeAhead = 0.5) {
-        // Simple linear prediction
-        return {
-            x: target.x + (target.vx || 0) * timeAhead,
-            y: target.y + (target.vy || 0) * timeAhead
-        };
-    }
-
-    moveToInterceptPoint(predictedPos, actualTarget) {
-        // Move to intercept point instead of current target position
-        this.controller.movementOptimizer.setMovementTarget(predictedPos, 'intercepting');
-    }
-
-    canDashIntercept() {
-        const hero = this.controller.hero;
-        if (!hero.heroData || !hero.heroData.abilities) return false;
-        if (!hero.abilityCooldowns) return false;
-
-        // Check if has dash ability ready
-        for (const key of ['e', 'r', 'q']) {
-            const ability = hero.heroData.abilities[key];
-            if (ability && (ability.isDash || ability.type === 'dash')) {
-                if (hero.abilityCooldowns[key] <= 0 && hero.abilityLevels[key] > 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 }
 
 // Export for module systems

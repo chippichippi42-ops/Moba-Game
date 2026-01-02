@@ -13,13 +13,9 @@ class AIState {
         this.previousState = null;
         this.stateStartTime = 0;
         this.stateHistory = [];
-
+        
         // State transition rules
         this.transitionRules = this.setupTransitionRules();
-
-        // Hysteresis settings
-        this.minStateDuration = 1000; // ms
-        this.retreatToLaningCooldown = 2500; // ms
     }
     
     setupTransitionRules() {
@@ -78,61 +74,30 @@ class AIState {
     
     setState(newState) {
         if (newState === this.currentState) return false;
-
-        // Check hysteresis before transition
-        if (!this.canTransitionState(newState, this.currentState)) {
-            return false;
-        }
-
+        
         // Check if transition is allowed
         const currentRules = this.transitionRules[this.currentState];
         if (currentRules && currentRules.canTransitionTo.includes(newState)) {
             this.previousState = this.currentState;
             this.currentState = newState;
             this.stateStartTime = Date.now();
-
+            
             // Add to history
             this.stateHistory.push({
                 from: this.previousState,
                 to: newState,
                 time: this.stateStartTime
             });
-
+            
             // Limit history size
             if (this.stateHistory.length > 20) {
                 this.stateHistory.shift();
             }
-
+            
             return true;
         }
-
+        
         return false;
-    }
-
-    canTransitionState(newState, currentState) {
-        const now = Date.now();
-        const stateDuration = now - this.stateStartTime;
-
-        // Don't transition too fast (minimum duration)
-        if (stateDuration < this.minStateDuration) {
-            return false;
-        }
-
-        // Special cooldown: retreating -> laning needs 2.5s
-        if (currentState === 'retreating' && newState === 'laning') {
-            if (stateDuration < this.retreatToLaningCooldown) {
-                return false;
-            }
-        }
-
-        // Fighting states should be more stable
-        if (currentState === 'fighting' && newState !== 'retreating' && newState !== 'dodging') {
-            if (stateDuration < 2000) {
-                return false;
-            }
-        }
-
-        return true;
     }
     
     getCurrentState() {

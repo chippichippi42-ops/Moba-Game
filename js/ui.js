@@ -548,7 +548,7 @@ const UI = {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
+            font-size: 14px;
             position: relative;
             font-weight: bold;
             color: white;

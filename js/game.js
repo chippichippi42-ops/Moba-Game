@@ -330,6 +330,9 @@ const Game = {
         
         // Render towers
         TowerManager.render(this.ctx);
+		
+		// Render tower range indicators
+		TowerManager.renderRangeIndicators(this.ctx, HeroManager.player);
         
         // Render projectiles (zones first)
         ProjectileManager.render(this.ctx);

@@ -11,11 +11,11 @@ class AIController {
         this.difficulty = difficulty;
         this.difficultySettings = CONFIG.aiDifficulty[difficulty];
         this.systems = systems;
-
+        
         // State management
         this.stateMachine = new AIState(this, difficulty);
         this.decisionMaker = new DecisionMaker(this, difficulty);
-
+        
         // Tactical Systems
         this.visionSystem = systems.visionSystem;
         this.pathFinding = systems.pathFinding;
@@ -30,9 +30,6 @@ class AIController {
         this.promptBuilder = systems.promptBuilder;
         this.responseFusion = systems.responseFusion;
 
-        // Ability Analysis System
-        this.abilityAnalyzer = new AIAbilityAnalyzer();
-
         // Behavior systems
         this.laneBehavior = new LaneBehavior(this);
         this.combatBehavior = new CombatBehavior(this);
@@ -40,25 +37,17 @@ class AIController {
         this.pushBehavior = new PushBehavior(this);
         this.dodgeBehavior = new DodgeBehavior(this);
         this.jungleBehavior = new JungleBehavior(this);
-
+        
         // Intelligence systems
         this.strategicAnalyzer = new StrategicAnalyzer(this);
         this.combatAnalyzer = new CombatAnalyzer(this);
         this.movementOptimizer = new MovementOptimizer(this);
         this.llmDecisionEngine = new LLMDecisionEngine(this);
-
-        // Performance optimization: AI update throttling
-        this.lastAIUpdateTime = 0;
-
-        const freqConfig = CONFIG?.AI_UPDATE_FREQUENCY || {};
-        const configuredHz = freqConfig[difficulty] ?? freqConfig.normal ?? freqConfig.medium ?? 10;
-        const frequencyHz = Number.isFinite(configuredHz) && configuredHz > 0 ? configuredHz : 10;
-        this.aiUpdateInterval = 1000 / frequencyHz;
-
+        
         // Initialize
         this.initialize();
     }
-
+    
     initialize() {
         // Set initial state
         this.stateMachine.setState('laning');
@@ -84,16 +73,9 @@ class AIController {
         this.movementOptimizer.initialize();
         this.llmDecisionEngine.initialize();
     }
-
+    
     update(deltaTime, entities) {
         if (!this.hero.isAlive || this.hero.isDead) return;
-
-        // Performance optimization: Throttle AI updates
-        this.lastAIUpdateTime += deltaTime;
-        if (this.lastAIUpdateTime < this.aiUpdateInterval) {
-            return;
-        }
-        this.lastAIUpdateTime = 0;
 
         // Update state machine
         this.stateMachine.update(deltaTime, entities);
@@ -274,150 +256,6 @@ class AIController {
 
         const nearbyEnemies = Combat.getEnemiesInRange(hero, 1000) || [];
         const nearbyAllies = Combat.getAlliesInRange(hero, 1000) || [];
-
-        // Movement prediction for enemies and allies
-        const enemyMovementVectors = nearbyEnemies.map(e => ({
-            heroId: e.id,
-            vx: e.vx || 0,
-            vy: e.vy || 0,
-            predictedPos: {
-                x: e.x + (e.vx || 0) * 0.5,
-                y: e.y + (e.vy || 0) * 0.5
-            }
-        }));
-
-        const allyMovementVectors = nearbyAllies.map(a => ({
-            heroId: a.id,
-            vx: a.vx || 0,
-            vy: a.vy || 0,
-            predictedPos: {
-                x: a.x + (a.vx || 0) * 0.5,
-                y: a.y + (a.vy || 0) * 0.5
-            }
-        }));
-
-        // Ability cooldown state for enemies
-        const enemyAbilityCooldowns = {};
-        for (const enemy of nearbyEnemies) {
-            enemyAbilityCooldowns[enemy.id] = {};
-            if (enemy.abilityCooldowns) {
-                for (const key of ['q', 'e', 'r', 't']) {
-                    enemyAbilityCooldowns[enemy.id][key] = enemy.abilityCooldowns[key] || 0;
-                }
-            }
-        }
-
-        // Vision control state
-        const hasVisionOfEnemies = {};
-        for (const enemy of nearbyEnemies) {
-            if (typeof GameMap !== 'undefined' && GameMap.canSee) {
-                hasVisionOfEnemies[enemy.id] = GameMap.canSee(hero.x, hero.y, enemy.x, enemy.y);
-            } else {
-                hasVisionOfEnemies[enemy.id] = true;
-            }
-        }
-
-        // Minion state
-        let minionsAliveNearby = 0;
-        let minionWaveHealth = 0;
-        let isMinionWavePushing = false;
-        let minionWaveAdvantage = 'frozen';
-
-        if (typeof MinionManager !== 'undefined' && MinionManager.minions) {
-            const enemyTeam = hero.team === 'blue' ? 'red' : 'blue';
-            const checkRange = 1500;
-
-            let allyMinions = 0;
-            let enemyMinions = 0;
-            let allyHealthSum = 0;
-            let enemyHealthSum = 0;
-
-            for (const minion of MinionManager.minions) {
-                if (!minion.isAlive) continue;
-
-                const dist = Utils.distance(hero.x, hero.y, minion.x, minion.y);
-                if (dist < checkRange) {
-                    minionsAliveNearby++;
-
-                    if (minion.team === hero.team) {
-                        allyMinions++;
-                        allyHealthSum += minion.health || 0;
-                    } else {
-                        enemyMinions++;
-                        enemyHealthSum += minion.health || 0;
-                    }
-                }
-            }
-
-            minionWaveHealth = allyHealthSum;
-
-            // Determine wave advantage
-            const diff = allyMinions - enemyMinions;
-            if (diff > 2) {
-                minionWaveAdvantage = 'pushing';
-                isMinionWavePushing = true;
-            } else if (diff < -2) {
-                minionWaveAdvantage = 'slow-push';
-            } else {
-                minionWaveAdvantage = 'frozen';
-            }
-        }
-
-        // Tower threats
-        const towersNearby = [];
-        let towersThreaten = false;
-        let distToNearestTower = Infinity;
-
-        if (typeof TowerManager !== 'undefined' && TowerManager.towers) {
-            const enemyTeam = hero.team === 'blue' ? 'red' : 'blue';
-
-            for (const tower of TowerManager.towers) {
-                if (tower.isAlive) {
-                    const dist = Utils.distance(hero.x, hero.y, tower.x, tower.y);
-                    if (dist < 1000) {
-                        towersNearby.push({
-                            x: tower.x,
-                            y: tower.y,
-                            health: tower.health || 0,
-                            maxHealth: tower.maxHealth || 5000,
-                            team: tower.team,
-                            range: tower.range || 800
-                        });
-
-                        if (tower.team !== hero.team) {
-                            towersThreaten = true;
-                        }
-
-                        if (dist < distToNearestTower) {
-                            distToNearestTower = dist;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Objective state
-        const objectivesAlive = { baron: false, dragon: false, herald: false };
-
-        if (typeof CreatureManager !== 'undefined' && CreatureManager.creatures) {
-            for (const creature of CreatureManager.creatures) {
-                if (creature.isAlive && creature.type) {
-                    if (creature.type.includes('baron')) {
-                        objectivesAlive.baron = true;
-                    } else if (creature.type.includes('dragon')) {
-                        objectivesAlive.dragon = true;
-                    } else if (creature.type.includes('herald')) {
-                        objectivesAlive.herald = true;
-                    }
-                }
-            }
-        }
-
-        let objectivesFighting = false;
-        if (objectivesAlive.baron || objectivesAlive.dragon) {
-            const nearbyObj = Combat.getEnemiesInRange(hero, 2000);
-            objectivesFighting = nearbyObj.length > 0;
-        }
         
         // Helper to safely get max health
         const getMaxHealth = (entity) => {
@@ -501,22 +339,7 @@ class AIController {
             deathProbability: deathProb,
             killOpportunity: killOpp,
             nearObjective: nearObj,
-            hasEscapeRoute: hasEscape,
-
-            // Enhanced game state fields
-            enemyMovementVectors,
-            allyMovementVectors,
-            enemyAbilityCooldowns,
-            hasVisionOfEnemies,
-            minionsAliveNearby,
-            minionWaveHealth,
-            isMinionWavePushing,
-            minionWaveAdvantage,
-            towersNearby,
-            towersThreaten,
-            distToNearestTower,
-            objectivesAlive,
-            objectivesFighting
+            hasEscapeRoute: hasEscape
         };
     }
 
