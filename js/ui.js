@@ -502,7 +502,7 @@ const UI = {
         const existingOverlay = element.querySelector('.cooldown-overlay');
         element.innerHTML = '';
         
-        // Create key indicator
+        // Create key indicator (hidden by default, will show if icon fails)
         const keyIndicator = document.createElement('div');
         keyIndicator.className = 'skill-key-indicator';
         keyIndicator.textContent = key.toUpperCase();
@@ -518,7 +518,7 @@ const UI = {
             color: white;
             font-size: 11px;
             font-weight: bold;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 5;
@@ -562,49 +562,43 @@ const UI = {
         if (player && player.heroData && player.heroData.abilities[key]) {
             const ability = player.heroData.abilities[key];
             if (ability.icon) {
-                // Check if file exists BEFORE attempting to load
-                fetch(ability.icon, { method: 'HEAD' })
-                    .then(response => {
-                        if (response.ok) {
-                            // File exists, load it
-                            const img = new Image();
-                            
-                            img.addEventListener('load', () => {
-                                iconLoaded = true;
-                                skillIcon.innerHTML = '';
-                                skillIcon.appendChild(img);
-                                skillIcon.style.background = 'transparent';
-                            }, { once: true });
-                            
-                            img.addEventListener('error', () => {
-                                // Fallback if load fails
-                                if (!iconLoaded) {
-                                    skillIcon.textContent = key.toUpperCase();
-                                }
-                            }, { once: true });
-                            
-                            img.style.cssText = `
-                                width: 100%;
-                                height: 100%;
-                                object-fit: cover;
-                                display: block;
-                            `;
-                            img.src = ability.icon;
-                            img.alt = key.toUpperCase();
-                        } else {
-                            // File doesn't exist, use text fallback immediately
-                            skillIcon.textContent = key.toUpperCase();
-                        }
-                    })
-                    .catch(() => {
-                        // File check failed, use text fallback immediately
+                // Load image directly without fetch to avoid CORS
+                const img = new Image();
+                
+                img.addEventListener('load', () => {
+                    iconLoaded = true;
+                    skillIcon.innerHTML = '';
+                    skillIcon.appendChild(img);
+                    skillIcon.style.background = 'transparent';
+                    // Show key indicator when icon loads successfully
+                    keyIndicator.style.display = 'flex';
+                }, { once: true });
+                
+                img.addEventListener('error', () => {
+                    // Fallback if load fails - hide key indicator
+                    if (!iconLoaded) {
                         skillIcon.textContent = key.toUpperCase();
-                    });
+                        keyIndicator.style.display = 'none';
+                    }
+                }, { once: true });
+                
+                img.style.cssText = `
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
+                `;
+                img.src = ability.icon;
+                img.alt = key.toUpperCase();
             } else {
+                // No icon specified, use text fallback
                 skillIcon.textContent = key.toUpperCase();
+                keyIndicator.style.display = 'none';
             }
         } else {
+            // No ability data, use text fallback
             skillIcon.textContent = key.toUpperCase();
+            keyIndicator.style.display = 'none';
         }
         
         iconContainer.appendChild(skillIcon);

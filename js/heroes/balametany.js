@@ -63,7 +63,7 @@ const HeroBalametany = {
         q: {
             name: 'Phi Tiêu',
             description: 'Ném một phi tiêu gây sát thương và đánh dấu mục tiêu. Đánh dấu làm tăng sát thương đòn đánh tiếp theo.',
-            icon: 'assets/icons/balametany_q.png',
+            icon: 'assets/heroes/balametany/q.png',
             type: 'skillshot',
             damageType: 'physical',
             baseDamage: [50, 85, 120, 155, 190],
@@ -123,7 +123,7 @@ const HeroBalametany = {
         e: {
             name: 'Lướt Bóng',
             description: 'Lướt đến vị trí chỉ định, kẻ địch trên đường đi chịu sát thương.',
-            icon: 'assets/icons/balametany_e.png',
+            icon: 'assets/heroes/balametany/e.png',
             type: 'dash',
             damageType: 'physical',
             baseDamage: [40, 70, 100, 130, 160],
@@ -166,7 +166,7 @@ const HeroBalametany = {
         r: {
             name: 'Tàng Hình',
             description: 'Trở nên tàng hình trong 3 giây và tăng tốc độ di chuyển. Tấn công hoặc dùng kỹ năng sẽ hủy tàng hình.',
-            icon: 'assets/icons/balametany_r.png',
+            icon: 'assets/heroes/balametany/r.png',
             type: 'self_buff',
             damageType: 'none',
             manaCost: [60, 60, 60, 60, 60],
@@ -204,7 +204,7 @@ const HeroBalametany = {
         t: {
             name: 'Ám Sát',
             description: 'Nhảy đến mục tiêu tướng địch và thực hiện một đòn đánh chí mạng. Nếu hạ gục mục tiêu, có thể sử dụng lại trong 5 giây.',
-            icon: 'assets/icons/balametany_t.png',
+            icon: 'assets/heroes/balametany/t.png',
             type: 'targeted',
             damageType: 'physical',
             baseDamage: [200, 300, 400],
