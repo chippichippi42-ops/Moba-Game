@@ -79,7 +79,7 @@ http://localhost:8000
 
 ### Cài Đặt Độ Khó AI - Chi Tiết
 
-Game có 4 mức độ khó với các tham số tùy chỉnh:
+Game có 5 mức độ khó với các tham số tùy chỉnh:
 
 | Tham Số | Dễ | Thường | Khó | Rất Khó | Ác Mộng |
 |---------|-----|--------|------|----------|----------|
