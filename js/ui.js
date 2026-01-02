@@ -1324,33 +1324,33 @@ const UI = {
 
         // Check killer type to get proper name
         if (!killer) {
-            killerName = 'Unknown';
+            killerName = 'Không xác định';
         } else if (killer.type === 'hero') {
             // Hero: use playerName or name
-            killerName = killer.playerName || killer.name || 'Unknown';
+            killerName = killer.playerName || killer.name || 'Không xác định';
             killerTeam = killer.team;
             killerType = 'hero';
         } else if (killer.type === 'tower') {
             // Tower: use name or "Tower"
-            killerName = killer.name || 'Tower';
+            killerName = killer.name || 'Trụ';
             killerTeam = killer.team;
             killerType = 'tower';
         } else if (killer.type === 'minion') {
             // Minion: use name or "Minion"
-            killerName = killer.name || 'Minion';
+            killerName = killer.name || 'T lính';
             killerTeam = killer.team;
             killerType = 'minion';
         } else if (killer.type === 'creature') {
             // Creature: use name or "Monster"
-            killerName = killer.name || 'Monster';
+            killerName = killer.name || 'Quái vật';
             killerType = 'creature';
         } else {
             // Fallback: try to get name or playerName
-            killerName = killer.playerName || killer.name || 'Unknown';
+            killerName = killer.playerName || killer.name || 'Không xác định';
             killerTeam = killer.team;
         }
 
-        let victimName = typeof victim === 'string' ? victim : (victim?.playerName || victim?.name || 'Unknown');
+        let victimName = typeof victim === 'string' ? victim : (victim?.playerName || victim?.name || 'Không xác định');
         let victimTeam = typeof victim === 'string' ? null : victim?.team;
         let victimType = typeof victim === 'string' ? 'unknown' : (victim?.type || 'unknown');
 
@@ -1508,12 +1508,12 @@ const UI = {
             const player = HeroManager.player;
             if (player) {
                 statsDiv.innerHTML = `
-                    <div class="stat-row"><span>Kills:</span><span>${player.kills}</span></div>
-                    <div class="stat-row"><span>Deaths:</span><span>${player.deaths}</span></div>
-                    <div class="stat-row"><span>Assists:</span><span>${player.assists}</span></div>
-                    <div class="stat-row"><span>Damage Dealt:</span><span>${Math.ceil(player.totalDamageDealt)}</span></div>
-                    <div class="stat-row"><span>Level:</span><span>${player.level}</span></div>
-                    <div class="stat-row"><span>Game Time:</span><span>${Utils.formatTime(Game.gameTime)}</span></div>
+                    <div class="stat-row"><span>Đã hạ gục:</span><span>${player.kills}</span></div>
+                    <div class="stat-row"><span>Chết:</span><span>${player.deaths}</span></div>
+                    <div class="stat-row"><span>Hỗ trợ:</span><span>${player.assists}</span></div>
+                    <div class="stat-row"><span>Sát thương gây ra:</span><span>${Math.ceil(player.totalDamageDealt)}</span></div>
+                    <div class="stat-row"><span>Cấp độ:</span><span>${player.level}</span></div>
+                    <div class="stat-row"><span>Thời gian:</span><span>${Utils.formatTime(Game.gameTime)}</span></div>
                 `;
             }
         }

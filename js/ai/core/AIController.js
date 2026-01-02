@@ -47,10 +47,14 @@ class AIController {
         this.movementOptimizer = new MovementOptimizer(this);
         this.llmDecisionEngine = new LLMDecisionEngine(this);
 
+        // Performance optimization: AI update throttling
+        this.lastAIUpdateTime = 0;
+        this.aiUpdateInterval = 100; // Update AI every 100ms (10 times/second instead of 60)
+
         // Initialize
         this.initialize();
     }
-    
+
     initialize() {
         // Set initial state
         this.stateMachine.setState('laning');
@@ -76,9 +80,16 @@ class AIController {
         this.movementOptimizer.initialize();
         this.llmDecisionEngine.initialize();
     }
-    
+
     update(deltaTime, entities) {
         if (!this.hero.isAlive || this.hero.isDead) return;
+
+        // Performance optimization: Throttle AI updates
+        this.lastAIUpdateTime += deltaTime;
+        if (this.lastAIUpdateTime < this.aiUpdateInterval) {
+            return;
+        }
+        this.lastAIUpdateTime = 0;
 
         // Update state machine
         this.stateMachine.update(deltaTime, entities);

@@ -301,19 +301,22 @@ const Game = {
         const rect = this.canvas.getBoundingClientRect();
         this.ctx.fillStyle = '#1a1a2e';
         this.ctx.fillRect(0, 0, rect.width, rect.height);
-        
+
         // Apply camera transform
         Camera.applyTransform(this.ctx);
-        
+
         // Render world
         this.renderWorld();
-        
+
+        // Render tower range indicators
+        TowerManager.renderRangeIndicators(this.ctx, HeroManager.player);
+
         // Render attack range indicator (UI element but in world space)
         UI.renderAttackRange(this.ctx);
-        
+
         // Restore transform
         Camera.restoreTransform(this.ctx);
-        
+
         // Render minimap
         Minimap.render();
     },
@@ -424,7 +427,7 @@ const Game = {
         UI.hideIngameUI();
         Screens.showGameOver(won);
         
-        console.log(won ? 'Victory!' : 'Defeat!');
+        console.log(won ? 'Thắng!' : 'Thua!');
     },
     
     /**
