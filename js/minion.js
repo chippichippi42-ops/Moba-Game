@@ -514,63 +514,190 @@ class Minion {
         }
     }
 
+    /**
+     * Render minion - IMPROVED GRAPHICS
+     */
     render(ctx) {
+        if (!this.isAlive) return;
+        
         ctx.save();
         ctx.translate(this.x, this.y);
-        ctx.rotate(this.facingAngle);
-
-        // Draw minion
-        this.drawMinion(ctx);
-
+        
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.beginPath();
+        ctx.ellipse(3, 5, this.radius * 0.8, this.radius * 0.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        if (this.minionType === 'melee') {
+            this.renderMeleeMinion(ctx);
+        } else {
+            this.renderRangedMinion(ctx);
+        }
+        
         ctx.restore();
-
-        // Draw health bar
-        this.drawHealthBar(ctx);
+        
+        // Health bar
+        this.renderHealthBar(ctx);
     }
-
-    drawMinion(ctx) {
-        const size = this.radius * 2;
-
-        // Body
+    
+    /**
+     * Render melee minion - soldier-like
+     */
+    renderMeleeMinion(ctx) {
+        const bounce = Math.sin(this.walkCycle) * 2;
+        
+        // Body (armor)
         ctx.fillStyle = this.primaryColor;
         ctx.beginPath();
-        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.roundRect(-this.radius, -this.radius + bounce, this.radius * 2, this.radius * 2.2, 5);
         ctx.fill();
-
-        // Inner highlight
+        
+        // Armor detail
         ctx.fillStyle = this.secondaryColor;
         ctx.beginPath();
-        ctx.arc(-this.radius * 0.2, -this.radius * 0.2, this.radius * 0.4, 0, Math.PI * 2);
+        ctx.roundRect(-this.radius + 4, -this.radius + 4 + bounce, this.radius * 2 - 8, this.radius * 1.4, 3);
         ctx.fill();
-
-        // Eye direction indicator
-        ctx.fillStyle = '#fff';
+        
+        // Helmet
+        ctx.fillStyle = this.primaryColor;
         ctx.beginPath();
-        ctx.arc(this.radius * 0.3, -this.radius * 0.1, this.radius * 0.2, 0, Math.PI * 2);
+        ctx.arc(0, -this.radius * 0.6 + bounce, this.radius * 0.7, 0, Math.PI * 2);
         ctx.fill();
-
-        // Weapon indicator for melee
-        if (this.minionType === 'melee') {
-            ctx.fillStyle = this.accentColor;
-            ctx.fillRect(this.radius * 0.5, -this.radius * 0.1, this.radius * 0.8, this.radius * 0.3);
-        }
+        
+        // Helmet visor
+        ctx.fillStyle = '#1a1a2e';
+        ctx.beginPath();
+        ctx.ellipse(0, -this.radius * 0.5 + bounce, this.radius * 0.4, this.radius * 0.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Shield
+        ctx.save();
+        ctx.rotate(this.facingAngle);
+        ctx.fillStyle = this.accentColor;
+        ctx.beginPath();
+        ctx.ellipse(this.radius * 0.8, 0, this.radius * 0.4, this.radius * 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Shield emblem
+        ctx.fillStyle = this.team === CONFIG.teams.BLUE ? '#fff' : '#fff';
+        ctx.beginPath();
+        ctx.arc(this.radius * 0.8, 0, this.radius * 0.15, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Sword
+        ctx.fillStyle = '#c0c0c0';
+        ctx.fillRect(this.radius * 0.3, -this.radius * 0.1, this.radius * 1.2, this.radius * 0.2);
+        ctx.fillStyle = '#ffd700';
+        ctx.fillRect(this.radius * 0.2, -this.radius * 0.2, this.radius * 0.2, this.radius * 0.4);
+        ctx.restore();
     }
-
-    drawHealthBar(ctx) {
-        const barWidth = this.radius * 2.5;
-        const barHeight = 4;
-        const x = this.x - barWidth / 2;
-        const y = this.y - this.radius - 8;
-
-        // Background
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(x, y, barWidth, barHeight);
-
-        // Health
+    
+    /**
+     * Render ranged minion - mage/archer-like
+     */
+    renderRangedMinion(ctx) {
+        const bounce = Math.sin(this.walkCycle) * 1.5;
+        
+        // Robe body
+        ctx.fillStyle = this.secondaryColor;
+        ctx.beginPath();
+        ctx.moveTo(-this.radius, this.radius + bounce);
+        ctx.lineTo(this.radius, this.radius + bounce);
+        ctx.lineTo(this.radius * 0.6, -this.radius * 0.5 + bounce);
+        ctx.lineTo(-this.radius * 0.6, -this.radius * 0.5 + bounce);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Inner robe
+        ctx.fillStyle = this.primaryColor;
+        ctx.beginPath();
+        ctx.moveTo(-this.radius * 0.6, this.radius * 0.8 + bounce);
+        ctx.lineTo(this.radius * 0.6, this.radius * 0.8 + bounce);
+        ctx.lineTo(this.radius * 0.4, -this.radius * 0.3 + bounce);
+        ctx.lineTo(-this.radius * 0.4, -this.radius * 0.3 + bounce);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Hood
+        ctx.fillStyle = this.primaryColor;
+        ctx.beginPath();
+        ctx.arc(0, -this.radius * 0.5 + bounce, this.radius * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Face shadow
+        ctx.fillStyle = '#1a1a2e';
+        ctx.beginPath();
+        ctx.ellipse(0, -this.radius * 0.4 + bounce, this.radius * 0.35, this.radius * 0.25, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Glowing eyes
+        ctx.fillStyle = this.accentColor;
+        ctx.shadowColor = this.accentColor;
+        ctx.shadowBlur = 5;
+        ctx.beginPath();
+        ctx.arc(-this.radius * 0.15, -this.radius * 0.45 + bounce, 3, 0, Math.PI * 2);
+        ctx.arc(this.radius * 0.15, -this.radius * 0.45 + bounce, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // Staff
+        ctx.save();
+        ctx.rotate(this.facingAngle);
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(this.radius * 0.5, -this.radius * 0.1, this.radius * 1.5, 4);
+        
+        // Staff orb
+        ctx.fillStyle = this.accentColor;
+        ctx.shadowColor = this.accentColor;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(this.radius * 2, 0, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.restore();
+    }
+    
+    /**
+     * Render health bar - improved
+     */
+    renderHealthBar(ctx) {
         const healthPercent = this.health / this.maxHealth;
-        ctx.fillStyle = healthPercent > 0.5 ? '#2ecc71' : healthPercent > 0.25 ? '#f39c12' : '#e74c3c';
-        ctx.fillRect(x, y, barWidth * healthPercent, barHeight);
+        if (healthPercent >= 1) return;
+        
+        const barWidth = this.radius * 2.2;
+        const barHeight = 6;
+        const barY = this.y - this.radius - 15;
+        
+        // Background
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.beginPath();
+        ctx.roundRect(this.x - barWidth / 2 - 1, barY - 1, barWidth + 2, barHeight + 2, 2);
+        ctx.fill();
+        
+        // Health fill with gradient
+        const gradient = ctx.createLinearGradient(
+            this.x - barWidth / 2, barY,
+            this.x - barWidth / 2 + barWidth * healthPercent, barY
+        );
+        
+        if (healthPercent > 0.5) {
+            gradient.addColorStop(0, '#22c55e');
+            gradient.addColorStop(1, '#16a34a');
+        } else if (healthPercent > 0.25) {
+            gradient.addColorStop(0, '#fbbf24');
+            gradient.addColorStop(1, '#f59e0b');
+        } else {
+            gradient.addColorStop(0, '#ef4444');
+            gradient.addColorStop(1, '#dc2626');
+        }
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.roundRect(this.x - barWidth / 2, barY, barWidth * healthPercent, barHeight, 2);
+        ctx.fill();
     }
+
 
     getState() {
         return {
@@ -587,6 +714,20 @@ class Minion {
             damage: this.damage,
         };
     }
+}
+
+// Polyfill for roundRect if not available
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        if (w < 2 * r) r = w / 2;
+        if (h < 2 * r) r = h / 2;
+        this.moveTo(x + r, y);
+        this.arcTo(x + w, y, x + w, y + h, r);
+        this.arcTo(x + w, y + h, x, y + h, r);
+        this.arcTo(x, y + h, x, y, r);
+        this.arcTo(x, y, x + w, y, r);
+        this.closePath();
+    };
 }
 
 // Export for module systems

@@ -103,9 +103,9 @@ const CONFIG = {
         // === TOWER DISTANCES BY LANE ===
         // Independent spacing for each lane to allow balance tweaking
         towerLaneDistances: {
-            top: 1200,    // TOP lane - towers 1200px apart
-            mid: 800,     // MID lane - towers 800px apart (closer for mid fights)
-            bot: 1200,    // BOT lane - towers 1200px apart
+            top: 1800,
+            mid: 900,
+            bot: 1800,
         },
         // Main tower (Nexus)
         main: {

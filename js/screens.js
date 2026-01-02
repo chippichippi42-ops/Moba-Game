@@ -14,7 +14,6 @@ Welcome to MOBA Arena! This guide will help you get started and master the game.
 ### Movement
 - **WASD Keys** - Move your hero around the map
 - **Mouse** - Aim abilities and select targets
-- **Right Click** - Attack move or target enemies
 
 ### Abilities
 - **Q Key** - First Ability
@@ -146,31 +145,31 @@ Choose the challenge level for AI opponents:
 
 ## 🦸 Hero Roles
 
-### Marksman (Vanheo)
+### Marksman
 - High physical damage from range
 - Weak early, strong late game
 - Stay behind tanks
 - Focus on farming
 
-### Fighter (Zephy)
+### Fighter
 - Balanced damage and durability
 - Good in extended fights
 - Dive enemy backline
 - Sustain with lifesteal
 
-### Mage (LaLo)
+### Mage
 - High burst magical damage
 - Skillshot focused
 - Control zones with abilities
 - Fragile but deadly
 
-### Tank (Nemo)
+### Tank
 - High health and armor
 - Protect teammates
 - Initiate team fights
 - Absorb damage
 
-### Assassin (Balametany)
+### Assassin
 - High burst damage
 - Mobility and stealth
 - Eliminate priority targets
@@ -214,12 +213,6 @@ Choose the challenge level for AI opponents:
 - **Wave management**: Control minion waves
 - **Cooldown tracking**: Know when enemies can use abilities
 
-### Item Strategy (Coming Soon)
-- Build items based on your role
-- Adapt to enemy team composition
-- Balance offense and defense
-- Don't neglect utility items
-
 ## ⚠️ Common Mistakes
 
 ❌ **Don't**:
@@ -231,7 +224,6 @@ Choose the challenge level for AI opponents:
 - Give up after one death
 
 ✅ **Do**:
-- Communicate with pings (if available)
 - Farm safely when behind
 - Ward key locations
 - Group for objectives
